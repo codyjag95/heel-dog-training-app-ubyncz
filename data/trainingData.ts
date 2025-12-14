@@ -1,4 +1,14 @@
 
+import { QuizAnswer } from './quizData';
+
+export interface SessionNote {
+  id: string;
+  lessonId: string;
+  date: string;
+  wentWell: string;
+  struggled: string;
+}
+
 export interface Lesson {
   id: string;
   name: string;
@@ -11,6 +21,7 @@ export interface Lesson {
   imageUrl?: string;
   steps: string[];
   description: string;
+  prerequisiteIds?: string[];
 }
 
 export interface Category {
@@ -67,6 +78,7 @@ export const trainingCategories: Category[] = [
           'Gradually increase the distance and duration',
           'Practice in various environments',
         ],
+        prerequisiteIds: ['sit-1'],
       },
       {
         id: 'down-1',
@@ -86,6 +98,7 @@ export const trainingCategories: Category[] = [
           'Once they\'re down, say "Down" and give the treat',
           'Practice regularly to build muscle memory',
         ],
+        prerequisiteIds: ['sit-1'],
       },
       {
         id: 'place-1',
@@ -105,6 +118,7 @@ export const trainingCategories: Category[] = [
           'Gradually increase distance from the place',
           'Add duration before releasing them',
         ],
+        prerequisiteIds: ['sit-1', 'stay-1', 'down-1'],
       },
     ],
   },
@@ -152,6 +166,7 @@ export const trainingCategories: Category[] = [
           'Practice turns and pace changes',
           'Gradually reduce treat frequency',
         ],
+        prerequisiteIds: ['loose-leash-1'],
       },
       {
         id: 'distractions-1',
@@ -171,6 +186,7 @@ export const trainingCategories: Category[] = [
           'Practice with various triggers (dogs, people, bikes)',
           'Build confidence through repetition',
         ],
+        prerequisiteIds: ['loose-leash-1', 'heel-1'],
       },
     ],
   },
@@ -237,6 +253,7 @@ export const trainingCategories: Category[] = [
           'Gradually increase difficulty',
           'Apply to real-world situations',
         ],
+        prerequisiteIds: ['settle-1', 'eye-contact-1'],
       },
     ],
   },
@@ -284,6 +301,7 @@ export const trainingCategories: Category[] = [
           'Use high-value rewards',
           'Practice with mild distractions',
         ],
+        prerequisiteIds: ['come-1'],
       },
       {
         id: 'emergency-recall-1',
@@ -303,6 +321,7 @@ export const trainingCategories: Category[] = [
           'Never use if you can\'t reward',
           'Build through consistent success',
         ],
+        prerequisiteIds: ['come-1', 'distance-recall-1'],
       },
     ],
   },
@@ -350,6 +369,7 @@ export const trainingCategories: Category[] = [
           'Create DIY puzzles at home',
           'Balance mental and physical exercise',
         ],
+        prerequisiteIds: ['nose-work-1'],
       },
       {
         id: 'trick-training-1',
@@ -369,6 +389,7 @@ export const trainingCategories: Category[] = [
           'Chain behaviors together',
           'Keep training fun and positive',
         ],
+        prerequisiteIds: ['nose-work-1', 'puzzle-games-1'],
       },
     ],
   },
@@ -379,6 +400,11 @@ export interface DogProfile {
   age?: string;
   breed?: string;
   imageUrl?: string;
+  quizAnswers?: QuizAnswer;
+  recommendedPrimaryTrack?: string;
+  recommendedSecondaryTracks?: string[];
+  lastViewedLesson?: string;
+  sessionNotes?: SessionNote[];
 }
 
 export interface UserProgress {
@@ -386,4 +412,16 @@ export interface UserProgress {
   currentStreak: number;
   totalSessions: number;
   isPremium: boolean;
+  lastTrainingDate?: string;
+  lessonViews: { [lessonId: string]: number };
+  lessonCompletions: { [lessonId: string]: number };
+  quizCompleted: boolean;
+}
+
+export interface AnalyticsEvent {
+  type: 'lesson_view' | 'lesson_completion' | 'quiz_completion' | 'session_start' | 'session_complete';
+  timestamp: string;
+  lessonId?: string;
+  categoryId?: string;
+  duration?: number;
 }

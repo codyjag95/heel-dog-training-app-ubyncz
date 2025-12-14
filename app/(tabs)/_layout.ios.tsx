@@ -18,9 +18,9 @@ export default function TabLayout() {
         <Icon sf="star.fill" color={colors.text} />
         <Label>Premium</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger key="profile" name="profile">
-        <Icon sf="person.fill" color={colors.text} />
-        <Label>Profile</Label>
+      <NativeTabs.Trigger key="settings" name="settings">
+        <Icon sf="gearshape.fill" color={colors.text} />
+        <Label>Settings</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );

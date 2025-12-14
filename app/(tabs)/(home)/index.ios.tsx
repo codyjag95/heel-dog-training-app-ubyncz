@@ -8,7 +8,7 @@ import { IconSymbol } from '@/components/IconSymbol';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { dogProfile, categories, hasCompletedOnboarding } = useApp();
+  const { dogProfile, categories, hasCompletedOnboarding, userProgress } = useApp();
 
   // Use Redirect component for navigation - it handles timing automatically
   if (!hasCompletedOnboarding) {
@@ -19,6 +19,25 @@ export default function HomeScreen() {
   const totalLessons = categories.reduce((acc, cat) => acc + cat.lessons.length, 0);
   const completedLessons = categories.reduce((acc, cat) => acc + cat.completedCount, 0);
   const progressPercentage = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+
+  // Find last viewed lesson
+  const lastViewedLesson = dogProfile?.lastViewedLesson;
+  let lastViewedLessonData = null;
+  let lastViewedCategory = null;
+
+  if (lastViewedLesson) {
+    for (const category of categories) {
+      const lesson = category.lessons.find(l => l.id === lastViewedLesson);
+      if (lesson) {
+        lastViewedLessonData = lesson;
+        lastViewedCategory = category;
+        break;
+      }
+    }
+  }
+
+  // Empty state check
+  const hasStartedTraining = completedLessons > 0 || lastViewedLesson;
 
   return (
     <View style={[commonStyles.container]}>
@@ -38,12 +57,70 @@ export default function HomeScreen() {
           )}
         </View>
 
+        {/* Empty State */}
+        {!hasStartedTraining && (
+          <View style={styles.emptyStateCard}>
+            <IconSymbol
+              ios_icon_name="pawprint.fill"
+              android_material_icon_name="pets"
+              size={48}
+              color={colors.primary}
+            />
+            <Text style={styles.emptyStateTitle}>Ready to start training?</Text>
+            <Text style={styles.emptyStateText}>
+              Choose a category below and begin your first lesson. Consistent practice makes all the difference!
+            </Text>
+          </View>
+        )}
+
+        {/* Continue Where You Left Off */}
+        {lastViewedLessonData && lastViewedCategory && !lastViewedLessonData.isCompleted && (
+          <View style={styles.continueSection}>
+            <Text style={styles.sectionTitle}>Continue Where You Left Off</Text>
+            <TouchableOpacity
+              style={styles.continueCard}
+              onPress={() => router.push({
+                pathname: '/lesson',
+                params: {
+                  categoryId: lastViewedCategory.id,
+                  lessonId: lastViewedLessonData.id
+                }
+              })}
+              activeOpacity={0.7}
+            >
+              <View style={styles.continueIcon}>
+                <IconSymbol
+                  ios_icon_name="play.fill"
+                  android_material_icon_name="play-arrow"
+                  size={24}
+                  color={colors.text}
+                />
+              </View>
+              <View style={styles.continueContent}>
+                <Text style={styles.continueCategoryText}>{lastViewedCategory.name}</Text>
+                <Text style={styles.continueLessonText}>{lastViewedLessonData.name}</Text>
+              </View>
+              <IconSymbol
+                ios_icon_name="chevron.right"
+                android_material_icon_name="chevron-right"
+                size={20}
+                color={colors.textSecondary}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Progress Summary */}
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryNumber}>{completedLessons}</Text>
               <Text style={styles.summaryLabel}>Completed</Text>
+            </View>
+            <View style={styles.summaryDivider} />
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryNumber}>{userProgress.currentStreak}</Text>
+              <Text style={styles.summaryLabel}>Day Streak</Text>
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryItem}>
@@ -129,6 +206,65 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.primary,
+  },
+  emptyStateCard: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    marginBottom: 32,
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+    elevation: 4,
+  },
+  emptyStateTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.text,
+    marginTop: 16,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  emptyStateText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  continueSection: {
+    marginBottom: 24,
+  },
+  continueCard: {
+    backgroundColor: colors.primary,
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+    elevation: 4,
+  },
+  continueIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  continueContent: {
+    flex: 1,
+  },
+  continueCategoryText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginBottom: 4,
+  },
+  continueLessonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
   },
   summaryCard: {
     backgroundColor: colors.card,

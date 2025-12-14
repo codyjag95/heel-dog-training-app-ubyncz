@@ -7,7 +7,7 @@ import { useApp } from '@/contexts/AppContext';
 
 export default function DogProfileScreen() {
   const router = useRouter();
-  const { setDogProfile, completeOnboarding } = useApp();
+  const { setDogProfile } = useApp();
   
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
@@ -20,8 +20,8 @@ export default function DogProfileScreen() {
         age: age.trim() || undefined,
         breed: breed.trim() || undefined,
       });
-      completeOnboarding();
-      router.replace('/(tabs)/(home)/');
+      // Navigate to quiz instead of completing onboarding
+      router.push('/onboarding/quiz');
     }
   };
 
@@ -53,11 +53,10 @@ export default function DogProfileScreen() {
             <Text style={styles.label}>Age (optional)</Text>
             <TextInput
               style={styles.input}
-              placeholder="e.g., 2"
+              placeholder="e.g., 2 years"
               placeholderTextColor={colors.textSecondary}
               value={age}
               onChangeText={setAge}
-              keyboardType="numeric"
             />
           </View>
 
@@ -86,7 +85,7 @@ export default function DogProfileScreen() {
           disabled={!name.trim()}
           activeOpacity={0.8}
         >
-          <Text style={buttonStyles.primaryButtonText}>Continue</Text>
+          <Text style={buttonStyles.primaryButtonText}>Continue to Quiz</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
