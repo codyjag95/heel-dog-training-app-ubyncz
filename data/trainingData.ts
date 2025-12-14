@@ -34,6 +34,15 @@ export interface Category {
   disclaimer?: string;
 }
 
+export interface SessionTemplate {
+  id: string;
+  name: string;
+  description: string;
+  duration: string;
+  lessonIds: string[];
+  isPremium: boolean;
+}
+
 export const trainingCategories: Category[] = [
   {
     id: 'everyday-obedience',
@@ -1491,9 +1500,186 @@ export const trainingCategories: Category[] = [
       },
     ],
   },
+  {
+    id: 'handler-skills',
+    name: 'Handler Skills',
+    icon: 'person.fill',
+    description: 'Training lessons focused on the human handler',
+    completedCount: 0,
+    lessons: [
+      {
+        id: 'handler-intro-1',
+        name: 'Introduction to Handler Skills',
+        difficulty: 'Beginner',
+        estimatedTime: '10 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
+        description: 'Understanding your role in training success',
+        steps: [
+          'Training is a two-way conversation',
+          'Your energy and body language matter',
+          'Consistency is more important than perfection',
+          'Dogs learn from every interaction',
+          'Your mindset affects your dog\'s behavior',
+          'Patience and timing are key skills',
+          'This module focuses on improving your skills',
+        ],
+      },
+      {
+        id: 'timing-rewards-1',
+        name: 'Timing Rewards Correctly',
+        difficulty: 'Beginner',
+        estimatedTime: '12 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
+        description: 'Master the art of perfect timing',
+        steps: [
+          'Reward within 1-2 seconds of the behavior',
+          'Mark the exact moment with a word or clicker',
+          'Practice your timing without your dog first',
+          'Watch for subtle correct behaviors',
+          'Late rewards confuse the message',
+          'Use a marker word like "Yes!" or "Good!"',
+          'Film yourself training to review timing',
+        ],
+        prerequisiteIds: ['handler-intro-1'],
+      },
+      {
+        id: 'body-language-1',
+        name: 'Body Language Awareness',
+        difficulty: 'Intermediate',
+        estimatedTime: '15 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
+        description: 'Learn how your body language affects your dog',
+        steps: [
+          'Dogs read our body language constantly',
+          'Leaning forward can be intimidating',
+          'Turning away can invite approach',
+          'Your posture communicates confidence or uncertainty',
+          'Practice calm, neutral body language',
+          'Be aware of your hand gestures',
+          'Record training sessions to observe yourself',
+        ],
+        prerequisiteIds: ['handler-intro-1'],
+      },
+      {
+        id: 'staying-calm-1',
+        name: 'Staying Calm During Training',
+        difficulty: 'Intermediate',
+        estimatedTime: '12 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
+        description: 'Manage your emotions for better results',
+        steps: [
+          'Your dog mirrors your emotional state',
+          'Frustration travels down the leash',
+          'Take breaks when you feel stressed',
+          'Deep breathing helps both of you',
+          'End sessions on a positive note',
+          'It\'s okay to have bad training days',
+          'Your calm energy creates a safe learning space',
+        ],
+        prerequisiteIds: ['handler-intro-1'],
+      },
+      {
+        id: 'managing-frustration-1',
+        name: 'Managing Frustration and Expectations',
+        difficulty: 'Intermediate',
+        estimatedTime: '15 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
+        description: 'Set realistic goals and handle setbacks',
+        steps: [
+          'Progress is not always linear',
+          'Every dog learns at their own pace',
+          'Celebrate small wins',
+          'Regression is normal and temporary',
+          'Compare your dog to themselves, not others',
+          'Break goals into smaller steps',
+          'Remember why you started training',
+        ],
+        prerequisiteIds: ['handler-intro-1'],
+      },
+      {
+        id: 'reading-dog-signals-1',
+        name: 'Reading Your Dog\'s Signals',
+        difficulty: 'Intermediate',
+        estimatedTime: '15 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
+        description: 'Learn to recognize stress and engagement',
+        steps: [
+          'Watch for signs of stress (yawning, lip licking)',
+          'Recognize when your dog is overwhelmed',
+          'Notice when they\'re engaged and focused',
+          'Tail position tells you a lot',
+          'Ears, eyes, and mouth all communicate',
+          'Stop training if you see stress signals',
+          'Learn your dog\'s unique communication style',
+        ],
+        prerequisiteIds: ['handler-intro-1'],
+      },
+      {
+        id: 'consistency-practice-1',
+        name: 'Building Consistency',
+        difficulty: 'Beginner',
+        estimatedTime: '10 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
+        description: 'Create consistent training habits',
+        steps: [
+          'Use the same cues every time',
+          'Reward the same behaviors consistently',
+          'Train at the same time each day if possible',
+          'Get family members on the same page',
+          'Write down your training plan',
+          'Track what works and what doesn\'t',
+          'Consistency builds trust and clarity',
+        ],
+        prerequisiteIds: ['handler-intro-1'],
+      },
+      {
+        id: 'problem-solving-1',
+        name: 'Problem-Solving Training Challenges',
+        difficulty: 'Advanced',
+        estimatedTime: '15 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
+        description: 'Troubleshoot common training issues',
+        steps: [
+          'If something isn\'t working, change your approach',
+          'Break the behavior into smaller steps',
+          'Increase the value of your rewards',
+          'Reduce distractions and rebuild',
+          'Ask: Is my dog physically capable of this?',
+          'Seek help from a professional if stuck',
+          'Every challenge is a learning opportunity',
+        ],
+        prerequisiteIds: ['handler-intro-1', 'timing-rewards-1', 'body-language-1'],
+      },
+    ],
+  },
 ];
 
 export interface DogProfile {
+  id?: string;
   name: string;
   age?: string;
   breed?: string;

@@ -8,7 +8,7 @@ import { IconSymbol } from '@/components/IconSymbol';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { dogProfile, categories, hasCompletedOnboarding, userProgress } = useApp();
+  const { dogProfile, categories, hasCompletedOnboarding, userProgress, getTodaysFocus, getProgressInsights, allDogs } = useApp();
 
   // Use Redirect component for navigation - it handles timing automatically
   if (!hasCompletedOnboarding) {
@@ -39,6 +39,13 @@ export default function HomeScreen() {
   // Empty state check
   const hasStartedTraining = completedLessons > 0 || lastViewedLesson;
 
+  // Premium features
+  const todaysFocus = getTodaysFocus();
+  const insights = getProgressInsights();
+
+  // Check if free user has reached dog limit
+  const canAddMoreDogs = userProgress.isPremium || allDogs.length < 1;
+
   return (
     <View style={[commonStyles.container]}>
       <ScrollView
@@ -55,7 +62,74 @@ export default function HomeScreen() {
               <Text style={styles.progressText}>{progressPercentage}% Complete</Text>
             </View>
           )}
+          {userProgress.isPremium && allDogs.length > 1 && (
+            <TouchableOpacity
+              style={styles.switchDogButton}
+              onPress={() => router.push('/settings')}
+              activeOpacity={0.7}
+            >
+              <IconSymbol
+                ios_icon_name="person.2.fill"
+                android_material_icon_name="group"
+                size={20}
+                color={colors.primary}
+              />
+              <Text style={styles.switchDogText}>Switch Dog</Text>
+            </TouchableOpacity>
+          )}
         </View>
+
+        {/* Today's Focus (Premium) */}
+        {userProgress.isPremium && todaysFocus && (
+          <View style={styles.todaysFocusSection}>
+            <Text style={styles.sectionTitle}>Today&apos;s Focus</Text>
+            <TouchableOpacity
+              style={styles.todaysFocusCard}
+              onPress={() => router.push({
+                pathname: '/lesson',
+                params: {
+                  categoryId: todaysFocus.category.id,
+                  lessonId: todaysFocus.lesson.id
+                }
+              })}
+              activeOpacity={0.7}
+            >
+              <View style={styles.todaysFocusIcon}>
+                <IconSymbol
+                  ios_icon_name="target"
+                  android_material_icon_name="track-changes"
+                  size={32}
+                  color={colors.text}
+                />
+              </View>
+              <View style={styles.todaysFocusContent}>
+                <Text style={styles.todaysFocusCategoryText}>{todaysFocus.category.name}</Text>
+                <Text style={styles.todaysFocusLessonText}>{todaysFocus.lesson.name}</Text>
+                <Text style={styles.todaysFocusTimeText}>{todaysFocus.lesson.estimatedTime}</Text>
+              </View>
+              <IconSymbol
+                ios_icon_name="chevron.right"
+                android_material_icon_name="chevron-right"
+                size={20}
+                color={colors.textSecondary}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Progress Insights (Premium) */}
+        {userProgress.isPremium && insights.length > 0 && (
+          <View style={styles.insightsSection}>
+            <Text style={styles.sectionTitle}>Progress Insights</Text>
+            <View style={styles.insightsCard}>
+              {insights.map((insight, index) => (
+                <View key={index} style={styles.insightItem}>
+                  <Text style={styles.insightText}>{insight}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         {/* Empty State */}
         {!hasStartedTraining && (
@@ -130,6 +204,66 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* Session Templates (Premium) */}
+        {userProgress.isPremium && (
+          <View style={styles.templatesSection}>
+            <View style={styles.templatesSectionHeader}>
+              <Text style={styles.sectionTitle}>Quick Sessions</Text>
+              <TouchableOpacity
+                onPress={() => router.push('/modal')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.viewAllText}>View All</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.templatesScroll}
+            >
+              <TouchableOpacity
+                style={styles.templateCard}
+                onPress={() => router.push('/modal')}
+                activeOpacity={0.7}
+              >
+                <IconSymbol
+                  ios_icon_name="bolt.fill"
+                  android_material_icon_name="flash-on"
+                  size={24}
+                  color={colors.primary}
+                />
+                <Text style={styles.templateName}>5-Min Reset</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.templateCard}
+                onPress={() => router.push('/modal')}
+                activeOpacity={0.7}
+              >
+                <IconSymbol
+                  ios_icon_name="eye.fill"
+                  android_material_icon_name="visibility"
+                  size={24}
+                  color={colors.primary}
+                />
+                <Text style={styles.templateName}>Focus Day</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.templateCard}
+                onPress={() => router.push('/modal')}
+                activeOpacity={0.7}
+              >
+                <IconSymbol
+                  ios_icon_name="flame.fill"
+                  android_material_icon_name="whatshot"
+                  size={24}
+                  color={colors.primary}
+                />
+                <Text style={styles.templateName}>Energy Drain</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        )}
+
         {/* Categories */}
         <View style={styles.categoriesSection}>
           <Text style={styles.sectionTitle}>Training Categories</Text>
@@ -169,6 +303,34 @@ export default function HomeScreen() {
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* Upgrade Prompt for Free Users */}
+        {!userProgress.isPremium && (
+          <TouchableOpacity
+            style={styles.upgradePrompt}
+            onPress={() => router.push('/(tabs)/premium')}
+            activeOpacity={0.8}
+          >
+            <IconSymbol
+              ios_icon_name="star.fill"
+              android_material_icon_name="star"
+              size={24}
+              color={colors.text}
+            />
+            <View style={styles.upgradePromptContent}>
+              <Text style={styles.upgradePromptTitle}>Unlock Premium Features</Text>
+              <Text style={styles.upgradePromptText}>
+                Get personalized roadmaps, multi-dog management, and advanced insights
+              </Text>
+            </View>
+            <IconSymbol
+              ios_icon_name="chevron.right"
+              android_material_icon_name="chevron-right"
+              size={20}
+              color={colors.text}
+            />
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );
@@ -207,6 +369,80 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.primary,
   },
+  switchDogButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingVertical: 8,
+  },
+  switchDogText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+    marginLeft: 6,
+  },
+  todaysFocusSection: {
+    marginBottom: 24,
+  },
+  todaysFocusCard: {
+    backgroundColor: colors.primary,
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    boxShadow: '0px 4px 12px rgba(255, 59, 48, 0.4)',
+    elevation: 4,
+  },
+  todaysFocusIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  todaysFocusContent: {
+    flex: 1,
+  },
+  todaysFocusCategoryText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  todaysFocusLessonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  todaysFocusTimeText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  insightsSection: {
+    marginBottom: 24,
+  },
+  insightsCard: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 20,
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+    elevation: 4,
+  },
+  insightItem: {
+    marginBottom: 12,
+  },
+  insightText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.text,
+    lineHeight: 22,
+  },
   emptyStateCard: {
     backgroundColor: colors.card,
     borderRadius: 16,
@@ -235,19 +471,21 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   continueCard: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
     elevation: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
   },
   continueIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: colors.secondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -258,7 +496,7 @@ const styles = StyleSheet.create({
   continueCategoryText: {
     fontSize: 13,
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   continueLessonText: {
@@ -299,6 +537,40 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: colors.textSecondary,
     opacity: 0.3,
+  },
+  templatesSection: {
+    marginBottom: 32,
+  },
+  templatesSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  templatesScroll: {
+    paddingRight: 20,
+  },
+  templateCard: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginRight: 12,
+    alignItems: 'center',
+    minWidth: 120,
+    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.2)',
+    elevation: 2,
+  },
+  templateName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+    marginTop: 8,
+    textAlign: 'center',
   },
   categoriesSection: {
     marginBottom: 20,
@@ -352,5 +624,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: colors.primary,
+  },
+  upgradePrompt: {
+    backgroundColor: colors.primary,
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    boxShadow: '0px 4px 12px rgba(255, 59, 48, 0.4)',
+    elevation: 4,
+  },
+  upgradePromptContent: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  upgradePromptTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  upgradePromptText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.8)',
+    lineHeight: 18,
   },
 });
