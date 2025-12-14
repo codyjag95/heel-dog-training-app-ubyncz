@@ -57,6 +57,24 @@ export default function HomeScreen() {
           )}
         </View>
 
+        {/* Free Training Tip */}
+        <View style={styles.trainingTipCard}>
+          <View style={styles.trainingTipIcon}>
+            <IconSymbol
+              ios_icon_name="lightbulb.fill"
+              android_material_icon_name="lightbulb"
+              size={24}
+              color={colors.primary}
+            />
+          </View>
+          <View style={styles.trainingTipContent}>
+            <Text style={styles.trainingTipLabel}>Training Tip</Text>
+            <Text style={styles.trainingTipText}>
+              Train before meals. Dogs are more focused and motivated when training happens before feeding, not after.
+            </Text>
+          </View>
+        </View>
+
         {/* Empty State */}
         {!hasStartedTraining && (
           <View style={styles.emptyStateCard}>
@@ -206,6 +224,44 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.primary,
+  },
+  trainingTipCard: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+    elevation: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  trainingTipIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  trainingTipContent: {
+    flex: 1,
+  },
+  trainingTipLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.primary,
+    marginBottom: 6,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  trainingTipText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.text,
+    lineHeight: 22,
   },
   emptyStateCard: {
     backgroundColor: colors.card,
