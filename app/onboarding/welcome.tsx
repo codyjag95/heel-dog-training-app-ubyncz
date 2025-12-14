@@ -20,13 +20,9 @@ export default function WelcomeScreen() {
           />
         </View>
         
-        <Text style={styles.title}>Welcome to HEEL</Text>
+        <Text style={styles.title}>Calm, structured dog training</Text>
         <Text style={styles.subtitle}>
-          Modern dog training for everyday life
-        </Text>
-        
-        <Text style={styles.description}>
-          Train your dog like you train yourself. Structured lessons, calm techniques, and positive reinforcement for a well-behaved companion.
+          Short, structured sessions that build real behavior
         </Text>
 
         <View style={styles.features}>
@@ -37,7 +33,7 @@ export default function WelcomeScreen() {
               size={24}
               color={colors.primary}
             />
-            <Text style={styles.featureText}>Structured training programs</Text>
+            <Text style={styles.featureText}>Build calm focus in minutes</Text>
           </View>
           <View style={styles.featureItem}>
             <IconSymbol
@@ -46,7 +42,7 @@ export default function WelcomeScreen() {
               size={24}
               color={colors.primary}
             />
-            <Text style={styles.featureText}>Positive reinforcement methods</Text>
+            <Text style={styles.featureText}>Reinforce good behavior consistently</Text>
           </View>
           <View style={styles.featureItem}>
             <IconSymbol
@@ -55,7 +51,7 @@ export default function WelcomeScreen() {
               size={24}
               color={colors.primary}
             />
-            <Text style={styles.featureText}>Track your progress</Text>
+            <Text style={styles.featureText}>See progress over time</Text>
           </View>
         </View>
       </View>
@@ -66,7 +62,7 @@ export default function WelcomeScreen() {
           onPress={() => router.push('/onboarding/dog-profile')}
           activeOpacity={0.8}
         >
-          <Text style={buttonStyles.primaryButtonText}>Get Started</Text>
+          <Text style={buttonStyles.primaryButtonText}>Start Training</Text>
         </TouchableOpacity>
       </View>
     </View>
