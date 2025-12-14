@@ -51,7 +51,7 @@ export default function DogProfileScreen() {
             <Text style={styles.label}>Breed (optional)</Text>
             <TextInput
               style={styles.input}
-              placeholder="e.g., Golden Retriever"
+              placeholder="e.g. Aussie, Lab, Mixed"
               placeholderTextColor={colors.textSecondary}
               value={breed}
               onChangeText={setBreed}

@@ -15,7 +15,7 @@ export default function WelcomeScreen() {
           <IconSymbol
             ios_icon_name="pawprint.fill"
             android_material_icon_name="pets"
-            size={80}
+            size={76}
             color={colors.primary}
           />
         </View>
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: colors.textSecondary,
-    marginBottom: 24,
+    marginBottom: 40,
     textAlign: 'center',
   },
   description: {
