@@ -61,6 +61,19 @@ export default function CategoryScreen() {
       >
         <Text style={styles.description}>{category.description}</Text>
 
+        {/* Disclaimer for Service Dog Pre-Class */}
+        {category.disclaimer && (
+          <View style={styles.disclaimerCard}>
+            <IconSymbol
+              ios_icon_name="info.circle.fill"
+              android_material_icon_name="info"
+              size={24}
+              color={colors.primary}
+            />
+            <Text style={styles.disclaimerText}>{category.disclaimer}</Text>
+          </View>
+        )}
+
         <View style={styles.progressCard}>
           <Text style={styles.progressText}>
             {category.completedCount} of {category.lessons.length} lessons completed
@@ -197,6 +210,26 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginBottom: 24,
     lineHeight: 24,
+  },
+  disclaimerCard: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.2)',
+    elevation: 2,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  disclaimerText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text,
+    marginLeft: 12,
+    flex: 1,
+    lineHeight: 20,
   },
   progressCard: {
     backgroundColor: colors.card,
