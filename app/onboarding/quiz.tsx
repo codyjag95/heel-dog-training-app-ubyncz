@@ -12,6 +12,7 @@ export default function QuizScreen() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer>({
     challenges: [],
+    early_challenges: [],
   });
 
   const currentQuestion = quizQuestions[currentQuestionIndex];
@@ -43,25 +44,42 @@ export default function QuizScreen() {
   const handleMultiChoice = (option: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
-    let newChallenges = [...answers.challenges];
+    const fieldName = currentQuestion.saveAs;
+    let currentSelections = [...(answers[fieldName] as string[] || [])];
     
-    if (option === 'None of the above') {
-      // If "None of the above" is selected, clear all other selections
-      newChallenges = newChallenges.includes(option) ? [] : [option];
-    } else {
-      // Remove "None of the above" if selecting other options
-      newChallenges = newChallenges.filter(c => c !== 'None of the above');
-      
-      if (newChallenges.includes(option)) {
-        newChallenges = newChallenges.filter(c => c !== option);
+    if (fieldName === 'challenges') {
+      if (option === 'None of the above') {
+        // If "None of the above" is selected, clear all other selections
+        currentSelections = currentSelections.includes(option) ? [] : [option];
       } else {
-        newChallenges.push(option);
+        // Remove "None of the above" if selecting other options
+        currentSelections = currentSelections.filter(c => c !== 'None of the above');
+        
+        if (currentSelections.includes(option)) {
+          currentSelections = currentSelections.filter(c => c !== option);
+        } else {
+          currentSelections.push(option);
+        }
+      }
+    } else if (fieldName === 'early_challenges') {
+      if (option === 'Neither / already resolved') {
+        // If "Neither / already resolved" is selected, clear all other selections
+        currentSelections = currentSelections.includes(option) ? [] : [option];
+      } else {
+        // Remove "Neither / already resolved" if selecting other options
+        currentSelections = currentSelections.filter(c => c !== 'Neither / already resolved');
+        
+        if (currentSelections.includes(option)) {
+          currentSelections = currentSelections.filter(c => c !== option);
+        } else {
+          currentSelections.push(option);
+        }
       }
     }
 
     setAnswers({
       ...answers,
-      challenges: newChallenges,
+      [fieldName]: currentSelections,
     });
   };
 
@@ -93,7 +111,17 @@ export default function QuizScreen() {
     if (currentQuestion.type === 'single') {
       return answers[currentQuestion.saveAs] !== undefined;
     } else {
-      return answers.challenges.length > 0;
+      const fieldValue = answers[currentQuestion.saveAs];
+      return Array.isArray(fieldValue) && fieldValue.length > 0;
+    }
+  };
+
+  const isOptionSelected = (option: string): boolean => {
+    if (currentQuestion.type === 'single') {
+      return answers[currentQuestion.saveAs] === option;
+    } else {
+      const fieldValue = answers[currentQuestion.saveAs];
+      return Array.isArray(fieldValue) && fieldValue.includes(option);
     }
   };
 
@@ -132,10 +160,7 @@ export default function QuizScreen() {
 
         <View style={styles.optionsContainer}>
           {currentQuestion.options.map((option, index) => {
-            const isSelected =
-              currentQuestion.type === 'single'
-                ? answers[currentQuestion.saveAs] === option
-                : answers.challenges.includes(option);
+            const isSelected = isOptionSelected(option);
 
             return (
               <TouchableOpacity

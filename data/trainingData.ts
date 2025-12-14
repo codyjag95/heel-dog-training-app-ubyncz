@@ -2039,6 +2039,7 @@ export interface DogProfile {
   quizAnswers?: QuizAnswer;
   recommendedPrimaryTrack?: string;
   recommendedSecondaryTracks?: string[];
+  immediateFocus?: string[];
   lastViewedLesson?: string;
   sessionNotes?: SessionNote[];
 }

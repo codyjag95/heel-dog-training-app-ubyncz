@@ -6,6 +6,7 @@ export interface QuizAnswer {
   training_level?: string;
   primary_goal?: string;
   daily_time?: string;
+  early_challenges: string[];
 }
 
 export interface QuizQuestion {
@@ -91,11 +92,23 @@ export const quizQuestions: QuizQuestion[] = [
       '15+ minutes',
     ],
   },
+  {
+    id: 'q7',
+    question: 'Are you currently dealing with any of the following? (Select all that apply)',
+    type: 'multi',
+    saveAs: 'early_challenges',
+    options: [
+      'Potty accidents indoors',
+      'Puppy biting or nipping',
+      'Neither / already resolved',
+    ],
+  },
 ];
 
 export interface TrainingRecommendation {
   primaryTrack: string;
   secondaryTracks: string[];
+  immediateFocus: string[];
   reasoning: string[];
 }
 
@@ -112,6 +125,19 @@ export function generateRecommendation(answers: QuizAnswer): TrainingRecommendat
   const reasoning: string[] = [];
   let primaryTrack = 'Everyday Obedience';
   const secondaryTracks: string[] = [];
+  const immediateFocus: string[] = [];
+
+  // NEW: Check for early behavior challenges
+  if (answers.early_challenges && answers.early_challenges.length > 0) {
+    if (answers.early_challenges.includes('Potty accidents indoors')) {
+      immediateFocus.push('Potty Training & House Habits');
+      reasoning.push('We\'ll help you establish a solid potty routine first');
+    }
+    if (answers.early_challenges.includes('Puppy biting or nipping')) {
+      immediateFocus.push('Biting, Nipping & Mouthing');
+      reasoning.push('Addressing biting early will make all other training easier');
+    }
+  }
 
   // Rule 1: If age_group = "Under 6 months" → Primary = Beginner Foundations
   if (answers.age_group === 'Under 6 months') {
@@ -201,6 +227,7 @@ export function generateRecommendation(answers: QuizAnswer): TrainingRecommendat
   return {
     primaryTrack,
     secondaryTracks: limitedSecondaryTracks,
+    immediateFocus,
     reasoning,
   };
 }

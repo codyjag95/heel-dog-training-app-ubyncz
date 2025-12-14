@@ -13,7 +13,7 @@ export default function QuizResultsScreen() {
   const { answers: answersParam } = useLocalSearchParams();
   const { dogProfile, setDogProfile, completeOnboarding } = useApp();
 
-  const answers: QuizAnswer = answersParam ? JSON.parse(answersParam as string) : { challenges: [] };
+  const answers: QuizAnswer = answersParam ? JSON.parse(answersParam as string) : { challenges: [], early_challenges: [] };
   const recommendation = generateRecommendation(answers);
 
   useEffect(() => {
@@ -24,6 +24,7 @@ export default function QuizResultsScreen() {
         quizAnswers: answers,
         recommendedPrimaryTrack: recommendation.primaryTrack,
         recommendedSecondaryTracks: recommendation.secondaryTracks,
+        immediateFocus: recommendation.immediateFocus,
       });
     }
   }, []);
@@ -58,9 +59,30 @@ export default function QuizResultsScreen() {
           Based on {dogProfile?.name}&apos;s profile, here&apos;s what we recommend
         </Text>
 
+        {/* Immediate Focus (if applicable) */}
+        {recommendation.immediateFocus.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>Start Here First</Text>
+            <Text style={styles.sectionDescription}>
+              These foundational areas will make all other training easier
+            </Text>
+            {recommendation.immediateFocus.map((track, index) => (
+              <View key={index} style={styles.immediateFocusCard}>
+                <IconSymbol
+                  ios_icon_name="exclamationmark.circle.fill"
+                  android_material_icon_name="priority-high"
+                  size={28}
+                  color={colors.primary}
+                />
+                <Text style={styles.immediateFocusText}>{track}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
         {/* Primary Track */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Recommended Starting Track</Text>
+          <Text style={styles.sectionLabel}>Your Core Training Path</Text>
           <View style={styles.primaryTrackCard}>
             <IconSymbol
               ios_icon_name="star.fill"
@@ -75,7 +97,7 @@ export default function QuizResultsScreen() {
         {/* Secondary Tracks */}
         {recommendation.secondaryTracks.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Focus Areas</Text>
+            <Text style={styles.sectionLabel}>Additional Focus Areas</Text>
             {recommendation.secondaryTracks.map((track, index) => (
               <View key={index} style={styles.secondaryTrackCard}>
                 <IconSymbol
@@ -179,7 +201,33 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 1,
+    marginBottom: 8,
+  },
+  sectionDescription: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
     marginBottom: 12,
+    lineHeight: 20,
+  },
+  immediateFocusCard: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+    elevation: 4,
+  },
+  immediateFocusText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+    marginLeft: 16,
+    flex: 1,
   },
   primaryTrackCard: {
     backgroundColor: colors.card,

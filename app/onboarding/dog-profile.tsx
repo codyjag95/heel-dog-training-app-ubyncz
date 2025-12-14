@@ -10,14 +10,12 @@ export default function DogProfileScreen() {
   const { setDogProfile } = useApp();
   
   const [name, setName] = useState('');
-  const [age, setAge] = useState('');
   const [breed, setBreed] = useState('');
 
   const handleContinue = () => {
     if (name.trim()) {
       setDogProfile({
         name: name.trim(),
-        age: age.trim() || undefined,
         breed: breed.trim() || undefined,
       });
       // Navigate to quiz instead of completing onboarding
@@ -46,17 +44,6 @@ export default function DogProfileScreen() {
               value={name}
               onChangeText={setName}
               autoCapitalize="words"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Age (optional)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g., 2 years"
-              placeholderTextColor={colors.textSecondary}
-              value={age}
-              onChangeText={setAge}
             />
           </View>
 
