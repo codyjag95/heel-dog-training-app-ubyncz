@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 import { useApp } from '@/contexts/AppContext';
@@ -10,20 +10,30 @@ import * as Haptics from 'expo-haptics';
 export default function SessionModeScreen() {
   const router = useRouter();
   const { categoryId, lessonId } = useLocalSearchParams();
-  const { categories, completeLesson, updateStreak } = useApp();
+  const { categories, completeLesson, updateStreak, addSessionNote } = useApp();
   
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [sessionComplete, setSessionComplete] = useState(false);
+  const [showTimerPicker, setShowTimerPicker] = useState(false);
+  
+  // Step navigation
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [showAllSteps, setShowAllSteps] = useState(false);
+  
+  // Notes
+  const [wentWell, setWentWell] = useState('');
+  const [needsWork, setNeedsWork] = useState('');
 
   const category = categories.find(cat => cat.id === categoryId);
   const lesson = category?.lessons.find(l => l.id === lessonId);
 
-  const durations = [
+  const timerOptions = [
     { label: '5 min', value: 5 * 60 },
     { label: '10 min', value: 10 * 60 },
     { label: '15 min', value: 15 * 60 },
+    { label: 'No timer', value: null },
   ];
 
   // Timer logic
@@ -58,10 +68,14 @@ export default function SessionModeScreen() {
     );
   }
 
-  const handleSelectDuration = (duration: number) => {
+  const handleSelectTimer = (duration: number | null) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedDuration(duration);
-    setTimeRemaining(duration);
+    if (duration !== null) {
+      setTimeRemaining(duration);
+    }
     setIsTimerRunning(false);
+    setShowTimerPicker(false);
   };
 
   const handleStartPauseTimer = () => {
@@ -91,8 +105,40 @@ export default function SessionModeScreen() {
     setSessionComplete(true);
   };
 
-  const handleReturnHome = () => {
+  const handleSaveAndReturn = () => {
+    // Save notes if provided
+    if (wentWell.trim() || needsWork.trim()) {
+      const note = {
+        id: `note-${Date.now()}`,
+        lessonId: lesson.id,
+        date: new Date().toISOString(),
+        wentWell: wentWell.trim(),
+        struggled: needsWork.trim(),
+      };
+      addSessionNote(note);
+    }
+    
     router.push('/(tabs)/(home)');
+  };
+
+  const handleStartAnother = () => {
+    // Save notes if provided
+    if (wentWell.trim() || needsWork.trim()) {
+      const note = {
+        id: `note-${Date.now()}`,
+        lessonId: lesson.id,
+        date: new Date().toISOString(),
+        wentWell: wentWell.trim(),
+        struggled: needsWork.trim(),
+      };
+      addSessionNote(note);
+    }
+    
+    // Navigate back to category to select another lesson
+    router.push({
+      pathname: '/category',
+      params: { categoryId: category.id },
+    });
   };
 
   // Get session steps from the new fields or fall back to the steps array
@@ -106,34 +152,112 @@ export default function SessionModeScreen() {
 
   // If no session steps, fall back to regular steps
   const stepsToDisplay = sessionSteps.length > 0 ? sessionSteps : lesson.steps;
+  const totalSteps = stepsToDisplay.length;
+
+  const handleNextStep = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (currentStepIndex < totalSteps - 1) {
+      setCurrentStepIndex(currentStepIndex + 1);
+    }
+  };
+
+  const handlePreviousStep = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(currentStepIndex - 1);
+    }
+  };
+
+  const handleToggleAllSteps = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setShowAllSteps(!showAllSteps);
+  };
 
   // Session Complete State
   if (sessionComplete) {
     return (
-      <View style={[commonStyles.container, styles.completeContainer]}>
-        <View style={styles.completeContent}>
-          <View style={styles.checkmarkContainer}>
-            <IconSymbol
-              ios_icon_name="checkmark.circle.fill"
-              android_material_icon_name="check-circle"
-              size={80}
-              color={colors.primary}
-            />
-          </View>
-          
-          <Text style={styles.completeTitle}>Session complete</Text>
-          <Text style={styles.completeMessage}>
-            Consistency builds calm behavior.
-          </Text>
-
-          <TouchableOpacity
-            style={[buttonStyles.primaryButton, styles.returnButton]}
-            onPress={handleReturnHome}
-            activeOpacity={0.8}
-          >
-            <Text style={buttonStyles.primaryButtonText}>Return to Home</Text>
-          </TouchableOpacity>
+      <View style={[commonStyles.container]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerSpacer} />
+          <Text style={styles.headerTitle}>Session Complete</Text>
+          <View style={styles.headerSpacer} />
         </View>
+
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.completeContent}>
+            <View style={styles.checkmarkContainer}>
+              <IconSymbol
+                ios_icon_name="checkmark.circle.fill"
+                android_material_icon_name="check-circle"
+                size={80}
+                color={colors.primary}
+              />
+            </View>
+            
+            <Text style={styles.completeTitle}>Nice work.</Text>
+            <Text style={styles.completeMessage}>
+              Consistency beats perfection.
+            </Text>
+
+            {/* Notes Section */}
+            <View style={styles.notesSection}>
+              <Text style={styles.notesTitle}>Session Notes</Text>
+              <Text style={styles.notesSubtitle}>Optional — helps track progress</Text>
+
+              <View style={styles.noteInputContainer}>
+                <Text style={styles.noteLabel}>What went well?</Text>
+                <TextInput
+                  style={styles.noteInput}
+                  placeholder="e.g., Stayed focused, responded quickly..."
+                  placeholderTextColor={colors.textSecondary}
+                  value={wentWell}
+                  onChangeText={setWentWell}
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                />
+              </View>
+
+              <View style={styles.noteInputContainer}>
+                <Text style={styles.noteLabel}>What needs work next time?</Text>
+                <TextInput
+                  style={styles.noteInput}
+                  placeholder="e.g., Got distracted by sounds, needs more practice..."
+                  placeholderTextColor={colors.textSecondary}
+                  value={needsWork}
+                  onChangeText={setNeedsWork}
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                />
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.completeActions}>
+              <TouchableOpacity
+                style={[buttonStyles.primaryButton, styles.actionButton]}
+                onPress={handleSaveAndReturn}
+                activeOpacity={0.8}
+              >
+                <Text style={buttonStyles.primaryButtonText}>Done</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[buttonStyles.secondaryButton, styles.actionButton]}
+                onPress={handleStartAnother}
+                activeOpacity={0.8}
+              >
+                <Text style={buttonStyles.secondaryButtonText}>Start another session</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
       </View>
     );
   }
@@ -163,69 +287,32 @@ export default function SessionModeScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Lesson Info Card */}
-        <View style={styles.lessonInfoCard}>
+        {/* Simplified Session Header */}
+        <View style={styles.sessionHeader}>
           <Text style={styles.lessonTitle}>{lesson.name}</Text>
-          <View style={styles.lessonMeta}>
-            <View style={styles.metaItem}>
-              <IconSymbol
-                ios_icon_name="clock.fill"
-                android_material_icon_name="schedule"
-                size={18}
-                color={colors.primary}
-              />
-              <Text style={styles.metaText}>{lesson.estimatedTime}</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <IconSymbol
-                ios_icon_name="chart.bar.fill"
-                android_material_icon_name="bar-chart"
-                size={18}
-                color={colors.primary}
-              />
-              <Text style={styles.metaText}>{lesson.difficulty}</Text>
-            </View>
-          </View>
-          
-          {/* Session Flow Subheading */}
-          <Text style={styles.sessionSubheading}>
-            Follow the steps below. Keep sessions short and calm.
-          </Text>
+          {lesson.session_goal && (
+            <Text style={styles.sessionGoal}>{lesson.session_goal}</Text>
+          )}
         </View>
-
-        {/* Today's Goal */}
-        {lesson.session_goal && (
-          <View style={styles.goalCard}>
-            <View style={styles.goalHeader}>
-              <IconSymbol
-                ios_icon_name="target"
-                android_material_icon_name="track-changes"
-                size={24}
-                color={colors.primary}
-              />
-              <Text style={styles.goalTitle}>Today&apos;s Goal</Text>
-            </View>
-            <Text style={styles.goalText}>{lesson.session_goal}</Text>
-          </View>
-        )}
 
         {/* Timer Section */}
         <View style={styles.timerCard}>
           <Text style={styles.sectionTitle}>Session Timer (Optional)</Text>
           
-          {!selectedDuration ? (
-            <View style={styles.durationSelector}>
-              {durations.map((duration, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.durationButton}
-                  onPress={() => handleSelectDuration(duration.value)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.durationButtonText}>{duration.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+          {selectedDuration === null ? (
+            <TouchableOpacity
+              style={styles.setTimerButton}
+              onPress={() => setShowTimerPicker(true)}
+              activeOpacity={0.7}
+            >
+              <IconSymbol
+                ios_icon_name="timer"
+                android_material_icon_name="timer"
+                size={20}
+                color={colors.text}
+              />
+              <Text style={styles.setTimerButtonText}>Set Timer</Text>
+            </TouchableOpacity>
           ) : (
             <View style={styles.timerContainer}>
               <View style={styles.timerDisplay}>
@@ -287,15 +374,97 @@ export default function SessionModeScreen() {
 
         {/* Training Steps */}
         <View style={styles.stepsSection}>
-          <Text style={styles.sectionTitle}>Training Steps</Text>
-          {stepsToDisplay.map((step, index) => (
-            <View key={index} style={styles.stepCard}>
-              <View style={styles.stepNumber}>
-                <Text style={styles.stepNumberText}>{index + 1}</Text>
+          <View style={styles.stepsSectionHeader}>
+            <Text style={styles.sectionTitle}>Training Steps</Text>
+            <TouchableOpacity
+              onPress={handleToggleAllSteps}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.viewAllText}>
+                {showAllSteps ? 'Show one at a time' : 'View all steps'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {showAllSteps ? (
+            // Show all steps
+            <React.Fragment>
+              {stepsToDisplay.map((step, index) => (
+                <View key={index} style={styles.stepCard}>
+                  <View style={styles.stepNumber}>
+                    <Text style={styles.stepNumberText}>{index + 1}</Text>
+                  </View>
+                  <Text style={styles.stepText}>{step}</Text>
+                </View>
+              ))}
+            </React.Fragment>
+          ) : (
+            // Show one step at a time
+            <React.Fragment>
+              <View style={styles.stepCard}>
+                <View style={styles.stepNumber}>
+                  <Text style={styles.stepNumberText}>{currentStepIndex + 1}</Text>
+                </View>
+                <Text style={styles.stepText}>{stepsToDisplay[currentStepIndex]}</Text>
               </View>
-              <Text style={styles.stepText}>{step}</Text>
-            </View>
-          ))}
+
+              <View style={styles.stepNavigation}>
+                <TouchableOpacity
+                  style={[
+                    styles.stepNavButton,
+                    currentStepIndex === 0 && styles.stepNavButtonDisabled,
+                  ]}
+                  onPress={handlePreviousStep}
+                  disabled={currentStepIndex === 0}
+                  activeOpacity={0.7}
+                >
+                  <IconSymbol
+                    ios_icon_name="chevron.left"
+                    android_material_icon_name="chevron-left"
+                    size={20}
+                    color={currentStepIndex === 0 ? colors.textSecondary : colors.text}
+                  />
+                  <Text
+                    style={[
+                      styles.stepNavButtonText,
+                      currentStepIndex === 0 && styles.stepNavButtonTextDisabled,
+                    ]}
+                  >
+                    Previous
+                  </Text>
+                </TouchableOpacity>
+
+                <Text style={styles.stepCounter}>
+                  {currentStepIndex + 1} of {totalSteps}
+                </Text>
+
+                <TouchableOpacity
+                  style={[
+                    styles.stepNavButton,
+                    currentStepIndex === totalSteps - 1 && styles.stepNavButtonDisabled,
+                  ]}
+                  onPress={handleNextStep}
+                  disabled={currentStepIndex === totalSteps - 1}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.stepNavButtonText,
+                      currentStepIndex === totalSteps - 1 && styles.stepNavButtonTextDisabled,
+                    ]}
+                  >
+                    Next Step
+                  </Text>
+                  <IconSymbol
+                    ios_icon_name="chevron.right"
+                    android_material_icon_name="chevron-right"
+                    size={20}
+                    color={currentStepIndex === totalSteps - 1 ? colors.textSecondary : colors.text}
+                  />
+                </TouchableOpacity>
+              </View>
+            </React.Fragment>
+          )}
         </View>
 
         {/* Finish Session Button */}
@@ -317,6 +486,34 @@ export default function SessionModeScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Timer Picker Modal */}
+      <Modal
+        visible={showTimerPicker}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowTimerPicker(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowTimerPicker(false)}
+        >
+          <View style={styles.timerPickerContainer}>
+            <Text style={styles.timerPickerTitle}>Set Timer</Text>
+            {timerOptions.map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.timerOption}
+                onPress={() => handleSelectTimer(option.value)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.timerOptionText}>{option.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -357,68 +554,23 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 40,
   },
-  lessonInfoCard: {
+  sessionHeader: {
     backgroundColor: colors.card,
     marginHorizontal: 20,
     marginTop: 20,
     borderRadius: 16,
-    padding: 20,
+    padding: 24,
     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
     elevation: 4,
   },
   lessonTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '800',
     color: colors.text,
     marginBottom: 12,
     letterSpacing: -0.5,
   },
-  lessonMeta: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    gap: 24,
-    marginBottom: 16,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  metaText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  sessionSubheading: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: colors.textSecondary,
-    lineHeight: 22,
-    marginTop: 8,
-  },
-  goalCard: {
-    backgroundColor: colors.card,
-    marginHorizontal: 20,
-    marginTop: 20,
-    borderRadius: 16,
-    padding: 20,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.primary,
-    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
-    elevation: 4,
-  },
-  goalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    gap: 8,
-  },
-  goalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  goalText: {
+  sessionGoal: {
     fontSize: 16,
     fontWeight: '500',
     color: colors.textSecondary,
@@ -439,21 +591,18 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: 16,
   },
-  durationSelector: {
+  setTimerButton: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  durationButton: {
-    flex: 1,
-    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.secondary,
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
+    gap: 8,
   },
-  durationButtonText: {
+  setTimerButtonText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   timerContainer: {
@@ -492,10 +641,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 32,
   },
+  stepsSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+  },
   stepCard: {
     backgroundColor: colors.card,
     borderRadius: 12,
-    padding: 16,
+    padding: 20,
     marginBottom: 12,
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -517,11 +677,40 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   stepText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '500',
     color: colors.text,
-    lineHeight: 22,
+    lineHeight: 24,
     flex: 1,
+  },
+  stepNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingHorizontal: 8,
+  },
+  stepNavButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    padding: 8,
+  },
+  stepNavButtonDisabled: {
+    opacity: 0.4,
+  },
+  stepNavButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  stepNavButtonTextDisabled: {
+    color: colors.textSecondary,
+  },
+  stepCounter: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textSecondary,
   },
   actionButtons: {
     paddingHorizontal: 20,
@@ -541,14 +730,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.textSecondary,
   },
-  completeContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
   completeContent: {
     alignItems: 'center',
     width: '100%',
+    paddingHorizontal: 20,
+    paddingTop: 40,
   },
   checkmarkContainer: {
     marginBottom: 32,
@@ -557,7 +743,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '800',
     color: colors.text,
-    marginBottom: 16,
+    marginBottom: 12,
     textAlign: 'center',
   },
   completeMessage: {
@@ -566,9 +752,84 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 26,
-    marginBottom: 48,
+    marginBottom: 40,
   },
-  returnButton: {
+  notesSection: {
     width: '100%',
+    marginBottom: 32,
+  },
+  notesTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  notesSubtitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    marginBottom: 20,
+  },
+  noteInputContainer: {
+    marginBottom: 20,
+  },
+  noteLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  noteInput: {
+    backgroundColor: colors.secondary,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.text,
+    minHeight: 80,
+    borderWidth: 1,
+    borderColor: colors.textSecondary,
+  },
+  completeActions: {
+    width: '100%',
+    gap: 12,
+  },
+  actionButton: {
+    width: '100%',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  timerPickerContainer: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 300,
+    boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.4)',
+    elevation: 8,
+  },
+  timerPickerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  timerOption: {
+    backgroundColor: colors.secondary,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  timerOptionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
   },
 });
