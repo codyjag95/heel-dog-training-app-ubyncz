@@ -1,3 +1,4 @@
+
 {
   "expo": {
     "name": "HEEL",
@@ -34,7 +35,15 @@
     "plugins": [
       "expo-font",
       "expo-router",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#000000",
+          "image": "./assets/images/natively-dark.png",
+          "imageWidth": 160
+        }
+      ]
     ],
     "scheme": "natively",
     "experiments": {
