@@ -15,7 +15,7 @@ export default function WelcomeScreen() {
           <IconSymbol
             ios_icon_name="pawprint.fill"
             android_material_icon_name="pets"
-            size={76}
+            size={80}
             color={colors.primary}
           />
         </View>

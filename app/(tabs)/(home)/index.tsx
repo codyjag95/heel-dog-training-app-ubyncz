@@ -149,7 +149,7 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* Empty State */}
+        {/* Early Progress Reinforcement */}
         {!hasStartedTraining && (
           <View style={styles.emptyStateCard}>
             <IconSymbol
@@ -160,7 +160,23 @@ export default function HomeScreen() {
             />
             <Text style={styles.emptyStateTitle}>Ready to start training?</Text>
             <Text style={styles.emptyStateText}>
-              Choose a category below and begin your first lesson. Consistent practice makes all the difference!
+              Your first session matters! Choose a category below and begin building calm, focused behavior with {dogProfile?.name || 'your dog'}.
+            </Text>
+          </View>
+        )}
+
+        {/* Progress Acknowledgment at 0% */}
+        {hasStartedTraining && progressPercentage === 0 && (
+          <View style={styles.progressEncouragementCard}>
+            <IconSymbol
+              ios_icon_name="star.fill"
+              android_material_icon_name="star"
+              size={32}
+              color={colors.primary}
+            />
+            <Text style={styles.progressEncouragementTitle}>Great start!</Text>
+            <Text style={styles.progressEncouragementText}>
+              You&apos;ve taken the first step. Every session builds on the last—consistency is what creates lasting change.
             </Text>
           </View>
         )}
@@ -517,6 +533,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   emptyStateText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  progressEncouragementCard: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 24,
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+    elevation: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  progressEncouragementTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginTop: 12,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  progressEncouragementText: {
     fontSize: 15,
     fontWeight: '500',
     color: colors.textSecondary,

@@ -15,6 +15,7 @@ export default function SessionModeScreen() {
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [sessionComplete, setSessionComplete] = useState(false);
 
   const category = categories.find(cat => cat.id === categoryId);
   const lesson = category?.lessons.find(l => l.id === lessonId);
@@ -87,7 +88,11 @@ export default function SessionModeScreen() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     completeLesson(lesson.id);
     updateStreak();
-    router.back();
+    setSessionComplete(true);
+  };
+
+  const handleReturnHome = () => {
+    router.push('/(tabs)/(home)');
   };
 
   // Get session steps from the new fields or fall back to the steps array
@@ -101,6 +106,37 @@ export default function SessionModeScreen() {
 
   // If no session steps, fall back to regular steps
   const stepsToDisplay = sessionSteps.length > 0 ? sessionSteps : lesson.steps;
+
+  // Session Complete State
+  if (sessionComplete) {
+    return (
+      <View style={[commonStyles.container, styles.completeContainer]}>
+        <View style={styles.completeContent}>
+          <View style={styles.checkmarkContainer}>
+            <IconSymbol
+              ios_icon_name="checkmark.circle.fill"
+              android_material_icon_name="check-circle"
+              size={80}
+              color={colors.primary}
+            />
+          </View>
+          
+          <Text style={styles.completeTitle}>Session complete</Text>
+          <Text style={styles.completeMessage}>
+            Consistency builds calm behavior.
+          </Text>
+
+          <TouchableOpacity
+            style={[buttonStyles.primaryButton, styles.returnButton]}
+            onPress={handleReturnHome}
+            activeOpacity={0.8}
+          >
+            <Text style={buttonStyles.primaryButtonText}>Return to Home</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={[commonStyles.container]}>
@@ -150,6 +186,11 @@ export default function SessionModeScreen() {
               <Text style={styles.metaText}>{lesson.difficulty}</Text>
             </View>
           </View>
+          
+          {/* Session Flow Subheading */}
+          <Text style={styles.sessionSubheading}>
+            Follow the steps below. Keep sessions short and calm.
+          </Text>
         </View>
 
         {/* Today's Goal */}
@@ -271,7 +312,7 @@ export default function SessionModeScreen() {
               color={colors.text}
             />
             <Text style={[buttonStyles.primaryButtonText, styles.finishButtonText]}>
-              Finish Session
+              Complete Session
             </Text>
           </TouchableOpacity>
         </View>
@@ -336,6 +377,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     gap: 24,
+    marginBottom: 16,
   },
   metaItem: {
     flexDirection: 'row',
@@ -346,6 +388,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.text,
+  },
+  sessionSubheading: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    lineHeight: 22,
+    marginTop: 8,
   },
   goalCard: {
     backgroundColor: colors.card,
@@ -491,5 +540,35 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: colors.textSecondary,
+  },
+  completeContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  completeContent: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  checkmarkContainer: {
+    marginBottom: 32,
+  },
+  completeTitle: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: colors.text,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  completeMessage: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 26,
+    marginBottom: 48,
+  },
+  returnButton: {
+    width: '100%',
   },
 });
