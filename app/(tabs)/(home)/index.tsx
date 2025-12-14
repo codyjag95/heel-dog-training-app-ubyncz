@@ -1,36 +1,19 @@
 
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { useRouter, useRootNavigationState } from 'expo-router';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useRouter, Redirect } from 'expo-router';
 import { colors, commonStyles } from '@/styles/commonStyles';
 import { useApp } from '@/contexts/AppContext';
 import { IconSymbol } from '@/components/IconSymbol';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const rootNavigationState = useRootNavigationState();
   const { dogProfile, categories, hasCompletedOnboarding } = useApp();
 
-  useEffect(() => {
-    // Wait for navigation to be ready before attempting to navigate
-    if (!rootNavigationState?.key) {
-      console.log('Navigation not ready yet');
-      return;
-    }
-
-    if (!hasCompletedOnboarding) {
-      console.log('Redirecting to onboarding');
-      router.replace('/onboarding/welcome');
-    }
-  }, [hasCompletedOnboarding, rootNavigationState?.key]);
-
-  // Show loading state while navigation is mounting
-  if (!rootNavigationState?.key) {
-    return (
-      <View style={[commonStyles.container, styles.loadingContainer]}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
-    );
+  // Use Redirect component for navigation - it handles timing automatically
+  if (!hasCompletedOnboarding) {
+    console.log('Redirecting to onboarding via Redirect component');
+    return <Redirect href="/onboarding/welcome" />;
   }
 
   const totalLessons = categories.reduce((acc, cat) => acc + cat.lessons.length, 0);
@@ -122,16 +105,6 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 120,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
   },
   header: {
     marginBottom: 24,
