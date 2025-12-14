@@ -5,17 +5,12 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 import { useApp } from '@/contexts/AppContext';
 import { IconSymbol } from '@/components/IconSymbol';
-import SessionTimer from '@/components/SessionTimer';
 import * as Haptics from 'expo-haptics';
 
 export default function LessonScreen() {
   const router = useRouter();
   const { categoryId, lessonId } = useLocalSearchParams();
-  const { categories, completeLesson, setLastViewedLesson, addSessionNote, getSessionNotes, isLessonLocked, updateStreak, userProgress } = useApp();
-  const [sessionStarted, setSessionStarted] = useState(false);
-  const [showNotes, setShowNotes] = useState(false);
-  const [wentWell, setWentWell] = useState('');
-  const [struggled, setStruggled] = useState('');
+  const { categories, setLastViewedLesson, isLessonLocked, userProgress } = useApp();
 
   const category = categories.find(cat => cat.id === categoryId);
   const lesson = category?.lessons.find(l => l.id === lessonId);
@@ -35,35 +30,6 @@ export default function LessonScreen() {
   }
 
   const locked = isLessonLocked(lesson);
-  const sessionNotes = getSessionNotes(lesson.id);
-
-  const handleMarkComplete = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    completeLesson(lesson.id);
-    updateStreak();
-    
-    // Save notes if provided
-    if (wentWell.trim() || struggled.trim()) {
-      addSessionNote({
-        id: `${lesson.id}-${Date.now()}`,
-        lessonId: lesson.id,
-        date: new Date().toISOString(),
-        wentWell: wentWell.trim(),
-        struggled: struggled.trim(),
-      });
-    }
-    
-    router.back();
-  };
-
-  const handleTimerComplete = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    Alert.alert(
-      'Session Complete!',
-      'Great work! Time to mark this lesson as complete.',
-      [{ text: 'OK' }]
-    );
-  };
 
   // Check prerequisites
   const getPrerequisiteNames = (): string[] => {
@@ -84,6 +50,14 @@ export default function LessonScreen() {
   };
 
   const prerequisiteNames = getPrerequisiteNames();
+
+  const handleStartSession = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push({
+      pathname: '/session-mode',
+      params: { categoryId, lessonId },
+    });
+  };
 
   if (locked) {
     return (
@@ -196,133 +170,61 @@ export default function LessonScreen() {
           </View>
         </View>
 
-        {/* Session Timer */}
-        {sessionStarted && <SessionTimer onComplete={handleTimerComplete} />}
-
         {/* Description */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About This Lesson</Text>
           <Text style={styles.description}>{lesson.description}</Text>
         </View>
 
-        {/* Steps */}
+        {/* Session Goal Preview */}
+        {lesson.session_goal && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Session Goal</Text>
+            <View style={styles.goalPreview}>
+              <IconSymbol
+                ios_icon_name="target"
+                android_material_icon_name="track-changes"
+                size={20}
+                color={colors.primary}
+              />
+              <Text style={styles.goalPreviewText}>{lesson.session_goal}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Steps Preview */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Training Steps</Text>
-          {lesson.steps.map((step, index) => (
-            <View key={index} style={styles.stepCard}>
-              <View style={styles.stepNumber}>
-                <Text style={styles.stepNumberText}>{index + 1}</Text>
-              </View>
-              <Text style={styles.stepText}>{step}</Text>
+          <Text style={styles.sectionTitle}>What You&apos;ll Learn</Text>
+          {lesson.steps.slice(0, 3).map((step, index) => (
+            <View key={index} style={styles.stepPreview}>
+              <View style={styles.stepBullet} />
+              <Text style={styles.stepPreviewText}>{step}</Text>
             </View>
           ))}
+          {lesson.steps.length > 3 && (
+            <Text style={styles.moreStepsText}>
+              + {lesson.steps.length - 3} more steps
+            </Text>
+          )}
         </View>
 
-        {/* Session Notes */}
-        {sessionStarted && (
-          <View style={styles.section}>
-            <TouchableOpacity
-              style={styles.notesHeader}
-              onPress={() => setShowNotes(!showNotes)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.sectionTitle}>Session Notes (Optional)</Text>
-              <IconSymbol
-                ios_icon_name={showNotes ? 'chevron.up' : 'chevron.down'}
-                android_material_icon_name={showNotes ? 'expand-less' : 'expand-more'}
-                size={24}
-                color={colors.text}
-              />
-            </TouchableOpacity>
-            
-            {showNotes && (
-              <View style={styles.notesContainer}>
-                <Text style={styles.notesLabel}>What went well?</Text>
-                <TextInput
-                  style={styles.notesInput}
-                  placeholder="e.g., Great focus today"
-                  placeholderTextColor={colors.textSecondary}
-                  value={wentWell}
-                  onChangeText={setWentWell}
-                  multiline
-                  numberOfLines={3}
-                />
-                
-                <Text style={styles.notesLabel}>What did you struggle with?</Text>
-                <TextInput
-                  style={styles.notesInput}
-                  placeholder="e.g., Distractions from other dogs"
-                  placeholderTextColor={colors.textSecondary}
-                  value={struggled}
-                  onChangeText={setStruggled}
-                  multiline
-                  numberOfLines={3}
-                />
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Previous Notes */}
-        {sessionNotes.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Previous Notes</Text>
-            {sessionNotes.slice(-3).reverse().map((note, index) => (
-              <View key={index} style={styles.previousNoteCard}>
-                <Text style={styles.previousNoteDate}>
-                  {new Date(note.date).toLocaleDateString()}
-                </Text>
-                {note.wentWell && (
-                  <Text style={styles.previousNoteText}>
-                    ✓ {note.wentWell}
-                  </Text>
-                )}
-                {note.struggled && (
-                  <Text style={styles.previousNoteText}>
-                    ⚠ {note.struggled}
-                  </Text>
-                )}
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Action Buttons */}
+        {/* Action Button */}
         <View style={styles.actionButtons}>
-          {!sessionStarted ? (
-            <TouchableOpacity
-              style={[buttonStyles.primaryButton, styles.button]}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                setSessionStarted(true);
-              }}
-              activeOpacity={0.8}
-            >
-              <Text style={buttonStyles.primaryButtonText}>Start Session</Text>
-            </TouchableOpacity>
-          ) : (
-            <>
-              <TouchableOpacity
-                style={[buttonStyles.primaryButton, styles.button]}
-                onPress={handleMarkComplete}
-                activeOpacity={0.8}
-              >
-                <Text style={buttonStyles.primaryButtonText}>Mark Complete</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[buttonStyles.secondaryButton, styles.button, styles.buttonSecondary]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setSessionStarted(false);
-                  setWentWell('');
-                  setStruggled('');
-                }}
-                activeOpacity={0.8}
-              >
-                <Text style={buttonStyles.secondaryButtonText}>Reset Session</Text>
-              </TouchableOpacity>
-            </>
-          )}
+          <TouchableOpacity
+            style={[buttonStyles.primaryButton, styles.button]}
+            onPress={handleStartSession}
+            activeOpacity={0.8}
+          >
+            <IconSymbol
+              ios_icon_name="play.circle.fill"
+              android_material_icon_name="play-circle-filled"
+              size={24}
+              color={colors.text}
+            />
+            <Text style={[buttonStyles.primaryButtonText, styles.buttonText]}>
+              Start Session
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -410,97 +312,63 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 24,
   },
-  stepCard: {
+  goalPreview: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     backgroundColor: colors.card,
     borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
     boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.2)',
     elevation: 2,
   },
-  stepNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  goalPreviewText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.text,
+    lineHeight: 22,
+    flex: 1,
+    marginLeft: 12,
+  },
+  stepPreview: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  stepBullet: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: 7,
     marginRight: 12,
   },
-  stepNumberText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  stepText: {
+  stepPreviewText: {
     fontSize: 15,
     fontWeight: '500',
     color: colors.text,
     lineHeight: 22,
     flex: 1,
   },
-  notesHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  notesContainer: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.2)',
-    elevation: 2,
-  },
-  notesLabel: {
+  moreStepsText: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
-    marginBottom: 8,
+    color: colors.primary,
     marginTop: 8,
-  },
-  notesInput: {
-    backgroundColor: colors.secondary,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 14,
-    color: colors.text,
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  previousNoteCard: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.2)',
-    elevation: 2,
-  },
-  previousNoteDate: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    marginBottom: 8,
-  },
-  previousNoteText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.text,
-    lineHeight: 20,
-    marginBottom: 4,
   },
   actionButtons: {
     paddingHorizontal: 20,
     marginTop: 32,
   },
   button: {
-    width: '100%',
-    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
-  buttonSecondary: {
-    marginTop: 8,
+  buttonText: {
+    marginLeft: 8,
   },
   lockedContainer: {
     flex: 1,
