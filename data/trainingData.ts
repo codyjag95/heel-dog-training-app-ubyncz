@@ -29,6 +29,7 @@ export interface Lesson {
   step_4?: string;
   step_5?: string;
   step_6?: string;
+  trainingTips?: string[];
 }
 
 export interface Category {
@@ -83,6 +84,10 @@ export const trainingCategories: Category[] = [
           'Repeat this sequence several times daily',
           'Practice in different locations to reinforce the behavior',
         ],
+        trainingTips: [
+          'Say the command once and wait calmly for the response.',
+          'Reward immediately when their bottom touches the ground.',
+        ],
       },
       {
         id: 'stay-1',
@@ -110,6 +115,10 @@ export const trainingCategories: Category[] = [
           'Practice in various environments',
         ],
         prerequisiteIds: ['sit-1'],
+        trainingTips: [
+          'Start with just one second of stay and build gradually.',
+          'Always return to your dog to reward—don\'t call them to you.',
+        ],
       },
       {
         id: 'down-1',
@@ -137,33 +146,10 @@ export const trainingCategories: Category[] = [
           'Practice regularly to build muscle memory',
         ],
         prerequisiteIds: ['sit-1'],
-      },
-      {
-        id: 'place-1',
-        name: 'Place Training',
-        difficulty: 'Advanced',
-        estimatedTime: '20 min',
-        isLocked: true,
-        isPremium: true,
-        isCompleted: false,
-        imageUrl: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800',
-        description: 'Advanced command for sending your dog to a specific spot',
-        session_goal: 'Train your dog to go to and stay on their designated place',
-        step_1: 'Choose a designated "place" (mat, bed, or platform)',
-        step_2: 'Lure your dog onto the place with a treat',
-        step_3: 'Say "Place" as they step onto it',
-        step_4: 'Reward them for staying on the place',
-        step_5: 'Gradually increase distance from the place',
-        step_6: 'Add duration before releasing them',
-        steps: [
-          'Choose a designated "place" (mat, bed, or platform)',
-          'Lure your dog onto the place with a treat',
-          'Say "Place" as they step onto it',
-          'Reward them for staying on the place',
-          'Gradually increase distance from the place',
-          'Add duration before releasing them',
+        trainingTips: [
+          'Be patient—down is harder than sit for most dogs.',
+          'Reward any movement toward the ground at first.',
         ],
-        prerequisiteIds: ['sit-1', 'stay-1', 'down-1'],
       },
       {
         id: 'wait-1',
@@ -192,6 +178,10 @@ export const trainingCategories: Category[] = [
           'Practice at all doorways in your home',
         ],
         prerequisiteIds: ['sit-1'],
+        trainingTips: [
+          'Practice at every doorway to build the habit.',
+          'Use a calm, steady tone when saying "Wait."',
+        ],
       },
       {
         id: 'leave-it-1',
@@ -220,6 +210,10 @@ export const trainingCategories: Category[] = [
           'Always reward with something better than what they left',
         ],
         prerequisiteIds: ['sit-1'],
+        trainingTips: [
+          'Reward with a better treat than the one they\'re leaving.',
+          'Stay calm and patient—don\'t repeat the command.',
+        ],
       },
       {
         id: 'drop-it-1',
@@ -246,6 +240,10 @@ export const trainingCategories: Category[] = [
           'Give the treat immediately',
           'Return the toy to build trust',
           'Practice with various objects',
+        ],
+        trainingTips: [
+          'Always give the toy back after they drop it.',
+          'Use high-value treats to make the trade worthwhile.',
         ],
       },
       {
@@ -274,6 +272,10 @@ export const trainingCategories: Category[] = [
           'Practice holding the position briefly',
         ],
         prerequisiteIds: ['sit-1'],
+        trainingTips: [
+          'Keep the treat at nose level to prevent jumping.',
+          'Practice this before vet visits to reduce stress.',
+        ],
       },
       {
         id: 'off-1',
@@ -302,6 +304,10 @@ export const trainingCategories: Category[] = [
           'Teach family and guests the same protocol',
         ],
         prerequisiteIds: ['sit-1'],
+        trainingTips: [
+          'Consistency is everything—never reward jumping.',
+          'Turn away immediately when they jump up.',
+        ],
       },
       {
         id: 'touch-1',
@@ -327,6 +333,10 @@ export const trainingCategories: Category[] = [
           'Practice at different heights and angles',
           'Use to redirect attention or guide movement',
           'Build distance gradually',
+        ],
+        trainingTips: [
+          'Reward the moment their nose touches your palm.',
+          'This skill is useful for redirecting attention.',
         ],
       },
       {
@@ -356,6 +366,103 @@ export const trainingCategories: Category[] = [
           'Use during meal prep or when guests arrive',
         ],
         prerequisiteIds: ['sit-1', 'stay-1'],
+        trainingTips: [
+          'Make the bed a positive place with treats and praise.',
+          'Use this command during meal prep or when guests arrive.',
+        ],
+      },
+      {
+        id: 'place-1',
+        name: 'Place Training',
+        difficulty: 'Advanced',
+        estimatedTime: '20 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800',
+        description: 'Advanced command for sending your dog to a specific spot',
+        session_goal: 'Train your dog to go to and stay on their designated place',
+        step_1: 'Choose a designated "place" (mat, bed, or platform)',
+        step_2: 'Lure your dog onto the place with a treat',
+        step_3: 'Say "Place" as they step onto it',
+        step_4: 'Reward them for staying on the place',
+        step_5: 'Gradually increase distance from the place',
+        step_6: 'Add duration before releasing them',
+        steps: [
+          'Choose a designated "place" (mat, bed, or platform)',
+          'Lure your dog onto the place with a treat',
+          'Say "Place" as they step onto it',
+          'Reward them for staying on the place',
+          'Gradually increase distance from the place',
+          'Add duration before releasing them',
+        ],
+        prerequisiteIds: ['sit-1', 'stay-1', 'down-1'],
+        trainingTips: [
+          'Build duration slowly—start with just a few seconds.',
+          'Use place training to create calm during busy household moments.',
+        ],
+      },
+      {
+        id: 'advanced-stay-1',
+        name: 'Advanced Stay with Distractions',
+        difficulty: 'Advanced',
+        estimatedTime: '18 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800',
+        description: 'Build rock-solid stay behavior in real-world situations',
+        session_goal: 'Master stay command despite distractions and distance',
+        step_1: 'Start with a solid stay in a quiet environment',
+        step_2: 'Add mild distractions like toys or treats nearby',
+        step_3: 'Gradually increase distance while they stay',
+        step_4: 'Introduce movement around them',
+        step_5: 'Practice with people walking by',
+        step_6: 'Build up to staying while you leave the room',
+        steps: [
+          'Start with a solid stay in a quiet environment',
+          'Add mild distractions like toys or treats nearby',
+          'Gradually increase distance while they stay',
+          'Introduce movement around them',
+          'Practice with people walking by',
+          'Build up to staying while you leave the room',
+        ],
+        prerequisiteIds: ['sit-1', 'stay-1', 'down-1'],
+        trainingTips: [
+          'Add distractions gradually—don\'t rush the process.',
+          'Always return to reward rather than calling them to you.',
+        ],
+      },
+      {
+        id: 'reliable-recall-1',
+        name: 'Reliable Recall in Any Environment',
+        difficulty: 'Advanced',
+        estimatedTime: '20 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1541364983171-a8ba01e95cfc?w=800',
+        description: 'Build bulletproof recall for real-world reliability',
+        session_goal: 'Achieve reliable recall in challenging environments',
+        step_1: 'Practice recall in progressively distracting environments',
+        step_2: 'Use extremely high-value rewards',
+        step_3: 'Call your dog away from mild distractions',
+        step_4: 'Reward generously every single time',
+        step_5: 'Practice with long-line for safety',
+        step_6: 'Never call your dog if you can\'t reward',
+        steps: [
+          'Practice recall in progressively distracting environments',
+          'Use extremely high-value rewards',
+          'Call your dog away from mild distractions',
+          'Reward generously every single time',
+          'Practice with long-line for safety',
+          'Never call your dog if you can\'t reward',
+        ],
+        prerequisiteIds: ['sit-1', 'stay-1', 'come-1'],
+        trainingTips: [
+          'Never call your dog if you can\'t reward them.',
+          'Make coming to you the best thing that ever happens.',
+        ],
       },
     ],
   },
@@ -391,6 +498,10 @@ export const trainingCategories: Category[] = [
           'Resume walking only when they return to your side',
           'Practice consistency on every walk',
         ],
+        trainingTips: [
+          'Stop immediately when the leash tightens.',
+          'Reward frequently when the leash is loose.',
+        ],
       },
       {
         id: 'heel-1',
@@ -418,33 +529,10 @@ export const trainingCategories: Category[] = [
           'Gradually reduce treat frequency',
         ],
         prerequisiteIds: ['loose-leash-1'],
-      },
-      {
-        id: 'distractions-1',
-        name: 'Walking Past Distractions',
-        difficulty: 'Advanced',
-        estimatedTime: '25 min',
-        isLocked: true,
-        isPremium: true,
-        isCompleted: false,
-        imageUrl: 'https://images.unsplash.com/photo-1558788353-f76d92427f16?w=800',
-        description: 'Maintain focus despite environmental distractions',
-        session_goal: 'Build focus and calmness around distractions',
-        step_1: 'Start with mild distractions at a distance',
-        step_2: 'Use high-value treats',
-        step_3: 'Reward attention and calm behavior',
-        step_4: 'Gradually decrease distance to distractions',
-        step_5: 'Practice with various triggers (dogs, people, bikes)',
-        step_6: 'Build confidence through repetition',
-        steps: [
-          'Start with mild distractions at a distance',
-          'Use high-value treats',
-          'Reward attention and calm behavior',
-          'Gradually decrease distance to distractions',
-          'Practice with various triggers (dogs, people, bikes)',
-          'Build confidence through repetition',
+        trainingTips: [
+          'Keep treats at your hip to maintain position.',
+          'Practice turns and pace changes to build focus.',
         ],
-        prerequisiteIds: ['loose-leash-1', 'heel-1'],
       },
       {
         id: 'stop-on-walks-1',
@@ -472,6 +560,10 @@ export const trainingCategories: Category[] = [
           'Eventually they\'ll sit automatically when you stop',
         ],
         prerequisiteIds: ['sit-1', 'loose-leash-1'],
+        trainingTips: [
+          'Practice this at every stop during walks.',
+          'Be patient—automatic sits take time to develop.',
+        ],
       },
       {
         id: 'leash-pressure-1',
@@ -498,6 +590,10 @@ export const trainingCategories: Category[] = [
           'Practice in all directions',
           'Never jerk or pull hard on the leash',
           'Build a positive association with leash pressure',
+        ],
+        trainingTips: [
+          'Use the lightest pressure possible.',
+          'Release pressure the instant they respond.',
         ],
       },
       {
@@ -527,6 +623,10 @@ export const trainingCategories: Category[] = [
           'Practice with friends first',
         ],
         prerequisiteIds: ['sit-1', 'loose-leash-1', 'off-1'],
+        trainingTips: [
+          'Practice with friends before trying with strangers.',
+          'Step back if your dog breaks the sit.',
+        ],
       },
       {
         id: 'u-turn-1',
@@ -555,6 +655,10 @@ export const trainingCategories: Category[] = [
           'Make it a fun game, not a punishment',
         ],
         prerequisiteIds: ['loose-leash-1'],
+        trainingTips: [
+          'Use an upbeat tone to keep it positive.',
+          'Practice before you need it in real situations.',
+        ],
       },
       {
         id: 'sniff-breaks-1',
@@ -580,6 +684,10 @@ export const trainingCategories: Category[] = [
           'Use "Let\'s go" to resume walking',
           'Alternate between structured walking and sniff breaks',
           'This satisfies their need to explore',
+        ],
+        trainingTips: [
+          'Sniffing is mentally enriching for dogs.',
+          'Use a consistent release word like "Go sniff."',
         ],
       },
       {
@@ -609,6 +717,10 @@ export const trainingCategories: Category[] = [
           'Builds safety and impulse control',
         ],
         prerequisiteIds: ['sit-1', 'wait-1', 'loose-leash-1'],
+        trainingTips: [
+          'Practice at every curb to build the habit.',
+          'This builds safety and impulse control.',
+        ],
       },
       {
         id: 'side-switch-1',
@@ -636,6 +748,10 @@ export const trainingCategories: Category[] = [
           'Useful for navigating obstacles or other dogs',
         ],
         prerequisiteIds: ['heel-1'],
+        trainingTips: [
+          'Guide them behind you, not in front.',
+          'Useful for navigating obstacles on walks.',
+        ],
       },
       {
         id: 'calm-exit-1',
@@ -664,6 +780,103 @@ export const trainingCategories: Category[] = [
           'This sets the tone for the entire walk',
         ],
         prerequisiteIds: ['sit-1', 'wait-1'],
+        trainingTips: [
+          'This sets the tone for the entire walk.',
+          'Be patient—calm exits take practice.',
+        ],
+      },
+      {
+        id: 'distractions-1',
+        name: 'Walking Past Distractions',
+        difficulty: 'Advanced',
+        estimatedTime: '25 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1558788353-f76d92427f16?w=800',
+        description: 'Maintain focus despite environmental distractions',
+        session_goal: 'Build focus and calmness around distractions',
+        step_1: 'Start with mild distractions at a distance',
+        step_2: 'Use high-value treats',
+        step_3: 'Reward attention and calm behavior',
+        step_4: 'Gradually decrease distance to distractions',
+        step_5: 'Practice with various triggers (dogs, people, bikes)',
+        step_6: 'Build confidence through repetition',
+        steps: [
+          'Start with mild distractions at a distance',
+          'Use high-value treats',
+          'Reward attention and calm behavior',
+          'Gradually decrease distance to distractions',
+          'Practice with various triggers (dogs, people, bikes)',
+          'Build confidence through repetition',
+        ],
+        prerequisiteIds: ['loose-leash-1', 'heel-1'],
+        trainingTips: [
+          'Start at a distance where your dog can still focus.',
+          'Gradually decrease distance as they improve.',
+        ],
+      },
+      {
+        id: 'urban-walking-1',
+        name: 'Urban Walking Mastery',
+        difficulty: 'Advanced',
+        estimatedTime: '20 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1568572933382-74d440642117?w=800',
+        description: 'Navigate busy city streets with confidence',
+        session_goal: 'Master walking in complex urban environments',
+        step_1: 'Practice in progressively busier areas',
+        step_2: 'Navigate around obstacles smoothly',
+        step_3: 'Maintain focus despite noise and movement',
+        step_4: 'Practice stopping at curbs automatically',
+        step_5: 'Walk past outdoor dining and crowds',
+        step_6: 'Build confidence in all urban situations',
+        steps: [
+          'Practice in progressively busier areas',
+          'Navigate around obstacles smoothly',
+          'Maintain focus despite noise and movement',
+          'Practice stopping at curbs automatically',
+          'Walk past outdoor dining and crowds',
+          'Build confidence in all urban situations',
+        ],
+        prerequisiteIds: ['loose-leash-1', 'heel-1', 'distractions-1'],
+        trainingTips: [
+          'Build up to busy areas gradually.',
+          'Use high-value rewards in challenging environments.',
+        ],
+      },
+      {
+        id: 'off-leash-prep-1',
+        name: 'Off-Leash Preparation',
+        difficulty: 'Advanced',
+        estimatedTime: '25 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800',
+        description: 'Build skills for safe off-leash walking',
+        session_goal: 'Prepare for safe off-leash walking in controlled areas',
+        step_1: 'Start with a long training line (15-30 feet)',
+        step_2: 'Practice recall frequently',
+        step_3: 'Reward check-ins without calling',
+        step_4: 'Practice in fenced areas first',
+        step_5: 'Build distance gradually',
+        step_6: 'Never go off-leash near roads or unfenced areas',
+        steps: [
+          'Start with a long training line (15-30 feet)',
+          'Practice recall frequently',
+          'Reward check-ins without calling',
+          'Practice in fenced areas first',
+          'Build distance gradually',
+          'Never go off-leash near roads or unfenced areas',
+        ],
+        prerequisiteIds: ['loose-leash-1', 'come-1', 'distance-recall-1'],
+        trainingTips: [
+          'Always use a long line for safety during training.',
+          'Never go off-leash near roads or unfenced areas.',
+        ],
       },
     ],
   },
@@ -699,6 +912,10 @@ export const trainingCategories: Category[] = [
           'Practice in different locations',
           'Use as a calming tool in daily life',
         ],
+        trainingTips: [
+          'Reward calm, relaxed body language.',
+          'Start with short durations and build gradually.',
+        ],
       },
       {
         id: 'eye-contact-1',
@@ -725,33 +942,10 @@ export const trainingCategories: Category[] = [
           'Practice in various environments',
           'Use as a foundation for other commands',
         ],
-      },
-      {
-        id: 'impulse-control-1',
-        name: 'Impulse Control Games',
-        difficulty: 'Intermediate',
-        estimatedTime: '15 min',
-        isLocked: true,
-        isPremium: true,
-        isCompleted: false,
-        imageUrl: 'https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=800',
-        description: 'Advanced exercises for self-control',
-        session_goal: 'Develop advanced self-control through structured games',
-        step_1: 'Practice "wait" before meals',
-        step_2: 'Use "leave it" with treats on the ground',
-        step_3: 'Play the "it\'s your choice" game',
-        step_4: 'Reward patience and restraint',
-        step_5: 'Gradually increase difficulty',
-        step_6: 'Apply to real-world situations',
-        steps: [
-          'Practice "wait" before meals',
-          'Use "leave it" with treats on the ground',
-          'Play the "it\'s your choice" game',
-          'Reward patience and restraint',
-          'Gradually increase difficulty',
-          'Apply to real-world situations',
+        trainingTips: [
+          'Reward the instant they make eye contact.',
+          'Build duration slowly—start with one second.',
         ],
-        prerequisiteIds: ['settle-1', 'eye-contact-1'],
       },
       {
         id: 'relaxation-protocol-1',
@@ -780,6 +974,10 @@ export const trainingCategories: Category[] = [
           'Build up to more movement over time',
         ],
         prerequisiteIds: ['settle-1'],
+        trainingTips: [
+          'Start with frequent rewards and gradually space them out.',
+          'Add movement slowly to avoid breaking their calm state.',
+        ],
       },
       {
         id: 'name-game-1',
@@ -805,6 +1003,10 @@ export const trainingCategories: Category[] = [
           'Add mild distractions gradually',
           'Never repeat their name multiple times',
           'Make hearing their name always positive',
+        ],
+        trainingTips: [
+          'Say their name only once and wait.',
+          'Make hearing their name always positive.',
         ],
       },
       {
@@ -833,6 +1035,10 @@ export const trainingCategories: Category[] = [
           'Be consistent every single time',
         ],
         prerequisiteIds: ['settle-1', 'off-1'],
+        trainingTips: [
+          'Ignore them completely for the first few minutes.',
+          'Keep your own energy calm when you arrive.',
+        ],
       },
       {
         id: 'capture-calm-1',
@@ -858,6 +1064,10 @@ export const trainingCategories: Category[] = [
           'Don\'t make a big fuss',
           'This teaches that calm behavior is rewarding',
           'Do this 5-10 times per day',
+        ],
+        trainingTips: [
+          'Reward calm moments without making a fuss.',
+          'Do this throughout the day, not just during training.',
         ],
       },
       {
@@ -886,6 +1096,10 @@ export const trainingCategories: Category[] = [
           'Use in distracting environments',
         ],
         prerequisiteIds: ['eye-contact-1'],
+        trainingTips: [
+          'Start with brief eye contact and build duration.',
+          'Use this command to redirect attention.',
+        ],
       },
       {
         id: 'settle-in-public-1',
@@ -913,6 +1127,10 @@ export const trainingCategories: Category[] = [
           'Progress to busier environments',
         ],
         prerequisiteIds: ['settle-1', 'relaxation-protocol-1'],
+        trainingTips: [
+          'Start in quiet areas and build up to busier spaces.',
+          'Bring a portable mat to create a familiar settling spot.',
+        ],
       },
       {
         id: 'zen-bowl-1',
@@ -940,6 +1158,10 @@ export const trainingCategories: Category[] = [
           'This teaches patience and impulse control',
         ],
         prerequisiteIds: ['sit-1', 'wait-1'],
+        trainingTips: [
+          'Lift the bowl if they lunge—no second chances.',
+          'This builds patience around food.',
+        ],
       },
       {
         id: 'boundary-training-1',
@@ -967,6 +1189,103 @@ export const trainingCategories: Category[] = [
           'Useful for keeping dogs out of the kitchen',
         ],
         prerequisiteIds: ['settle-1', 'stay-1'],
+        trainingTips: [
+          'Use a visual marker like a mat or rug.',
+          'Useful for keeping dogs out of the kitchen.',
+        ],
+      },
+      {
+        id: 'impulse-control-1',
+        name: 'Impulse Control Games',
+        difficulty: 'Intermediate',
+        estimatedTime: '15 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=800',
+        description: 'Advanced exercises for self-control',
+        session_goal: 'Develop advanced self-control through structured games',
+        step_1: 'Practice "wait" before meals',
+        step_2: 'Use "leave it" with treats on the ground',
+        step_3: 'Play the "it\'s your choice" game',
+        step_4: 'Reward patience and restraint',
+        step_5: 'Gradually increase difficulty',
+        step_6: 'Apply to real-world situations',
+        steps: [
+          'Practice "wait" before meals',
+          'Use "leave it" with treats on the ground',
+          'Play the "it\'s your choice" game',
+          'Reward patience and restraint',
+          'Gradually increase difficulty',
+          'Apply to real-world situations',
+        ],
+        prerequisiteIds: ['settle-1', 'eye-contact-1'],
+        trainingTips: [
+          'Reward patience and restraint generously.',
+          'Gradually increase difficulty as they improve.',
+        ],
+      },
+      {
+        id: 'advanced-relaxation-1',
+        name: 'Advanced Relaxation Protocol',
+        difficulty: 'Advanced',
+        estimatedTime: '20 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=800',
+        description: 'Master deep relaxation in any environment',
+        session_goal: 'Achieve deep relaxation despite distractions',
+        step_1: 'Practice relaxation protocol with increasing movement',
+        step_2: 'Add household distractions (doorbell, phone)',
+        step_3: 'Practice in different rooms',
+        step_4: 'Build up to 30+ minutes of calm',
+        step_5: 'Reward only the calmest moments',
+        step_6: 'Apply to real-world situations',
+        steps: [
+          'Practice relaxation protocol with increasing movement',
+          'Add household distractions (doorbell, phone)',
+          'Practice in different rooms',
+          'Build up to 30+ minutes of calm',
+          'Reward only the calmest moments',
+          'Apply to real-world situations',
+        ],
+        prerequisiteIds: ['settle-1', 'relaxation-protocol-1'],
+        trainingTips: [
+          'Add distractions very gradually.',
+          'Build up to 30+ minutes of calm behavior.',
+        ],
+      },
+      {
+        id: 'focus-under-pressure-1',
+        name: 'Focus Under Pressure',
+        difficulty: 'Advanced',
+        estimatedTime: '18 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=800',
+        description: 'Maintain attention in highly distracting environments',
+        session_goal: 'Build unwavering focus despite intense distractions',
+        step_1: 'Practice focus exercises in progressively harder environments',
+        step_2: 'Add movement, noise, and visual distractions',
+        step_3: 'Reward sustained eye contact',
+        step_4: 'Practice in pet stores, parks, and busy areas',
+        step_5: 'Use extremely high-value rewards',
+        step_6: 'Build confidence through repetition',
+        steps: [
+          'Practice focus exercises in progressively harder environments',
+          'Add movement, noise, and visual distractions',
+          'Reward sustained eye contact',
+          'Practice in pet stores, parks, and busy areas',
+          'Use extremely high-value rewards',
+          'Build confidence through repetition',
+        ],
+        prerequisiteIds: ['eye-contact-1', 'watch-me-1'],
+        trainingTips: [
+          'Use extremely high-value rewards in challenging environments.',
+          'Build up to intense distractions gradually.',
+        ],
       },
     ],
   },
@@ -1002,6 +1321,10 @@ export const trainingCategories: Category[] = [
           'Reward generously when they arrive',
           'Never punish them for coming to you',
         ],
+        trainingTips: [
+          'Use an excited, happy tone when calling.',
+          'Never punish them for coming to you.',
+        ],
       },
       {
         id: 'distance-recall-1',
@@ -1029,33 +1352,10 @@ export const trainingCategories: Category[] = [
           'Practice with mild distractions',
         ],
         prerequisiteIds: ['come-1'],
-      },
-      {
-        id: 'emergency-recall-1',
-        name: 'Emergency Recall',
-        difficulty: 'Advanced',
-        estimatedTime: '20 min',
-        isLocked: true,
-        isPremium: true,
-        isCompleted: false,
-        imageUrl: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800',
-        description: 'Train a bulletproof emergency recall command',
-        session_goal: 'Create a bulletproof emergency recall for safety',
-        step_1: 'Choose a unique word (not "come")',
-        step_2: 'Only use in true emergencies',
-        step_3: 'Always use highest-value rewards',
-        step_4: 'Practice sparingly to maintain power',
-        step_5: 'Never use if you can\'t reward',
-        step_6: 'Build through consistent success',
-        steps: [
-          'Choose a unique word (not "come")',
-          'Only use in true emergencies',
-          'Always use highest-value rewards',
-          'Practice sparingly to maintain power',
-          'Never use if you can\'t reward',
-          'Build through consistent success',
+        trainingTips: [
+          'Use a long training leash for safety.',
+          'Gradually increase distance as they improve.',
         ],
-        prerequisiteIds: ['come-1', 'distance-recall-1'],
       },
       {
         id: 'recall-games-1',
@@ -1083,6 +1383,10 @@ export const trainingCategories: Category[] = [
           'Practice multiple times per day',
         ],
         prerequisiteIds: ['come-1'],
+        trainingTips: [
+          'Make it a fun game, not a chore.',
+          'Practice multiple times per day.',
+        ],
       },
       {
         id: 'recall-with-distractions-1',
@@ -1110,6 +1414,10 @@ export const trainingCategories: Category[] = [
           'Always make coming to you more rewarding',
         ],
         prerequisiteIds: ['come-1', 'distance-recall-1'],
+        trainingTips: [
+          'Start with mild distractions and build gradually.',
+          'Always make coming to you more rewarding than the distraction.',
+        ],
       },
       {
         id: 'long-line-recall-1',
@@ -1137,6 +1445,10 @@ export const trainingCategories: Category[] = [
           'Never use the line to reel them in',
         ],
         prerequisiteIds: ['come-1', 'distance-recall-1'],
+        trainingTips: [
+          'Never use the line to reel them in.',
+          'Let them explore freely between recalls.',
+        ],
       },
       {
         id: 'recall-from-play-1',
@@ -1164,6 +1476,10 @@ export const trainingCategories: Category[] = [
           'Practice with other dogs (controlled)',
         ],
         prerequisiteIds: ['come-1', 'distance-recall-1', 'recall-with-distractions-1'],
+        trainingTips: [
+          'Release them back to play after rewarding.',
+          'This teaches that coming doesn\'t end the fun.',
+        ],
       },
       {
         id: 'check-in-behavior-1',
@@ -1191,6 +1507,41 @@ export const trainingCategories: Category[] = [
           'Gradually become more selective',
         ],
         prerequisiteIds: ['come-1'],
+        trainingTips: [
+          'Don\'t call them—let it be their choice.',
+          'Reward every check-in initially.',
+        ],
+      },
+      {
+        id: 'emergency-recall-1',
+        name: 'Emergency Recall',
+        difficulty: 'Advanced',
+        estimatedTime: '20 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800',
+        description: 'Train a bulletproof emergency recall command',
+        session_goal: 'Create a bulletproof emergency recall for safety',
+        step_1: 'Choose a unique word (not "come")',
+        step_2: 'Only use in true emergencies',
+        step_3: 'Always use highest-value rewards',
+        step_4: 'Practice sparingly to maintain power',
+        step_5: 'Never use if you can\'t reward',
+        step_6: 'Build through consistent success',
+        steps: [
+          'Choose a unique word (not "come")',
+          'Only use in true emergencies',
+          'Always use highest-value rewards',
+          'Practice sparingly to maintain power',
+          'Never use if you can\'t reward',
+          'Build through consistent success',
+        ],
+        prerequisiteIds: ['come-1', 'distance-recall-1'],
+        trainingTips: [
+          'Only use this command in true emergencies.',
+          'Always use the highest-value rewards possible.',
+        ],
       },
       {
         id: 'recall-around-dogs-1',
@@ -1219,6 +1570,41 @@ export const trainingCategories: Category[] = [
           'This takes months of consistent work',
         ],
         prerequisiteIds: ['come-1', 'distance-recall-1', 'recall-with-distractions-1', 'recall-from-play-1'],
+        trainingTips: [
+          'Start with calm dogs at a distance.',
+          'This takes months of consistent work—be patient.',
+        ],
+      },
+      {
+        id: 'proofing-recall-1',
+        name: 'Proofing Recall in All Environments',
+        difficulty: 'Advanced',
+        estimatedTime: '25 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800',
+        description: 'Build recall reliability in any situation',
+        session_goal: 'Achieve recall reliability in all real-world situations',
+        step_1: 'Practice recall in every new environment',
+        step_2: 'Add progressively harder distractions',
+        step_3: 'Practice in parks, trails, and busy areas',
+        step_4: 'Use long-line for safety',
+        step_5: 'Reward generously every single time',
+        step_6: 'Build confidence through repetition',
+        steps: [
+          'Practice recall in every new environment',
+          'Add progressively harder distractions',
+          'Practice in parks, trails, and busy areas',
+          'Use long-line for safety',
+          'Reward generously every single time',
+          'Build confidence through repetition',
+        ],
+        prerequisiteIds: ['come-1', 'distance-recall-1', 'recall-with-distractions-1', 'emergency-recall-1'],
+        trainingTips: [
+          'Practice in every new environment you visit.',
+          'Use a long-line for safety until recall is bulletproof.',
+        ],
       },
     ],
   },
@@ -1254,60 +1640,10 @@ export const trainingCategories: Category[] = [
           'Hide treats in different rooms',
           'Celebrate successful finds',
         ],
-      },
-      {
-        id: 'puzzle-games-1',
-        name: 'Puzzle & Problem Solving',
-        difficulty: 'Intermediate',
-        estimatedTime: '12 min',
-        isLocked: true,
-        isPremium: true,
-        isCompleted: false,
-        imageUrl: 'https://images.unsplash.com/photo-1548681528-6a5c45b66b42?w=800',
-        description: 'Mental stimulation through problem-solving',
-        session_goal: 'Challenge your dog with problem-solving puzzles',
-        step_1: 'Introduce puzzle toys gradually',
-        step_2: 'Start with easy difficulty levels',
-        step_3: 'Supervise initial attempts',
-        step_4: 'Rotate toys to maintain interest',
-        step_5: 'Create DIY puzzles at home',
-        step_6: 'Balance mental and physical exercise',
-        steps: [
-          'Introduce puzzle toys gradually',
-          'Start with easy difficulty levels',
-          'Supervise initial attempts',
-          'Rotate toys to maintain interest',
-          'Create DIY puzzles at home',
-          'Balance mental and physical exercise',
+        trainingTips: [
+          'Start easy—let them watch you hide treats.',
+          'Celebrate every successful find enthusiastically.',
         ],
-        prerequisiteIds: ['nose-work-1'],
-      },
-      {
-        id: 'trick-training-1',
-        name: 'Advanced Trick Training',
-        difficulty: 'Advanced',
-        estimatedTime: '20 min',
-        isLocked: true,
-        isPremium: true,
-        isCompleted: false,
-        imageUrl: 'https://images.unsplash.com/photo-1587764379873-97837921fd44?w=800',
-        description: 'Fun tricks that challenge your dog mentally',
-        session_goal: 'Teach fun tricks that build mental strength',
-        step_1: 'Break tricks into small steps',
-        step_2: 'Use shaping and luring techniques',
-        step_3: 'Practice short, frequent sessions',
-        step_4: 'Add verbal and hand signals',
-        step_5: 'Chain behaviors together',
-        step_6: 'Keep training fun and positive',
-        steps: [
-          'Break tricks into small steps',
-          'Use shaping and luring techniques',
-          'Practice short, frequent sessions',
-          'Add verbal and hand signals',
-          'Chain behaviors together',
-          'Keep training fun and positive',
-        ],
-        prerequisiteIds: ['nose-work-1', 'puzzle-games-1'],
       },
       {
         id: 'scent-discrimination-1',
@@ -1335,6 +1671,10 @@ export const trainingCategories: Category[] = [
           'Increase difficulty over time',
         ],
         prerequisiteIds: ['nose-work-1'],
+        trainingTips: [
+          'Use safe essential oils like birch or anise.',
+          'Add decoy scents gradually.',
+        ],
       },
       {
         id: 'name-that-toy-1',
@@ -1360,6 +1700,10 @@ export const trainingCategories: Category[] = [
           'Add a second toy with a different name',
           'Ask for each toy by name',
           'Gradually add more toys',
+        ],
+        trainingTips: [
+          'Start with just one toy and build gradually.',
+          'Use distinct names for each toy.',
         ],
       },
       {
@@ -1387,6 +1731,10 @@ export const trainingCategories: Category[] = [
           'Reward correct choices',
           'Gradually increase shuffling speed',
         ],
+        trainingTips: [
+          'Start with slow shuffles.',
+          'Reward correct choices enthusiastically.',
+        ],
       },
       {
         id: 'food-dispensing-toys-1',
@@ -1412,6 +1760,10 @@ export const trainingCategories: Category[] = [
           'Let them figure it out',
           'Supervise to prevent frustration',
           'Rotate different toys',
+        ],
+        trainingTips: [
+          'Start with easy puzzles and build difficulty.',
+          'Rotate toys to maintain interest.',
         ],
       },
       {
@@ -1440,6 +1792,10 @@ export const trainingCategories: Category[] = [
           'Celebrate their success',
         ],
         prerequisiteIds: ['nose-work-1'],
+        trainingTips: [
+          'Use different heights to increase difficulty.',
+          'Time their searches to track improvement.',
+        ],
       },
       {
         id: 'which-hand-1',
@@ -1466,6 +1822,10 @@ export const trainingCategories: Category[] = [
           'If correct, they get the treat',
           'If wrong, show them and try again',
         ],
+        trainingTips: [
+          'Let them use their nose, not just guess.',
+          'This builds scent discrimination skills.',
+        ],
       },
       {
         id: 'muffin-tin-game-1',
@@ -1491,6 +1851,103 @@ export const trainingCategories: Category[] = [
           'Supervise to prevent eating tennis balls',
           'Vary which cups have treats',
           'This provides mental and physical work',
+        ],
+        trainingTips: [
+          'Supervise to prevent eating tennis balls.',
+          'Vary which cups have treats to keep it interesting.',
+        ],
+      },
+      {
+        id: 'puzzle-games-1',
+        name: 'Puzzle & Problem Solving',
+        difficulty: 'Intermediate',
+        estimatedTime: '12 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1548681528-6a5c45b66b42?w=800',
+        description: 'Mental stimulation through problem-solving',
+        session_goal: 'Challenge your dog with problem-solving puzzles',
+        step_1: 'Introduce puzzle toys gradually',
+        step_2: 'Start with easy difficulty levels',
+        step_3: 'Supervise initial attempts',
+        step_4: 'Rotate toys to maintain interest',
+        step_5: 'Create DIY puzzles at home',
+        step_6: 'Balance mental and physical exercise',
+        steps: [
+          'Introduce puzzle toys gradually',
+          'Start with easy difficulty levels',
+          'Supervise initial attempts',
+          'Rotate toys to maintain interest',
+          'Create DIY puzzles at home',
+          'Balance mental and physical exercise',
+        ],
+        prerequisiteIds: ['nose-work-1'],
+        trainingTips: [
+          'Start with easy puzzles and build difficulty.',
+          'Rotate toys to maintain interest.',
+        ],
+      },
+      {
+        id: 'trick-training-1',
+        name: 'Advanced Trick Training',
+        difficulty: 'Advanced',
+        estimatedTime: '20 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1587764379873-97837921fd44?w=800',
+        description: 'Fun tricks that challenge your dog mentally',
+        session_goal: 'Teach fun tricks that build mental strength',
+        step_1: 'Break tricks into small steps',
+        step_2: 'Use shaping and luring techniques',
+        step_3: 'Practice short, frequent sessions',
+        step_4: 'Add verbal and hand signals',
+        step_5: 'Chain behaviors together',
+        step_6: 'Keep training fun and positive',
+        steps: [
+          'Break tricks into small steps',
+          'Use shaping and luring techniques',
+          'Practice short, frequent sessions',
+          'Add verbal and hand signals',
+          'Chain behaviors together',
+          'Keep training fun and positive',
+        ],
+        prerequisiteIds: ['nose-work-1', 'puzzle-games-1'],
+        trainingTips: [
+          'Break tricks into tiny steps.',
+          'Keep sessions short and fun.',
+        ],
+      },
+      {
+        id: 'advanced-scent-work-1',
+        name: 'Advanced Scent Work',
+        difficulty: 'Advanced',
+        estimatedTime: '20 min',
+        isLocked: true,
+        isPremium: true,
+        isCompleted: false,
+        imageUrl: 'https://images.unsplash.com/photo-1585664811087-47f65abbad64?w=800',
+        description: 'Competition-level scent detection skills',
+        session_goal: 'Build advanced scent detection skills',
+        step_1: 'Practice scent discrimination with multiple decoys',
+        step_2: 'Hide scents in increasingly difficult locations',
+        step_3: 'Practice in different environments',
+        step_4: 'Add height and distance challenges',
+        step_5: 'Time searches to track improvement',
+        step_6: 'Consider joining a scent work class',
+        steps: [
+          'Practice scent discrimination with multiple decoys',
+          'Hide scents in increasingly difficult locations',
+          'Practice in different environments',
+          'Add height and distance challenges',
+          'Time searches to track improvement',
+          'Consider joining a scent work class',
+        ],
+        prerequisiteIds: ['nose-work-1', 'scent-discrimination-1'],
+        trainingTips: [
+          'Add multiple decoys to increase difficulty.',
+          'Consider joining a scent work class for advanced training.',
         ],
       },
     ],
@@ -1529,6 +1986,10 @@ export const trainingCategories: Category[] = [
           'Never push your dog beyond their threshold',
         ],
         prerequisiteIds: ['sit-1', 'stay-1', 'come-1'],
+        trainingTips: [
+          'Start with low-distraction locations.',
+          'Use higher-value rewards in harder environments.',
+        ],
       },
       {
         id: 'parking-lot-training-1',
@@ -1557,6 +2018,10 @@ export const trainingCategories: Category[] = [
           'Keep sessions short and positive',
         ],
         prerequisiteIds: ['sit-1', 'stay-1', 'down-1', 'loose-leash-1', 'proofing-intro-1'],
+        trainingTips: [
+          'Start in a quiet corner and build gradually.',
+          'Reward heavily for focus in this challenging environment.',
+        ],
       },
       {
         id: 'pet-store-training-1',
@@ -1585,6 +2050,10 @@ export const trainingCategories: Category[] = [
           'Keep visits short initially',
         ],
         prerequisiteIds: ['sit-1', 'stay-1', 'leave-it-1', 'loose-leash-1', 'proofing-intro-1'],
+        trainingTips: [
+          'Start during off-peak hours.',
+          'Bring extremely high-value treats.',
+        ],
       },
       {
         id: 'outdoor-cafe-1',
@@ -1613,6 +2082,10 @@ export const trainingCategories: Category[] = [
           'Gradually increase duration',
         ],
         prerequisiteIds: ['settle-1', 'stay-1', 'leave-it-1', 'settle-in-public-1', 'proofing-intro-1'],
+        trainingTips: [
+          'Bring a portable mat to create a familiar settling spot.',
+          'Start away from foot traffic and build gradually.',
+        ],
       },
       {
         id: 'busy-sidewalk-1',
@@ -1641,6 +2114,10 @@ export const trainingCategories: Category[] = [
           'Build up to peak hours gradually',
         ],
         prerequisiteIds: ['loose-leash-1', 'watch-me-1', 'stop-on-walks-1', 'proofing-intro-1'],
+        trainingTips: [
+          'Start during less busy times.',
+          'Use "watch me" to maintain focus.',
+        ],
       },
       {
         id: 'dog-park-boundary-1',
@@ -1669,6 +2146,10 @@ export const trainingCategories: Category[] = [
           'This is advanced work - take your time',
         ],
         prerequisiteIds: ['come-1', 'distance-recall-1', 'watch-me-1', 'proofing-intro-1'],
+        trainingTips: [
+          'Stay outside the fence initially.',
+          'Reward heavily for choosing you over dogs.',
+        ],
       },
       {
         id: 'vet-office-prep-1',
@@ -1697,6 +2178,10 @@ export const trainingCategories: Category[] = [
           'Make vet visits positive experiences',
         ],
         prerequisiteIds: ['sit-1', 'stay-1', 'stand-1', 'settle-1', 'proofing-intro-1'],
+        trainingTips: [
+          'Visit the vet office just to say hi.',
+          'Let staff give treats to build positive associations.',
+        ],
       },
       {
         id: 'farmers-market-1',
@@ -1725,6 +2210,10 @@ export const trainingCategories: Category[] = [
           'This is an advanced environment',
         ],
         prerequisiteIds: ['loose-leash-1', 'leave-it-1', 'stay-1', 'busy-sidewalk-1', 'proofing-intro-1'],
+        trainingTips: [
+          'Go during opening or closing for fewer crowds.',
+          'Keep sessions short—this is an advanced environment.',
+        ],
       },
     ],
   },
@@ -1763,6 +2252,10 @@ export const trainingCategories: Category[] = [
           'Temperament and health are critical factors',
         ],
         prerequisiteIds: ['sit-1', 'stay-1', 'down-1', 'come-1', 'loose-leash-1', 'settle-1'],
+        trainingTips: [
+          'Service dog training takes years, not months.',
+          'Professional training is essential for certification.',
+        ],
       },
       {
         id: 'extended-down-stay-1',
@@ -1791,6 +2284,10 @@ export const trainingCategories: Category[] = [
           'Reward calm, relaxed behavior',
         ],
         prerequisiteIds: ['down-1', 'stay-1', 'settle-1', 'service-intro-1'],
+        trainingTips: [
+          'Build duration slowly—start with 5 minutes.',
+          'Add distractions gradually.',
+        ],
       },
       {
         id: 'neutral-behavior-1',
@@ -1819,6 +2316,10 @@ export const trainingCategories: Category[] = [
           'This takes months of consistent work',
         ],
         prerequisiteIds: ['sit-1', 'stay-1', 'loose-leash-1', 'watch-me-1', 'service-intro-1'],
+        trainingTips: [
+          'No sniffing, jumping, or soliciting attention.',
+          'This takes months of consistent work.',
+        ],
       },
       {
         id: 'food-refusal-1',
@@ -1847,6 +2348,10 @@ export const trainingCategories: Category[] = [
           'This must be 100% reliable',
         ],
         prerequisiteIds: ['leave-it-1', 'loose-leash-1', 'service-intro-1'],
+        trainingTips: [
+          'This must be 100% reliable for safety.',
+          'Never allow your dog to take food from the ground.',
+        ],
       },
       {
         id: 'public-access-walking-1',
@@ -1875,6 +2380,10 @@ export const trainingCategories: Category[] = [
           'Handler focus must be unwavering',
         ],
         prerequisiteIds: ['loose-leash-1', 'heel-1', 'stop-on-walks-1', 'busy-sidewalk-1', 'service-intro-1'],
+        trainingTips: [
+          'Handler focus must be unwavering.',
+          'Practice in stores, malls, and busy areas.',
+        ],
       },
       {
         id: 'settling-busy-spaces-1',
@@ -1903,6 +2412,10 @@ export const trainingCategories: Category[] = [
           'This is essential for public access',
         ],
         prerequisiteIds: ['settle-1', 'extended-down-stay-1', 'settle-in-public-1', 'service-intro-1'],
+        trainingTips: [
+          'No whining, barking, or movement.',
+          'This is essential for public access.',
+        ],
       },
       {
         id: 'sound-sensitivity-1',
@@ -1931,6 +2444,10 @@ export const trainingCategories: Category[] = [
           'Service dogs must be bombproof with sounds',
         ],
         prerequisiteIds: ['settle-1', 'service-intro-1'],
+        trainingTips: [
+          'Never force exposure—go at your dog\'s pace.',
+          'Service dogs must be bombproof with sounds.',
+        ],
       },
       {
         id: 'focus-under-stress-1',
@@ -1959,6 +2476,10 @@ export const trainingCategories: Category[] = [
           'This is the hallmark of a service dog',
         ],
         prerequisiteIds: ['watch-me-1', 'eye-contact-1', 'neutral-behavior-1', 'service-intro-1'],
+        trainingTips: [
+          'Respond immediately to cues.',
+          'This is the hallmark of a service dog.',
+        ],
       },
       {
         id: 'public-access-test-prep-1',
@@ -1987,6 +2508,10 @@ export const trainingCategories: Category[] = [
           'Seek professional evaluation before testing',
         ],
         prerequisiteIds: ['extended-down-stay-1', 'neutral-behavior-1', 'food-refusal-1', 'public-access-walking-1', 'settling-busy-spaces-1', 'service-intro-1'],
+        trainingTips: [
+          'Seek professional evaluation before testing.',
+          'This is a comprehensive test of all skills.',
+        ],
       },
     ],
   },
@@ -2023,6 +2548,10 @@ export const trainingCategories: Category[] = [
           'Set your dog up for success with a routine',
           'Celebrate every successful potty break outside',
         ],
+        trainingTips: [
+          'Consistency is the key to success.',
+          'Never punish accidents after the fact.',
+        ],
       },
       {
         id: 'potty-schedule-1',
@@ -2051,6 +2580,10 @@ export const trainingCategories: Category[] = [
           'Adjust schedule based on your dog\'s needs',
         ],
         prerequisiteIds: ['potty-intro-1'],
+        trainingTips: [
+          'Set alarms to stay consistent.',
+          'Keep a log to identify patterns.',
+        ],
       },
       {
         id: 'accident-cleanup-1',
@@ -2079,6 +2612,10 @@ export const trainingCategories: Category[] = [
           'Accidents mean you need to supervise more closely',
         ],
         prerequisiteIds: ['potty-intro-1'],
+        trainingTips: [
+          'Use enzymatic cleaner, not regular cleaners.',
+          'Accidents mean you need to supervise more closely.',
+        ],
       },
       {
         id: 'crate-potty-1',
@@ -2107,6 +2644,10 @@ export const trainingCategories: Category[] = [
           'Crate training speeds up potty training significantly',
         ],
         prerequisiteIds: ['potty-intro-1'],
+        trainingTips: [
+          'Crate should be just big enough to stand and turn.',
+          'Never use the crate as punishment.',
+        ],
       },
       {
         id: 'apartment-potty-1',
@@ -2135,6 +2676,10 @@ export const trainingCategories: Category[] = [
           'Consistency is even more important in apartments',
         ],
         prerequisiteIds: ['potty-intro-1', 'potty-schedule-1'],
+        trainingTips: [
+          'Take the same route to the potty spot every time.',
+          'Consistency is even more important in apartments.',
+        ],
       },
       {
         id: 'nighttime-potty-1',
@@ -2163,6 +2708,10 @@ export const trainingCategories: Category[] = [
           'Set an alarm if needed for young puppies',
         ],
         prerequisiteIds: ['potty-intro-1', 'potty-schedule-1'],
+        trainingTips: [
+          'Keep nighttime breaks boring and quiet.',
+          'No play or excitement during night potty breaks.',
+        ],
       },
       {
         id: 'potty-cues-1',
@@ -2191,6 +2740,10 @@ export const trainingCategories: Category[] = [
           'Be patient - this can take weeks to establish',
         ],
         prerequisiteIds: ['potty-intro-1', 'potty-schedule-1'],
+        trainingTips: [
+          'Say the cue as they start to go.',
+          'Be patient—this can take weeks to establish.',
+        ],
       },
       {
         id: 'regression-handling-1',
@@ -2219,6 +2772,10 @@ export const trainingCategories: Category[] = [
           'Stay patient and consistent - you\'ll get back on track',
         ],
         prerequisiteIds: ['potty-intro-1', 'potty-schedule-1', 'accident-cleanup-1'],
+        trainingTips: [
+          'Rule out medical issues with your vet first.',
+          'Stay patient and consistent—you\'ll get back on track.',
+        ],
       },
     ],
   },
@@ -2255,6 +2812,10 @@ export const trainingCategories: Category[] = [
           'With consistent training, it will stop',
           'Your goal is to teach bite inhibition, not eliminate mouthing immediately',
         ],
+        trainingTips: [
+          'Puppy biting is normal—stay patient.',
+          'Your goal is to teach bite inhibition, not eliminate mouthing immediately.',
+        ],
       },
       {
         id: 'bite-inhibition-1',
@@ -2283,6 +2844,10 @@ export const trainingCategories: Category[] = [
           'Bite inhibition is a critical life skill',
         ],
         prerequisiteIds: ['biting-intro-1'],
+        trainingTips: [
+          'Say "Ouch!" in a high pitch and stop playing immediately.',
+          'Gradually lower your tolerance for pressure.',
+        ],
       },
       {
         id: 'redirection-techniques-1',
@@ -2311,6 +2876,10 @@ export const trainingCategories: Category[] = [
           'Make toys more exciting than your hands',
         ],
         prerequisiteIds: ['biting-intro-1'],
+        trainingTips: [
+          'Always have a toy within reach.',
+          'Make toys more exciting than your hands.',
+        ],
       },
       {
         id: 'overstimulation-management-1',
@@ -2339,6 +2908,10 @@ export const trainingCategories: Category[] = [
           'A tired puppy is not always a good puppy',
         ],
         prerequisiteIds: ['biting-intro-1', 'bite-inhibition-1'],
+        trainingTips: [
+          'Enforce naps—puppies need 18-20 hours of sleep.',
+          'Keep play sessions short (5-10 minutes).',
+        ],
       },
       {
         id: 'hands-not-toys-1',
@@ -2367,6 +2940,10 @@ export const trainingCategories: Category[] = [
           'Consistency from all family members is essential',
         ],
         prerequisiteIds: ['biting-intro-1', 'redirection-techniques-1'],
+        trainingTips: [
+          'Never use your hands as toys.',
+          'Consistency from all family members is essential.',
+        ],
       },
       {
         id: 'clothing-biting-1',
@@ -2395,6 +2972,10 @@ export const trainingCategories: Category[] = [
           'This behavior typically peaks around 3-4 months',
         ],
         prerequisiteIds: ['biting-intro-1', 'redirection-techniques-1', 'overstimulation-management-1'],
+        trainingTips: [
+          'Stop moving immediately when they bite.',
+          'Keep a toy in your pocket for quick redirection.',
+        ],
       },
       {
         id: 'gentle-mouth-1',
@@ -2423,6 +3004,10 @@ export const trainingCategories: Category[] = [
           'Practice with treats, toys, and during play',
         ],
         prerequisiteIds: ['biting-intro-1', 'bite-inhibition-1'],
+        trainingTips: [
+          'Open your hand only when they\'re being gentle.',
+          'Practice with treats, toys, and during play.',
+        ],
       },
       {
         id: 'age-expectations-1',
@@ -2451,6 +3036,10 @@ export const trainingCategories: Category[] = [
           'If biting continues past 6-7 months, seek professional help',
         ],
         prerequisiteIds: ['biting-intro-1'],
+        trainingTips: [
+          'Most puppies improve significantly by 6 months.',
+          'If biting continues past 6-7 months, seek professional help.',
+        ],
       },
     ],
   },
@@ -2487,6 +3076,10 @@ export const trainingCategories: Category[] = [
           'Patience and timing are key skills',
           'This module focuses on improving your skills',
         ],
+        trainingTips: [
+          'Your energy and body language matter.',
+          'Consistency is more important than perfection.',
+        ],
       },
       {
         id: 'timing-rewards-1',
@@ -2515,6 +3108,10 @@ export const trainingCategories: Category[] = [
           'Film yourself training to review timing',
         ],
         prerequisiteIds: ['handler-intro-1'],
+        trainingTips: [
+          'Reward within 1-2 seconds of the behavior.',
+          'Use a marker word like "Yes!" or "Good!"',
+        ],
       },
       {
         id: 'body-language-1',
@@ -2543,6 +3140,10 @@ export const trainingCategories: Category[] = [
           'Record training sessions to observe yourself',
         ],
         prerequisiteIds: ['handler-intro-1'],
+        trainingTips: [
+          'Dogs read our body language constantly.',
+          'Practice calm, neutral body language.',
+        ],
       },
       {
         id: 'staying-calm-1',
@@ -2571,6 +3172,10 @@ export const trainingCategories: Category[] = [
           'Your calm energy creates a safe learning space',
         ],
         prerequisiteIds: ['handler-intro-1'],
+        trainingTips: [
+          'Your dog mirrors your emotional state.',
+          'Take breaks when you feel stressed.',
+        ],
       },
       {
         id: 'managing-frustration-1',
@@ -2599,6 +3204,10 @@ export const trainingCategories: Category[] = [
           'Remember why you started training',
         ],
         prerequisiteIds: ['handler-intro-1'],
+        trainingTips: [
+          'Progress is not always linear.',
+          'Celebrate small wins.',
+        ],
       },
       {
         id: 'reading-dog-signals-1',
@@ -2627,6 +3236,10 @@ export const trainingCategories: Category[] = [
           'Learn your dog\'s unique communication style',
         ],
         prerequisiteIds: ['handler-intro-1'],
+        trainingTips: [
+          'Watch for signs of stress (yawning, lip licking).',
+          'Stop training if you see stress signals.',
+        ],
       },
       {
         id: 'consistency-practice-1',
@@ -2655,6 +3268,10 @@ export const trainingCategories: Category[] = [
           'Consistency builds trust and clarity',
         ],
         prerequisiteIds: ['handler-intro-1'],
+        trainingTips: [
+          'Use the same cues every time.',
+          'Get family members on the same page.',
+        ],
       },
       {
         id: 'problem-solving-1',
@@ -2683,6 +3300,10 @@ export const trainingCategories: Category[] = [
           'Every challenge is a learning opportunity',
         ],
         prerequisiteIds: ['handler-intro-1', 'timing-rewards-1', 'body-language-1'],
+        trainingTips: [
+          'If something isn\'t working, change your approach.',
+          'Break the behavior into smaller steps.',
+        ],
       },
       {
         id: 'feeding-schedule-1',
@@ -2711,6 +3332,10 @@ export const trainingCategories: Category[] = [
           'Consistency is key for training success',
         ],
         prerequisiteIds: ['handler-intro-1'],
+        trainingTips: [
+          'Feed at the same times each day.',
+          'Scheduled feeding supports potty training too.',
+        ],
       },
       {
         id: 'free-feeding-motivation-1',
@@ -2739,6 +3364,10 @@ export const trainingCategories: Category[] = [
           'Work with your vet if you have concerns',
         ],
         prerequisiteIds: ['handler-intro-1', 'feeding-schedule-1'],
+        trainingTips: [
+          'Scheduled meals create natural motivation windows.',
+          'This doesn\'t mean starving your dog.',
+        ],
       },
       {
         id: 'meals-as-training-1',
@@ -2767,6 +3396,10 @@ export const trainingCategories: Category[] = [
           'Your dog earns their food through engagement',
         ],
         prerequisiteIds: ['handler-intro-1', 'feeding-schedule-1'],
+        trainingTips: [
+          'Use part of their meal for training sessions.',
+          'Mealtimes become learning opportunities.',
+        ],
       },
       {
         id: 'table-feeding-1',
@@ -2795,6 +3428,10 @@ export const trainingCategories: Category[] = [
           'Your dog will be healthier and better trained',
         ],
         prerequisiteIds: ['handler-intro-1'],
+        trainingTips: [
+          'Table feeding teaches begging behavior.',
+          'Everyone in the household must follow the rule.',
+        ],
       },
       {
         id: 'hunger-rewards-balance-1',
@@ -2823,6 +3460,10 @@ export const trainingCategories: Category[] = [
           'Consult your vet if you have any concerns',
         ],
         prerequisiteIds: ['handler-intro-1', 'feeding-schedule-1', 'free-feeding-motivation-1'],
+        trainingTips: [
+          'Your dog should never be hungry or underweight.',
+          'Consult your vet if you have any concerns.',
+        ],
       },
     ],
   },

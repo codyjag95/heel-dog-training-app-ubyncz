@@ -21,6 +21,12 @@ export default function CategoryScreen() {
     );
   }
 
+  // Sort lessons: free lessons first, then premium lessons
+  const sortedLessons = [...category.lessons].sort((a, b) => {
+    if (a.isPremium === b.isPremium) return 0;
+    return a.isPremium ? 1 : -1;
+  });
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'Beginner':
@@ -94,7 +100,7 @@ export default function CategoryScreen() {
 
         {/* Lessons */}
         <View style={styles.lessonsSection}>
-          {category.lessons.map((lesson, index) => (
+          {sortedLessons.map((lesson, index) => (
             <TouchableOpacity
               key={index}
               style={[
@@ -116,10 +122,22 @@ export default function CategoryScreen() {
               activeOpacity={0.7}
             >
               {lesson.imageUrl && (
-                <Image
-                  source={{ uri: lesson.imageUrl }}
-                  style={styles.lessonImage}
-                />
+                <View style={styles.imageContainer}>
+                  <Image
+                    source={{ uri: lesson.imageUrl }}
+                    style={styles.lessonImage}
+                  />
+                  {lesson.isPremium && (
+                    <View style={styles.premiumOverlay}>
+                      <IconSymbol
+                        ios_icon_name="lock.fill"
+                        android_material_icon_name="lock"
+                        size={32}
+                        color={colors.text}
+                      />
+                    </View>
+                  )}
+                </View>
               )}
               <View style={styles.lessonContent}>
                 <View style={styles.lessonHeader}>
@@ -132,14 +150,6 @@ export default function CategoryScreen() {
                       color={colors.primary}
                     />
                   )}
-                  {lesson.isLocked && (
-                    <IconSymbol
-                      ios_icon_name="lock.fill"
-                      android_material_icon_name="lock"
-                      size={24}
-                      color={colors.textSecondary}
-                    />
-                  )}
                 </View>
                 <View style={styles.lessonMeta}>
                   <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(lesson.difficulty) }]}>
@@ -149,8 +159,8 @@ export default function CategoryScreen() {
                   {lesson.isPremium && (
                     <View style={styles.premiumBadge}>
                       <IconSymbol
-                        ios_icon_name="star.fill"
-                        android_material_icon_name="star"
+                        ios_icon_name="lock.fill"
+                        android_material_icon_name="lock"
                         size={14}
                         color={colors.text}
                       />
@@ -270,10 +280,25 @@ const styles = StyleSheet.create({
   lessonCardLocked: {
     opacity: 0.6,
   },
-  lessonImage: {
+  imageContainer: {
+    position: 'relative',
     width: '100%',
     height: 180,
+  },
+  lessonImage: {
+    width: '100%',
+    height: '100%',
     resizeMode: 'cover',
+  },
+  premiumOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   lessonContent: {
     padding: 16,

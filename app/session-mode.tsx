@@ -467,6 +467,26 @@ export default function SessionModeScreen() {
           )}
         </View>
 
+        {/* Training Tips */}
+        {lesson.trainingTips && lesson.trainingTips.length > 0 && (
+          <View style={styles.tipsSection}>
+            <View style={styles.tipsSectionHeader}>
+              <IconSymbol
+                ios_icon_name="lightbulb.fill"
+                android_material_icon_name="lightbulb"
+                size={20}
+                color={colors.primary}
+              />
+              <Text style={styles.tipsSectionTitle}>Training Tips</Text>
+            </View>
+            {lesson.trainingTips.map((tip, index) => (
+              <View key={index} style={styles.tipCard}>
+                <Text style={styles.tipText}>{tip}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
         {/* Finish Session Button */}
         <View style={styles.actionButtons}>
           <TouchableOpacity
@@ -711,6 +731,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.textSecondary,
+  },
+  tipsSection: {
+    paddingHorizontal: 20,
+    marginTop: 32,
+  },
+  tipsSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
+  },
+  tipsSectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  tipCard: {
+    backgroundColor: colors.secondary,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  tipText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    lineHeight: 20,
   },
   actionButtons: {
     paddingHorizontal: 20,
