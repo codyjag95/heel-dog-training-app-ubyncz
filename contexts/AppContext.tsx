@@ -25,6 +25,7 @@ interface AppContextType {
   sessionTemplates: SessionTemplate[];
   applySessionTemplate: (templateId: string) => Lesson[];
   togglePremium: () => void;
+  toggleBetaOverride: () => void;
   isPremiumUser: () => boolean;
 }
 
@@ -453,6 +454,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const toggleBetaOverride = () => {
+    console.log('Toggling beta override');
+    setUserProgress({
+      ...userProgress,
+      beta_override: !userProgress.beta_override,
+    });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -478,6 +487,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sessionTemplates,
         applySessionTemplate,
         togglePremium,
+        toggleBetaOverride,
         isPremiumUser,
       }}
     >
