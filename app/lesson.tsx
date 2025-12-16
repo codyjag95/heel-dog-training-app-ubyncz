@@ -19,7 +19,7 @@ export default function LessonScreen() {
     if (lesson) {
       setLastViewedLesson(lesson.id);
     }
-  }, [lesson]);
+  }, [lesson, setLastViewedLesson]);
 
   if (!lesson || !category) {
     return (
