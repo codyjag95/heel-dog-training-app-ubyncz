@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 import { quizQuestions, QuizAnswer } from '@/data/quizData';
@@ -13,9 +13,7 @@ export default function QuizScreen() {
   const [answers, setAnswers] = useState<QuizAnswer>({
     challenges: [],
     early_challenges: [],
-    current_challenges: [],
   });
-  const [textInput, setTextInput] = useState('');
 
   const currentQuestion = quizQuestions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
@@ -33,7 +31,6 @@ export default function QuizScreen() {
     setTimeout(() => {
       if (currentQuestionIndex < quizQuestions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
-        setTextInput('');
       } else {
         // Quiz complete, navigate to results
         router.push({
@@ -50,17 +47,33 @@ export default function QuizScreen() {
     const fieldName = currentQuestion.saveAs;
     let currentSelections = [...(answers[fieldName] as string[] || [])];
     
-    if (option === 'None of the above') {
-      // If "None of the above" is selected, clear all other selections
-      currentSelections = currentSelections.includes(option) ? [] : [option];
-    } else {
-      // Remove "None of the above" if selecting other options
-      currentSelections = currentSelections.filter(c => c !== 'None of the above');
-      
-      if (currentSelections.includes(option)) {
-        currentSelections = currentSelections.filter(c => c !== option);
+    if (fieldName === 'challenges') {
+      if (option === 'None of the above') {
+        // If "None of the above" is selected, clear all other selections
+        currentSelections = currentSelections.includes(option) ? [] : [option];
       } else {
-        currentSelections.push(option);
+        // Remove "None of the above" if selecting other options
+        currentSelections = currentSelections.filter(c => c !== 'None of the above');
+        
+        if (currentSelections.includes(option)) {
+          currentSelections = currentSelections.filter(c => c !== option);
+        } else {
+          currentSelections.push(option);
+        }
+      }
+    } else if (fieldName === 'early_challenges') {
+      if (option === 'Neither / already resolved') {
+        // If "Neither / already resolved" is selected, clear all other selections
+        currentSelections = currentSelections.includes(option) ? [] : [option];
+      } else {
+        // Remove "Neither / already resolved" if selecting other options
+        currentSelections = currentSelections.filter(c => c !== 'Neither / already resolved');
+        
+        if (currentSelections.includes(option)) {
+          currentSelections = currentSelections.filter(c => c !== option);
+        } else {
+          currentSelections.push(option);
+        }
       }
     }
 
@@ -70,38 +83,11 @@ export default function QuizScreen() {
     });
   };
 
-  const handleTextSubmit = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    
-    const newAnswers = {
-      ...answers,
-      [currentQuestion.saveAs]: textInput.trim() || undefined,
-    };
-    setAnswers(newAnswers);
-
-    if (currentQuestionIndex < quizQuestions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setTextInput('');
-    } else {
-      // Quiz complete, navigate to results
-      router.push({
-        pathname: '/onboarding/quiz-results',
-        params: { answers: JSON.stringify(newAnswers) },
-      });
-    }
-  };
-
   const handleNext = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     
-    if (currentQuestion.type === 'text') {
-      handleTextSubmit();
-      return;
-    }
-
     if (currentQuestionIndex < quizQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setTextInput('');
     } else {
       // Quiz complete, navigate to results
       router.push({
@@ -116,11 +102,6 @@ export default function QuizScreen() {
     
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
-      // Load previous text input if it exists
-      const prevQuestion = quizQuestions[currentQuestionIndex - 1];
-      if (prevQuestion.type === 'text') {
-        setTextInput((answers[prevQuestion.saveAs] as string) || '');
-      }
     } else {
       router.back();
     }
@@ -129,24 +110,19 @@ export default function QuizScreen() {
   const isAnswered = () => {
     if (currentQuestion.type === 'single') {
       return answers[currentQuestion.saveAs] !== undefined;
-    } else if (currentQuestion.type === 'multi') {
+    } else {
       const fieldValue = answers[currentQuestion.saveAs];
       return Array.isArray(fieldValue) && fieldValue.length > 0;
-    } else if (currentQuestion.type === 'text') {
-      // Text questions are optional, so always allow next
-      return true;
     }
-    return false;
   };
 
   const isOptionSelected = (option: string): boolean => {
     if (currentQuestion.type === 'single') {
       return answers[currentQuestion.saveAs] === option;
-    } else if (currentQuestion.type === 'multi') {
+    } else {
       const fieldValue = answers[currentQuestion.saveAs];
       return Array.isArray(fieldValue) && fieldValue.includes(option);
     }
-    return false;
   };
 
   return (
@@ -182,77 +158,61 @@ export default function QuizScreen() {
       >
         <Text style={styles.question}>{currentQuestion.question}</Text>
 
-        {currentQuestion.type === 'text' ? (
-          <View style={styles.textInputContainer}>
-            <TextInput
-              style={styles.textInput}
-              value={textInput}
-              onChangeText={setTextInput}
-              placeholder={currentQuestion.placeholder || 'Type here...'}
-              placeholderTextColor={colors.textSecondary}
-              autoCapitalize="words"
-              autoCorrect={false}
-              returnKeyType="next"
-              onSubmitEditing={handleTextSubmit}
-            />
-          </View>
-        ) : (
-          <View style={styles.optionsContainer}>
-            {currentQuestion.options?.map((option, index) => {
-              const isSelected = isOptionSelected(option);
+        <View style={styles.optionsContainer}>
+          {currentQuestion.options.map((option, index) => {
+            const isSelected = isOptionSelected(option);
 
-              return (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.optionCard,
-                    isSelected && styles.optionCardSelected,
-                  ]}
-                  onPress={() => {
-                    if (currentQuestion.type === 'single') {
-                      handleSingleChoice(option);
-                    } else {
-                      handleMultiChoice(option);
-                    }
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.optionContent}>
-                    <Text
-                      style={[
-                        styles.optionText,
-                        isSelected && styles.optionTextSelected,
-                      ]}
-                    >
-                      {option}
-                    </Text>
-                    {isSelected && (
-                      <IconSymbol
-                        ios_icon_name="checkmark.circle.fill"
-                        android_material_icon_name="check-circle"
-                        size={24}
-                        color={colors.primary}
-                      />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
+            return (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.optionCard,
+                  isSelected && styles.optionCardSelected,
+                ]}
+                onPress={() => {
+                  if (currentQuestion.type === 'single') {
+                    handleSingleChoice(option);
+                  } else {
+                    handleMultiChoice(option);
+                  }
+                }}
+                activeOpacity={0.7}
+              >
+                <View style={styles.optionContent}>
+                  <Text
+                    style={[
+                      styles.optionText,
+                      isSelected && styles.optionTextSelected,
+                    ]}
+                  >
+                    {option}
+                  </Text>
+                  {isSelected && (
+                    <IconSymbol
+                      ios_icon_name="checkmark.circle.fill"
+                      android_material_icon_name="check-circle"
+                      size={24}
+                      color={colors.primary}
+                    />
+                  )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </ScrollView>
 
-      {/* Next Button (for multi-select and text) */}
-      {(currentQuestion.type === 'multi' || currentQuestion.type === 'text') && (
+      {/* Next Button (for multi-select) */}
+      {currentQuestion.type === 'multi' && (
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[
               buttonStyles.primaryButton,
               styles.button,
-              !isAnswered() && currentQuestion.type === 'multi' && styles.buttonDisabled,
+              !isAnswered() && styles.buttonDisabled,
             ]}
             onPress={handleNext}
-            disabled={!isAnswered() && currentQuestion.type === 'multi'}
+            disabled={!isAnswered()}
             activeOpacity={0.8}
           >
             <Text style={buttonStyles.primaryButtonText}>
@@ -349,20 +309,6 @@ const styles = StyleSheet.create({
   },
   optionTextSelected: {
     color: colors.text,
-  },
-  textInputContainer: {
-    marginBottom: 20,
-  },
-  textInput: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 20,
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    borderWidth: 2,
-    borderColor: colors.secondary,
-    minHeight: 60,
   },
   buttonContainer: {
     paddingHorizontal: 20,
