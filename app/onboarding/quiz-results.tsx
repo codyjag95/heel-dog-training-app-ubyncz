@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
@@ -14,13 +14,16 @@ export default function QuizResultsScreen() {
   const { answers: answersParam } = useLocalSearchParams();
   const { dogProfile, setDogProfile, completeOnboarding, isPremiumUser, categories } = useApp();
 
-  const answers: QuizAnswer = answersParam 
-    ? JSON.parse(answersParam as string) 
-    : { challenges: [], early_challenges: [], current_challenges: [] };
-  const recommendation = generateRecommendation(answers);
+  const answers: QuizAnswer = useMemo(() => {
+    return answersParam 
+      ? JSON.parse(answersParam as string) 
+      : { challenges: [], early_challenges: [], current_challenges: [] };
+  }, [answersParam]);
+
+  const recommendation = useMemo(() => generateRecommendation(answers), [answers]);
   const isPremium = isPremiumUser();
 
-  useEffect(() => {
+  const updateDogProfile = useCallback(() => {
     if (dogProfile) {
       setDogProfile({
         ...dogProfile,
@@ -32,7 +35,11 @@ export default function QuizResultsScreen() {
         derived: recommendation.derived,
       });
     }
-  }, [dogProfile, setDogProfile, answers, recommendation.primaryTrack, recommendation.secondaryTracks, recommendation.immediateFocus, recommendation.scores, recommendation.derived]);
+  }, [dogProfile, setDogProfile, answers, recommendation]);
+
+  useEffect(() => {
+    updateDogProfile();
+  }, [updateDogProfile]);
 
   const handleStartTraining = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

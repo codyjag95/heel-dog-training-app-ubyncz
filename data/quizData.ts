@@ -284,7 +284,7 @@ export function deriveFields(scores: DogScores, answers: QuizAnswer): DerivedFie
   if (scores.score_energy <= 3) profile_energy_level = 'Low';
   else if (scores.score_energy >= 7) profile_energy_level = 'High';
 
-  const issues: { name: string; score: number }[] = [
+  const issues: Array<{ name: string; score: number }> = [
     { name: 'Energy Management', score: scores.score_energy },
     { name: 'Focus & Attention', score: 10 - scores.score_focus },
     { name: 'Arousal Control', score: scores.score_arousal },
