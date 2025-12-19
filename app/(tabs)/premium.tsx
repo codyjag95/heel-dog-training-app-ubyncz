@@ -1,47 +1,12 @@
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Modal } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { colors, commonStyles } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
 import { useApp } from '@/contexts/AppContext';
 
 export default function PremiumScreen() {
-  const { userProgress, togglePremium } = useApp();
-  const [tapCount, setTapCount] = useState(0);
-  const [showCodeModal, setShowCodeModal] = useState(false);
-  const [codeInput, setCodeInput] = useState('');
-
-  const handleStarPress = () => {
-    const newCount = tapCount + 1;
-    setTapCount(newCount);
-    
-    console.log('Star tapped:', newCount, 'times');
-    
-    if (newCount >= 7) {
-      setShowCodeModal(true);
-      setTapCount(0);
-    }
-  };
-
-  const handleCodeSubmit = () => {
-    if (codeInput.toUpperCase() === 'HEEL') {
-      togglePremium();
-      setShowCodeModal(false);
-      setCodeInput('');
-      Alert.alert(
-        'Premium Unlocked! 🎉',
-        'All premium features are now available for testing.',
-        [{ text: 'OK' }]
-      );
-    } else {
-      Alert.alert(
-        'Incorrect Code',
-        'Please try again.',
-        [{ text: 'OK' }]
-      );
-      setCodeInput('');
-    }
-  };
+  const { userProgress } = useApp();
 
   const features = [
     {
@@ -104,14 +69,12 @@ export default function PremiumScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleStarPress} activeOpacity={0.8}>
-            <IconSymbol
-              ios_icon_name="star.fill"
-              android_material_icon_name="star"
-              size={48}
-              color={colors.primary}
-            />
-          </TouchableOpacity>
+          <IconSymbol
+            ios_icon_name="star.fill"
+            android_material_icon_name="star"
+            size={48}
+            color={colors.primary}
+          />
           <Text style={styles.title}>HEEL Premium</Text>
           <Text style={styles.subtitle}>Unlock your dog&apos;s full potential</Text>
         </View>
@@ -189,54 +152,6 @@ export default function PremiumScreen() {
           </>
         )}
       </ScrollView>
-
-      {/* Hidden Code Entry Modal */}
-      <Modal
-        visible={showCodeModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => {
-          setShowCodeModal(false);
-          setCodeInput('');
-        }}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Tester Unlock</Text>
-            <Text style={styles.modalSubtitle}>Enter the secret code:</Text>
-            
-            <TextInput
-              style={styles.codeInput}
-              value={codeInput}
-              onChangeText={setCodeInput}
-              placeholder="Enter code"
-              placeholderTextColor={colors.textSecondary}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              maxLength={10}
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.modalButtonCancel]}
-                onPress={() => {
-                  setShowCodeModal(false);
-                  setCodeInput('');
-                }}
-              >
-                <Text style={styles.modalButtonText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modalButton, styles.modalButtonSubmit]}
-                onPress={handleCodeSubmit}
-              >
-                <Text style={styles.modalButtonText}>Submit</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -403,68 +318,5 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 18,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: colors.card,
-    borderRadius: 20,
-    padding: 32,
-    width: '100%',
-    maxWidth: 400,
-    boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.5)',
-    elevation: 8,
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  modalSubtitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  codeInput: {
-    backgroundColor: colors.background,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: 24,
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  modalButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  modalButtonCancel: {
-    backgroundColor: colors.secondary,
-  },
-  modalButtonSubmit: {
-    backgroundColor: colors.primary,
-  },
-  modalButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
   },
 });
