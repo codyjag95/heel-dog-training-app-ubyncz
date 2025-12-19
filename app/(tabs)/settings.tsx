@@ -1,22 +1,14 @@
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Modal } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, commonStyles } from '@/styles/commonStyles';
 import { useApp } from '@/contexts/AppContext';
 import { IconSymbol } from '@/components/IconSymbol';
-import * as Haptics from 'expo-haptics';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { dogProfile, userProgress, allDogs, switchDog, removeDog, togglePremium, toggleBetaOverride, isPremiumUser } = useApp();
-  
-  const [logoTapCount, setLogoTapCount] = useState(0);
-  const [showBetaTools, setShowBetaTools] = useState(false);
-  const [showCodeModal, setShowCodeModal] = useState(false);
-  const [betaCode, setBetaCode] = useState('');
-
-  const BETA_CODE = 'HEEL2024'; // Secret code for beta access
+  const { dogProfile, userProgress, allDogs, switchDog, removeDog, togglePremium } = useApp();
 
   const handleUpgradeToPremium = () => {
     Alert.alert(
@@ -24,7 +16,7 @@ export default function SettingsScreen() {
       'Get full access to all lessons, no ads, and advanced training content.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Upgrade', onPress: () => router.push('/(tabs)/premium') },
+        { text: 'Upgrade', onPress: () => console.log('Upgrade pressed') },
       ]
     );
   };
@@ -46,8 +38,7 @@ export default function SettingsScreen() {
   };
 
   const handleAddDog = () => {
-    const isPremium = isPremiumUser();
-    if (!isPremium && allDogs.length >= 1) {
+    if (!userProgress.isPremium && allDogs.length >= 1) {
       Alert.alert(
         'Premium Feature',
         'Multi-dog management is a Premium feature. Upgrade to add more dogs.',
@@ -89,49 +80,15 @@ export default function SettingsScreen() {
     );
   };
 
-  const handleLogoTap = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const newCount = logoTapCount + 1;
-    setLogoTapCount(newCount);
-    
-    if (newCount >= 7) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setShowBetaTools(true);
-      setLogoTapCount(0);
-    }
-  };
-
-  const handleEnterCode = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setShowCodeModal(true);
-  };
-
-  const handleSubmitCode = () => {
-    if (betaCode.toUpperCase() === BETA_CODE) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setShowBetaTools(true);
-      setShowCodeModal(false);
-      setBetaCode('');
-      Alert.alert('Success', 'Beta Tools unlocked!');
-    } else {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Invalid Code', 'Please try again.');
-      setBetaCode('');
-    }
-  };
-
-  const handleToggleBetaPremium = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    toggleBetaOverride();
-    const newStatus = !userProgress.beta_override;
+  // Debug function to toggle premium (remove in production)
+  const handleDebugTogglePremium = () => {
+    togglePremium();
     Alert.alert(
-      'Beta Premium',
-      `Beta Premium ${newStatus ? 'enabled' : 'disabled'}`,
+      'Debug',
+      `Premium ${!userProgress.isPremium ? 'enabled' : 'disabled'}`,
       [{ text: 'OK' }]
     );
   };
-
-  const isPremium = isPremiumUser();
 
   return (
     <View style={[commonStyles.container]}>
@@ -140,21 +97,9 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header with tappable logo */}
+        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Settings</Text>
-          <TouchableOpacity
-            onPress={handleLogoTap}
-            activeOpacity={0.9}
-            style={styles.logoContainer}
-          >
-            <IconSymbol
-              ios_icon_name="pawprint.fill"
-              android_material_icon_name="pets"
-              size={32}
-              color={colors.primary}
-            />
-          </TouchableOpacity>
         </View>
 
         {/* Dog Profile Section */}
@@ -187,12 +132,12 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Manage Dogs</Text>
-            {isPremium && (
+            {userProgress.isPremium && (
               <Text style={styles.dogCount}>{allDogs.length} dog{allDogs.length !== 1 ? 's' : ''}</Text>
             )}
           </View>
 
-          {isPremium && allDogs.length > 1 && (
+          {userProgress.isPremium && allDogs.length > 1 && (
             <View style={styles.dogsListCard}>
               {allDogs.map((dog, index) => (
                 <View key={index} style={styles.dogListItem}>
@@ -257,7 +202,7 @@ export default function SettingsScreen() {
               color={colors.text}
             />
             <Text style={styles.settingText}>Add Another Dog</Text>
-            {!isPremium && (
+            {!userProgress.isPremium && (
               <View style={styles.premiumBadge}>
                 <IconSymbol
                   ios_icon_name="star.fill"
@@ -280,7 +225,7 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Premium</Text>
           
-          {!isPremium ? (
+          {!userProgress.isPremium ? (
             <View style={styles.premiumCard}>
               <View style={styles.premiumHeader}>
                 <IconSymbol
@@ -311,11 +256,6 @@ export default function SettingsScreen() {
                 color={colors.primary}
               />
               <Text style={styles.premiumActiveText}>Premium Active</Text>
-              {userProgress.beta_override && (
-                <View style={styles.betaBadge}>
-                  <Text style={styles.betaBadgeText}>BETA</Text>
-                </View>
-              )}
             </View>
           )}
 
@@ -339,52 +279,6 @@ export default function SettingsScreen() {
             />
           </TouchableOpacity>
         </View>
-
-        {/* Beta Tools Section (Hidden) */}
-        {showBetaTools && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Beta Tools</Text>
-            <Text style={styles.betaDescription}>
-              For testers only. Works on TestFlight, Expo web, and shared demo links.
-            </Text>
-            
-            <TouchableOpacity
-              style={[styles.settingItem, styles.betaItem]}
-              onPress={handleToggleBetaPremium}
-              activeOpacity={0.7}
-            >
-              <IconSymbol
-                ios_icon_name={userProgress.beta_override ? 'checkmark.circle.fill' : 'circle'}
-                android_material_icon_name={userProgress.beta_override ? 'check-circle' : 'radio-button-unchecked'}
-                size={24}
-                color={userProgress.beta_override ? colors.primary : colors.text}
-              />
-              <Text style={styles.settingText}>
-                {userProgress.beta_override ? 'Disable Beta Premium' : 'Unlock Premium (Beta)'}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.settingItem, styles.betaItem]}
-              onPress={handleEnterCode}
-              activeOpacity={0.7}
-            >
-              <IconSymbol
-                ios_icon_name="key.fill"
-                android_material_icon_name="vpn-key"
-                size={24}
-                color={colors.text}
-              />
-              <Text style={styles.settingText}>Enter Beta Code</Text>
-              <IconSymbol
-                ios_icon_name="chevron.right"
-                android_material_icon_name="chevron-right"
-                size={20}
-                color={colors.textSecondary}
-              />
-            </TouchableOpacity>
-          </View>
-        )}
 
         {/* Support Section */}
         <View style={styles.section}>
@@ -411,57 +305,36 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Debug Section (Remove in production) */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Debug</Text>
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={handleDebugTogglePremium}
+            activeOpacity={0.7}
+          >
+            <IconSymbol
+              ios_icon_name="wrench.fill"
+              android_material_icon_name="build"
+              size={24}
+              color={colors.text}
+            />
+            <Text style={styles.settingText}>Toggle Premium (Debug)</Text>
+            <IconSymbol
+              ios_icon_name="chevron.right"
+              android_material_icon_name="chevron-right"
+              size={20}
+              color={colors.textSecondary}
+            />
+          </TouchableOpacity>
+        </View>
+
         {/* App Info */}
         <View style={styles.appInfo}>
           <Text style={styles.appInfoText}>HEEL v1.0.0</Text>
           <Text style={styles.appInfoText}>Modern Dog Training</Text>
-          {!showBetaTools && (
-            <Text style={styles.appInfoHint}>Tap the paw icon 7 times for beta tools</Text>
-          )}
         </View>
       </ScrollView>
-
-      {/* Beta Code Modal */}
-      <Modal
-        visible={showCodeModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowCodeModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.codeModalContainer}>
-            <Text style={styles.codeModalTitle}>Enter Beta Code</Text>
-            <TextInput
-              style={styles.codeInput}
-              placeholder="Enter code..."
-              placeholderTextColor={colors.textSecondary}
-              value={betaCode}
-              onChangeText={setBetaCode}
-              autoCapitalize="characters"
-              autoCorrect={false}
-            />
-            <View style={styles.codeModalButtons}>
-              <TouchableOpacity
-                style={[styles.codeModalButton, styles.codeModalButtonCancel]}
-                onPress={() => {
-                  setShowCodeModal(false);
-                  setBetaCode('');
-                }}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.codeModalButtonTextCancel}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.codeModalButton, styles.codeModalButtonSubmit]}
-                onPress={handleSubmitCode}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.codeModalButtonText}>Submit</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -476,9 +349,6 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 32,
   },
   title: {
@@ -486,9 +356,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: colors.text,
     letterSpacing: 2,
-  },
-  logoContainer: {
-    padding: 8,
   },
   section: {
     marginBottom: 32,
@@ -510,13 +377,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: colors.primary,
-  },
-  betaDescription: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: colors.textSecondary,
-    marginBottom: 12,
-    lineHeight: 18,
   },
   profileCard: {
     backgroundColor: colors.card,
@@ -623,10 +483,6 @@ const styles = StyleSheet.create({
     boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.2)',
     elevation: 2,
   },
-  betaItem: {
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
   settingText: {
     fontSize: 16,
     fontWeight: '600',
@@ -697,19 +553,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.text,
     marginLeft: 12,
-    flex: 1,
-  },
-  betaBadge: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  betaBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.text,
-    letterSpacing: 1,
   },
   appInfo: {
     alignItems: 'center',
@@ -721,73 +564,5 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.textSecondary,
     marginBottom: 4,
-  },
-  appInfoHint: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: colors.textSecondary,
-    marginTop: 8,
-    fontStyle: 'italic',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  codeModalContainer: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 24,
-    width: '100%',
-    maxWidth: 350,
-    boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.4)',
-    elevation: 8,
-  },
-  codeModalTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  codeInput: {
-    backgroundColor: colors.secondary,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 20,
-    textAlign: 'center',
-    borderWidth: 1,
-    borderColor: colors.textSecondary,
-  },
-  codeModalButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  codeModalButton: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  codeModalButtonCancel: {
-    backgroundColor: colors.secondary,
-  },
-  codeModalButtonSubmit: {
-    backgroundColor: colors.primary,
-  },
-  codeModalButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  codeModalButtonTextCancel: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.textSecondary,
   },
 });
