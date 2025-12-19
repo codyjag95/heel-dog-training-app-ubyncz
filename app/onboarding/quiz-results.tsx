@@ -33,7 +33,7 @@ export default function QuizResultsScreen() {
         derived: recommendation.derived,
       });
     }
-  }, [dogProfile, setDogProfile, answers, recommendation]);
+  }, []);
 
   const handleStartTraining = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

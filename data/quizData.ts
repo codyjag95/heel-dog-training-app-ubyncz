@@ -182,12 +182,12 @@ export const quizQuestions: QuizQuestion[] = [
 ];
 
 export interface DogScores {
-  score_energy: number;
-  score_focus: number;
-  score_arousal: number;
-  score_anxiety: number;
-  score_impulse: number;
-  score_structure: number;
+  score_energy: number; // 0-10
+  score_focus: number; // 0-10
+  score_arousal: number; // 0-10
+  score_anxiety: number; // 0-10
+  score_impulse: number; // 0-10
+  score_structure: number; // 0-10
 }
 
 export interface DerivedFields {
@@ -225,122 +225,54 @@ export function computeScores(answers: QuizAnswer): DogScores {
   let score_structure = 5;
 
   // Energy scoring
-  if (answers.exercise === 'Less than 20 minutes') {
-    score_energy += 1;
-  }
-  if (answers.exercise === '20–40 minutes') {
-    score_energy += 0;
-  }
-  if (answers.exercise === '40–60 minutes') {
-    score_energy -= 1;
-  }
-  if (answers.exercise === 'Over an hour') {
-    score_energy -= 2;
-  }
+  if (answers.exercise === 'Less than 20 minutes') score_energy += 1;
+  if (answers.exercise === '20–40 minutes') score_energy += 0;
+  if (answers.exercise === '40–60 minutes') score_energy -= 1;
+  if (answers.exercise === 'Over an hour') score_energy -= 2;
 
-  if (answers.indoor_behavior === 'Calm and relaxed') {
-    score_energy -= 2;
-  }
-  if (answers.indoor_behavior === 'Alert but manageable') {
-    score_energy -= 1;
-  }
-  if (answers.indoor_behavior === 'Restless or pacing') {
-    score_energy += 1;
-  }
-  if (answers.indoor_behavior === 'Always "on" or hyper') {
-    score_energy += 2;
-  }
+  if (answers.indoor_behavior === 'Calm and relaxed') score_energy -= 2;
+  if (answers.indoor_behavior === 'Alert but manageable') score_energy -= 1;
+  if (answers.indoor_behavior === 'Restless or pacing') score_energy += 1;
+  if (answers.indoor_behavior === 'Always "on" or hyper') score_energy += 2;
 
   // Focus scoring
-  if (answers.command_response === 'Immediately') {
-    score_focus += 3;
-  }
-  if (answers.command_response === 'After a few seconds') {
-    score_focus += 1;
-  }
-  if (answers.command_response === 'Only when food is visible') {
-    score_focus -= 1;
-  }
-  if (answers.command_response === 'Often ignores them') {
-    score_focus -= 3;
-  }
+  if (answers.command_response === 'Immediately') score_focus += 3;
+  if (answers.command_response === 'After a few seconds') score_focus += 1;
+  if (answers.command_response === 'Only when food is visible') score_focus -= 1;
+  if (answers.command_response === 'Often ignores them') score_focus -= 3;
 
   // Arousal scoring (based on indoor behavior and challenges)
-  if (answers.indoor_behavior === 'Calm and relaxed') {
-    score_arousal -= 2;
-  }
-  if (answers.indoor_behavior === 'Alert but manageable') {
-    score_arousal -= 1;
-  }
-  if (answers.indoor_behavior === 'Restless or pacing') {
-    score_arousal += 1;
-  }
-  if (answers.indoor_behavior === 'Always "on" or hyper') {
-    score_arousal += 2;
-  }
+  if (answers.indoor_behavior === 'Calm and relaxed') score_arousal -= 2;
+  if (answers.indoor_behavior === 'Alert but manageable') score_arousal -= 1;
+  if (answers.indoor_behavior === 'Restless or pacing') score_arousal += 1;
+  if (answers.indoor_behavior === 'Always "on" or hyper') score_arousal += 2;
 
-  if (answers.current_challenges.includes('Overexcited indoors')) {
-    score_arousal += 2;
-  }
-  if (answers.current_challenges.includes('Difficulty settling')) {
-    score_arousal += 1;
-  }
+  if (answers.current_challenges.includes('Overexcited indoors')) score_arousal += 2;
+  if (answers.current_challenges.includes('Difficulty settling')) score_arousal += 1;
 
   // Anxiety scoring
-  if (answers.current_challenges.includes('Fearful in new environments')) {
-    score_anxiety += 3;
-  }
-  if (answers.current_challenges.includes('Destructive when alone')) {
-    score_anxiety += 2;
-  }
-  if (answers.current_challenges.includes('Barking at noises')) {
-    score_anxiety += 1;
-  }
-  if (answers.current_challenges.includes('Barking at dogs or people')) {
-    score_anxiety += 1;
-  }
+  if (answers.current_challenges.includes('Fearful in new environments')) score_anxiety += 3;
+  if (answers.current_challenges.includes('Destructive when alone')) score_anxiety += 2;
+  if (answers.current_challenges.includes('Barking at noises')) score_anxiety += 1;
+  if (answers.current_challenges.includes('Barking at dogs or people')) score_anxiety += 1;
 
-  if (answers.biggest_frustration === 'Anxiety-related behaviors') {
-    score_anxiety += 2;
-  }
+  if (answers.biggest_frustration === 'Anxiety-related behaviors') score_anxiety += 2;
 
   // Impulse scoring
-  if (answers.current_challenges.includes('Jumping on people')) {
-    score_impulse += 1;
-  }
-  if (answers.current_challenges.includes('Pulling on leash')) {
-    score_impulse += 1;
-  }
-  if (answers.current_challenges.includes('Ignoring recall')) {
-    score_impulse += 2;
-  }
-  if (answers.current_challenges.includes('Overexcited indoors')) {
-    score_impulse += 1;
-  }
-  if (answers.current_challenges.includes('Difficulty settling')) {
-    score_impulse += 1;
-  }
+  if (answers.current_challenges.includes('Jumping on people')) score_impulse += 1;
+  if (answers.current_challenges.includes('Pulling on leash')) score_impulse += 1;
+  if (answers.current_challenges.includes('Ignoring recall')) score_impulse += 2;
+  if (answers.current_challenges.includes('Overexcited indoors')) score_impulse += 1;
+  if (answers.current_challenges.includes('Difficulty settling')) score_impulse += 1;
 
-  if (answers.command_response === 'Immediately') {
-    score_impulse -= 2;
-  }
-  if (answers.command_response === 'Often ignores them') {
-    score_impulse += 2;
-  }
+  if (answers.command_response === 'Immediately') score_impulse -= 2;
+  if (answers.command_response === 'Often ignores them') score_impulse += 2;
 
   // Structure scoring
-  if (answers.training_history === 'None') {
-    score_structure -= 2;
-  }
-  if (answers.training_history === 'Group classes') {
-    score_structure += 0;
-  }
-  if (answers.training_history === 'Private sessions') {
-    score_structure += 1;
-  }
-  if (answers.training_history === 'Multiple programs') {
-    score_structure += 2;
-  }
+  if (answers.training_history === 'None') score_structure -= 2;
+  if (answers.training_history === 'Group classes') score_structure += 0;
+  if (answers.training_history === 'Private sessions') score_structure += 1;
+  if (answers.training_history === 'Multiple programs') score_structure += 2;
 
   // Clamp scores to 0-10
   const clamp = (val: number) => Math.max(0, Math.min(10, val));
@@ -359,11 +291,8 @@ export function computeScores(answers: QuizAnswer): DogScores {
 export function deriveFields(scores: DogScores, answers: QuizAnswer): DerivedFields {
   // Profile energy level
   let profile_energy_level: 'Low' | 'Medium' | 'High' = 'Medium';
-  if (scores.score_energy <= 3) {
-    profile_energy_level = 'Low';
-  } else if (scores.score_energy >= 7) {
-    profile_energy_level = 'High';
-  }
+  if (scores.score_energy <= 3) profile_energy_level = 'Low';
+  else if (scores.score_energy >= 7) profile_energy_level = 'High';
 
   // Primary and secondary issues
   const issues: { name: string; score: number }[] = [
