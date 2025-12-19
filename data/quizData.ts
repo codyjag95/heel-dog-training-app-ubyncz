@@ -1,36 +1,27 @@
 
 export interface QuizAnswer {
-  // Dog Basics
-  age?: string; // Puppy (0-6 months) / Adolescent (6-18 months) / Adult (1.5-7 years) / Senior (7+)
-  breed?: string;
-  time_owned?: string; // Less than a month / 1-6 months / 6-12 months / Over a year
-  
-  // Environment & Energy
-  environment?: string; // Apartment / Townhome / House with yard
-  exercise?: string; // <20 / 20-40 / 40-60 / 60+
-  indoor_behavior?: string; // Calm and relaxed / Alert but manageable / Restless or pacing / Always "on" or hyper
-  alone_time?: string; // Rarely / 1-3 / 4-6 / 7+
-  
-  // Current Challenges (multi-select)
+  // New Quiz Fields
+  age?: string;
+  time_owned?: string;
+  environment?: string;
+  exercise?: string;
+  indoor_behavior?: string;
+  command_response?: string;
+  training_history?: string;
+  motivation?: string;
   current_challenges: string[];
-  
-  // Focus & Motivation
-  command_response?: string; // Immediately / After a few seconds / Only when food is visible / Often ignores them
-  engagement_time?: string; // <1 min / 1-3 / 3-5 / 5+
-  motivation?: string; // Food / Toys / Praise / Movement-chase
-  
-  // Regulation & Recovery
-  post_excitement?: string; // Calms quickly / Takes minutes / Takes a long time / Never really settles
-  overstimulation?: string; // Ignore commands / Bark-vocalize / Jump-mouth / Freeze-withdraw
-  new_environments?: string; // Confident-curious / Cautious at first / Hesitant-unsure / Fearful-reactive
-  alone_behavior?: string; // Rests calmly / Whines briefly / Paces-vocalizes / Destroys things
-  
-  // Training History
-  training_history?: string; // None / Group classes / Private sessions / Multiple programs
-  training_consistency?: string; // Very / Somewhat / Inconsistent / Rarely
-  biggest_frustration?: string; // Walks / Calm indoors / Recall / Listening in general / Anxiety behaviors
+  biggest_frustration?: string;
+  improve_first?: string;
   
   // Legacy fields (for backward compatibility)
+  breed?: string;
+  alone_time?: string;
+  engagement_time?: string;
+  post_excitement?: string;
+  overstimulation?: string;
+  new_environments?: string;
+  alone_behavior?: string;
+  training_consistency?: string;
   age_group?: string;
   energy_level?: string;
   challenges: string[];
@@ -50,7 +41,6 @@ export interface QuizQuestion {
 }
 
 export const quizQuestions: QuizQuestion[] = [
-  // Dog Basics
   {
     id: 'q1',
     question: 'How old is your dog?',
@@ -60,18 +50,11 @@ export const quizQuestions: QuizQuestion[] = [
       'Puppy (0–6 months)',
       'Adolescent (6–18 months)',
       'Adult (1.5–7 years)',
-      'Senior (7+)',
+      'Senior (7+ years)',
     ],
   },
   {
     id: 'q2',
-    question: 'Breed or mix (optional)',
-    type: 'text',
-    saveAs: 'breed',
-    placeholder: 'e.g., Golden Retriever, Lab Mix, etc.',
-  },
-  {
-    id: 'q3',
     question: 'How long have you had your dog?',
     type: 'single',
     saveAs: 'time_owned',
@@ -82,34 +65,32 @@ export const quizQuestions: QuizQuestion[] = [
       'Over a year',
     ],
   },
-  
-  // Environment & Energy
   {
-    id: 'q4',
+    id: 'q3',
     question: 'Where does your dog live most of the time?',
     type: 'single',
     saveAs: 'environment',
     options: [
       'Apartment',
       'Townhome',
-      'House with yard',
+      'House with a yard',
+    ],
+  },
+  {
+    id: 'q4',
+    question: 'On average, how much physical exercise does your dog get per day?',
+    type: 'single',
+    saveAs: 'exercise',
+    options: [
+      'Less than 20 minutes',
+      '20–40 minutes',
+      '40–60 minutes',
+      'Over an hour',
     ],
   },
   {
     id: 'q5',
-    question: 'On average, how much exercise per day?',
-    type: 'single',
-    saveAs: 'exercise',
-    options: [
-      '<20 min',
-      '20–40 min',
-      '40–60 min',
-      '60+ min',
-    ],
-  },
-  {
-    id: 'q6',
-    question: 'Indoors most days your dog is:',
+    question: 'How would you describe your dog indoors most days?',
     type: 'single',
     saveAs: 'indoor_behavior',
     options: [
@@ -120,41 +101,7 @@ export const quizQuestions: QuizQuestion[] = [
     ],
   },
   {
-    id: 'q7',
-    question: 'How long left alone per day?',
-    type: 'single',
-    saveAs: 'alone_time',
-    options: [
-      'Rarely',
-      '1–3 hours',
-      '4–6 hours',
-      '7+ hours',
-    ],
-  },
-  
-  // Current Challenges (multi-select)
-  {
-    id: 'q8',
-    question: 'Which behaviors are you working on? (Select all that apply)',
-    type: 'multi',
-    saveAs: 'current_challenges',
-    options: [
-      'Pulling on leash',
-      'Jumping on people',
-      'Barking at noises',
-      'Barking at dogs or people',
-      'Ignoring recall',
-      'Destructive when alone',
-      'Overexcited indoors',
-      'Difficulty settling',
-      'Fearful in new environments',
-      'None of the above',
-    ],
-  },
-  
-  // Focus & Motivation
-  {
-    id: 'q9',
+    id: 'q6',
     question: 'How does your dog respond to commands they already know?',
     type: 'single',
     saveAs: 'command_response',
@@ -166,84 +113,8 @@ export const quizQuestions: QuizQuestion[] = [
     ],
   },
   {
-    id: 'q10',
-    question: 'How long can your dog stay engaged during training?',
-    type: 'single',
-    saveAs: 'engagement_time',
-    options: [
-      '<1 min',
-      '1–3 min',
-      '3–5 min',
-      '5+ min',
-    ],
-  },
-  {
-    id: 'q11',
-    question: 'What motivates your dog most?',
-    type: 'single',
-    saveAs: 'motivation',
-    options: [
-      'Food',
-      'Toys',
-      'Praise',
-      'Movement / chase',
-    ],
-  },
-  
-  // Regulation & Recovery
-  {
-    id: 'q12',
-    question: 'After excitement (walks/visitors), your dog usually:',
-    type: 'single',
-    saveAs: 'post_excitement',
-    options: [
-      'Calms quickly',
-      'Takes a few minutes',
-      'Takes a long time',
-      'Never really settles',
-    ],
-  },
-  {
-    id: 'q13',
-    question: 'When overstimulated, your dog tends to:',
-    type: 'single',
-    saveAs: 'overstimulation',
-    options: [
-      'Ignore commands',
-      'Bark / vocalize',
-      'Jump / mouth',
-      'Freeze / withdraw',
-    ],
-  },
-  {
-    id: 'q14',
-    question: 'In new environments, your dog is usually:',
-    type: 'single',
-    saveAs: 'new_environments',
-    options: [
-      'Confident / curious',
-      'Cautious at first',
-      'Hesitant / unsure',
-      'Fearful / reactive',
-    ],
-  },
-  {
-    id: 'q15',
-    question: 'When left alone, your dog typically:',
-    type: 'single',
-    saveAs: 'alone_behavior',
-    options: [
-      'Rests calmly',
-      'Whines briefly',
-      'Paces / vocalizes',
-      'Destroys things',
-    ],
-  },
-  
-  // Training History
-  {
-    id: 'q16',
-    question: 'Has your dog had formal training before?',
+    id: 'q7',
+    question: 'Has your dog had any formal training before?',
     type: 'single',
     saveAs: 'training_history',
     options: [
@@ -254,20 +125,37 @@ export const quizQuestions: QuizQuestion[] = [
     ],
   },
   {
-    id: 'q17',
-    question: 'How consistent is training at home?',
+    id: 'q8',
+    question: 'What motivates your dog the most?',
     type: 'single',
-    saveAs: 'training_consistency',
+    saveAs: 'motivation',
     options: [
-      'Very consistent',
-      'Somewhat consistent',
-      'Inconsistent',
-      'Rarely train',
+      'Food',
+      'Toys',
+      'Praise / affection',
+      'Movement or chasing',
     ],
   },
   {
-    id: 'q18',
-    question: 'Biggest frustration right now:',
+    id: 'q9',
+    question: 'Which behaviors are you currently working on? (Multi-select)',
+    type: 'multi',
+    saveAs: 'current_challenges',
+    options: [
+      'Pulling on leash',
+      'Jumping on people',
+      'Barking at noises',
+      'Barking at dogs or people',
+      'Ignoring recall',
+      'Overexcited indoors',
+      'Difficulty settling',
+      'Destructive when alone',
+      'Fearful in new environments',
+    ],
+  },
+  {
+    id: 'q10',
+    question: 'What's your biggest frustration right now?',
     type: 'single',
     saveAs: 'biggest_frustration',
     options: [
@@ -275,7 +163,20 @@ export const quizQuestions: QuizQuestion[] = [
       'Calm indoors',
       'Recall',
       'Listening in general',
-      'Anxiety behaviors',
+      'Anxiety-related behaviors',
+    ],
+  },
+  {
+    id: 'q11',
+    question: 'What do you want to improve first?',
+    type: 'single',
+    saveAs: 'improve_first',
+    options: [
+      'Focus',
+      'Calmness',
+      'Manners',
+      'Confidence',
+      'Reliability',
     ],
   },
 ];
@@ -314,7 +215,7 @@ export const trainingTracks = [
   'Mental Stimulation',
 ];
 
-// Scoring logic
+// Scoring logic - Updated for new quiz questions
 export function computeScores(answers: QuizAnswer): DogScores {
   let score_energy = 5;
   let score_focus = 5;
@@ -324,10 +225,10 @@ export function computeScores(answers: QuizAnswer): DogScores {
   let score_structure = 5;
 
   // Energy scoring
-  if (answers.exercise === '<20 min') score_energy += 1;
-  if (answers.exercise === '20–40 min') score_energy += 0;
-  if (answers.exercise === '40–60 min') score_energy -= 1;
-  if (answers.exercise === '60+ min') score_energy -= 2;
+  if (answers.exercise === 'Less than 20 minutes') score_energy += 1;
+  if (answers.exercise === '20–40 minutes') score_energy += 0;
+  if (answers.exercise === '40–60 minutes') score_energy -= 1;
+  if (answers.exercise === 'Over an hour') score_energy -= 2;
 
   if (answers.indoor_behavior === 'Calm and relaxed') score_energy -= 2;
   if (answers.indoor_behavior === 'Alert but manageable') score_energy -= 1;
@@ -340,32 +241,22 @@ export function computeScores(answers: QuizAnswer): DogScores {
   if (answers.command_response === 'Only when food is visible') score_focus -= 1;
   if (answers.command_response === 'Often ignores them') score_focus -= 3;
 
-  if (answers.engagement_time === '<1 min') score_focus -= 2;
-  if (answers.engagement_time === '1–3 min') score_focus -= 1;
-  if (answers.engagement_time === '3–5 min') score_focus += 1;
-  if (answers.engagement_time === '5+ min') score_focus += 2;
+  // Arousal scoring (based on indoor behavior and challenges)
+  if (answers.indoor_behavior === 'Calm and relaxed') score_arousal -= 2;
+  if (answers.indoor_behavior === 'Alert but manageable') score_arousal -= 1;
+  if (answers.indoor_behavior === 'Restless or pacing') score_arousal += 1;
+  if (answers.indoor_behavior === 'Always "on" or hyper') score_arousal += 2;
 
-  // Arousal scoring
-  if (answers.post_excitement === 'Calms quickly') score_arousal -= 2;
-  if (answers.post_excitement === 'Takes a few minutes') score_arousal -= 1;
-  if (answers.post_excitement === 'Takes a long time') score_arousal += 1;
-  if (answers.post_excitement === 'Never really settles') score_arousal += 2;
-
-  if (answers.overstimulation === 'Ignore commands') score_arousal += 1;
-  if (answers.overstimulation === 'Bark / vocalize') score_arousal += 2;
-  if (answers.overstimulation === 'Jump / mouth') score_arousal += 2;
-  if (answers.overstimulation === 'Freeze / withdraw') score_arousal += 1;
+  if (answers.current_challenges.includes('Overexcited indoors')) score_arousal += 2;
+  if (answers.current_challenges.includes('Difficulty settling')) score_arousal += 1;
 
   // Anxiety scoring
-  if (answers.new_environments === 'Confident / curious') score_anxiety -= 2;
-  if (answers.new_environments === 'Cautious at first') score_anxiety += 0;
-  if (answers.new_environments === 'Hesitant / unsure') score_anxiety += 1;
-  if (answers.new_environments === 'Fearful / reactive') score_anxiety += 3;
+  if (answers.current_challenges.includes('Fearful in new environments')) score_anxiety += 3;
+  if (answers.current_challenges.includes('Destructive when alone')) score_anxiety += 2;
+  if (answers.current_challenges.includes('Barking at noises')) score_anxiety += 1;
+  if (answers.current_challenges.includes('Barking at dogs or people')) score_anxiety += 1;
 
-  if (answers.alone_behavior === 'Rests calmly') score_anxiety -= 2;
-  if (answers.alone_behavior === 'Whines briefly') score_anxiety += 0;
-  if (answers.alone_behavior === 'Paces / vocalizes') score_anxiety += 2;
-  if (answers.alone_behavior === 'Destroys things') score_anxiety += 3;
+  if (answers.biggest_frustration === 'Anxiety-related behaviors') score_anxiety += 2;
 
   // Impulse scoring
   if (answers.current_challenges.includes('Jumping on people')) score_impulse += 1;
@@ -382,11 +273,6 @@ export function computeScores(answers: QuizAnswer): DogScores {
   if (answers.training_history === 'Group classes') score_structure += 0;
   if (answers.training_history === 'Private sessions') score_structure += 1;
   if (answers.training_history === 'Multiple programs') score_structure += 2;
-
-  if (answers.training_consistency === 'Very consistent') score_structure += 2;
-  if (answers.training_consistency === 'Somewhat consistent') score_structure += 0;
-  if (answers.training_consistency === 'Inconsistent') score_structure -= 1;
-  if (answers.training_consistency === 'Rarely train') score_structure -= 2;
 
   // Clamp scores to 0-10
   const clamp = (val: number) => Math.max(0, Math.min(10, val));
@@ -524,6 +410,29 @@ export function generateRecommendation(answers: QuizAnswer): TrainingRecommendat
       secondaryTracks.push('Calm & Focus');
       reasoning.push('Focus work will improve all aspects of training');
     }
+  }
+
+  // Rule 11: Based on "improve_first" answer
+  if (answers.improve_first === 'Focus' && primaryTrack !== 'Calm & Focus') {
+    if (!secondaryTracks.includes('Calm & Focus')) {
+      secondaryTracks.push('Calm & Focus');
+      reasoning.push('Focus training will help with all other skills');
+    }
+  }
+
+  if (answers.improve_first === 'Calmness' && primaryTrack !== 'Calm & Focus') {
+    primaryTrack = 'Calm & Focus';
+    reasoning.push('Calmness is the foundation for all training success');
+  }
+
+  if (answers.improve_first === 'Confidence' && !secondaryTracks.includes('Mental Stimulation')) {
+    secondaryTracks.push('Mental Stimulation');
+    reasoning.push('Building confidence through mental challenges');
+  }
+
+  if (answers.improve_first === 'Reliability' && !secondaryTracks.includes('Recall')) {
+    secondaryTracks.push('Recall');
+    reasoning.push('Reliability starts with consistent recall training');
   }
 
   // Add Everyday Obedience as secondary if not already primary
