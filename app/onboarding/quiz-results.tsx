@@ -21,7 +21,6 @@ export default function QuizResultsScreen() {
   const isPremium = isPremiumUser();
 
   useEffect(() => {
-    // Save quiz answers and scores to dog profile
     if (dogProfile) {
       setDogProfile({
         ...dogProfile,
@@ -33,7 +32,7 @@ export default function QuizResultsScreen() {
         derived: recommendation.derived,
       });
     }
-  }, []);
+  }, [dogProfile, setDogProfile, answers, recommendation.primaryTrack, recommendation.secondaryTracks, recommendation.immediateFocus, recommendation.scores, recommendation.derived]);
 
   const handleStartTraining = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -46,12 +45,10 @@ export default function QuizResultsScreen() {
     router.push('/(tabs)/premium');
   };
 
-  // Get suggested lessons (3 lessons from primary track)
   const getSuggestedLessons = () => {
     const primaryCategory = categories.find(cat => cat.name === recommendation.primaryTrack);
     if (!primaryCategory) return [];
     
-    // Get first 3 unlocked lessons
     return primaryCategory.lessons.filter(l => !l.isLocked && !l.isPremium).slice(0, 3);
   };
 
@@ -64,7 +61,6 @@ export default function QuizResultsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Success Icon */}
         <View style={styles.iconContainer}>
           <View style={styles.iconCircle}>
             <IconSymbol
@@ -81,9 +77,6 @@ export default function QuizResultsScreen() {
           Based on {dogProfile?.name}&apos;s profile, here&apos;s what we recommend
         </Text>
 
-        {/* FREE USERS SEE: Snapshot */}
-        
-        {/* Energy Level */}
         {recommendation.derived && (
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Energy Level</Text>
@@ -99,7 +92,6 @@ export default function QuizResultsScreen() {
           </View>
         )}
 
-        {/* Primary + Secondary Challenge */}
         {recommendation.derived && (
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Focus Areas</Text>
@@ -116,7 +108,6 @@ export default function QuizResultsScreen() {
           </View>
         )}
 
-        {/* Motivation Type */}
         {answers.motivation && (
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Motivation Type</Text>
@@ -132,7 +123,6 @@ export default function QuizResultsScreen() {
           </View>
         )}
 
-        {/* Session Length Recommendation */}
         {recommendation.derived && (
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Recommended Session Length</Text>
@@ -148,7 +138,6 @@ export default function QuizResultsScreen() {
           </View>
         )}
 
-        {/* Suggested Lessons (3 lessons) */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Suggested Lessons</Text>
           <Text style={styles.sectionDescription}>Start with these to build momentum</Text>
@@ -168,17 +157,14 @@ export default function QuizResultsScreen() {
           ))}
         </View>
 
-        {/* PREMIUM USERS SEE: Everything above PLUS roadmap, pacing, details */}
         {isPremium ? (
           <React.Fragment>
-            {/* 2-4 Week Roadmap */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Your 4-Week Roadmap</Text>
               <Text style={styles.sectionDescription}>
                 A structured path to build skills progressively
               </Text>
 
-              {/* Week 1 */}
               <View style={styles.weekCard}>
                 <View style={styles.weekHeader}>
                   <Text style={styles.weekTitle}>Week 1: Foundation</Text>
@@ -191,7 +177,6 @@ export default function QuizResultsScreen() {
                 </View>
               </View>
 
-              {/* Week 2 */}
               <View style={styles.weekCard}>
                 <View style={styles.weekHeader}>
                   <Text style={styles.weekTitle}>Week 2: Control</Text>
@@ -204,7 +189,6 @@ export default function QuizResultsScreen() {
                 </View>
               </View>
 
-              {/* Week 3 */}
               <View style={styles.weekCard}>
                 <View style={styles.weekHeader}>
                   <Text style={styles.weekTitle}>Week 3: Real-World Skills</Text>
@@ -217,7 +201,6 @@ export default function QuizResultsScreen() {
                 </View>
               </View>
 
-              {/* Week 4 */}
               <View style={styles.weekCard}>
                 <View style={styles.weekHeader}>
                   <Text style={styles.weekTitle}>Week 4: Refinement</Text>
@@ -231,7 +214,6 @@ export default function QuizResultsScreen() {
               </View>
             </View>
 
-            {/* Pacing Rules */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Pacing Guidelines</Text>
               <View style={styles.pacingCard}>
@@ -263,7 +245,6 @@ export default function QuizResultsScreen() {
               </View>
             </View>
 
-            {/* Detailed Lesson Descriptions */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Why These Lessons Matter</Text>
               
@@ -300,7 +281,6 @@ export default function QuizResultsScreen() {
               </View>
             </View>
 
-            {/* Ability to Jump Categories */}
             <View style={styles.infoCard}>
               <IconSymbol
                 ios_icon_name="sparkles"
@@ -315,7 +295,6 @@ export default function QuizResultsScreen() {
             </View>
           </React.Fragment>
         ) : (
-          // FREE USERS: Blurred roadmap + lock + CTA
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Your Personalized Roadmap</Text>
             <View style={styles.lockedRoadmapContainer}>
@@ -341,7 +320,6 @@ export default function QuizResultsScreen() {
                 </View>
               </BlurView>
               
-              {/* Blurred preview content */}
               <View style={styles.blurredPreview}>
                 <View style={styles.weekCard}>
                   <View style={styles.weekHeader}>
@@ -360,7 +338,6 @@ export default function QuizResultsScreen() {
           </View>
         )}
 
-        {/* Info Card */}
         <View style={styles.infoCard}>
           <IconSymbol
             ios_icon_name="info.circle.fill"
@@ -374,7 +351,6 @@ export default function QuizResultsScreen() {
         </View>
       </ScrollView>
 
-      {/* Start Training Button */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[buttonStyles.primaryButton, styles.button]}

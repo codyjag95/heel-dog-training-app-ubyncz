@@ -182,12 +182,12 @@ export const quizQuestions: QuizQuestion[] = [
 ];
 
 export interface DogScores {
-  score_energy: number; // 0-10
-  score_focus: number; // 0-10
-  score_arousal: number; // 0-10
-  score_anxiety: number; // 0-10
-  score_impulse: number; // 0-10
-  score_structure: number; // 0-10
+  score_energy: number;
+  score_focus: number;
+  score_arousal: number;
+  score_anxiety: number;
+  score_impulse: number;
+  score_structure: number;
 }
 
 export interface DerivedFields {
@@ -215,7 +215,6 @@ export const trainingTracks = [
   'Mental Stimulation',
 ];
 
-// Scoring logic - Updated for new quiz questions
 export function computeScores(answers: QuizAnswer): DogScores {
   let score_energy = 5;
   let score_focus = 5;
@@ -224,7 +223,6 @@ export function computeScores(answers: QuizAnswer): DogScores {
   let score_impulse = 5;
   let score_structure = 5;
 
-  // Energy scoring
   if (answers.exercise === 'Less than 20 minutes') score_energy += 1;
   if (answers.exercise === '20–40 minutes') score_energy += 0;
   if (answers.exercise === '40–60 minutes') score_energy -= 1;
@@ -235,13 +233,11 @@ export function computeScores(answers: QuizAnswer): DogScores {
   if (answers.indoor_behavior === 'Restless or pacing') score_energy += 1;
   if (answers.indoor_behavior === 'Always "on" or hyper') score_energy += 2;
 
-  // Focus scoring
   if (answers.command_response === 'Immediately') score_focus += 3;
   if (answers.command_response === 'After a few seconds') score_focus += 1;
   if (answers.command_response === 'Only when food is visible') score_focus -= 1;
   if (answers.command_response === 'Often ignores them') score_focus -= 3;
 
-  // Arousal scoring (based on indoor behavior and challenges)
   if (answers.indoor_behavior === 'Calm and relaxed') score_arousal -= 2;
   if (answers.indoor_behavior === 'Alert but manageable') score_arousal -= 1;
   if (answers.indoor_behavior === 'Restless or pacing') score_arousal += 1;
@@ -250,7 +246,6 @@ export function computeScores(answers: QuizAnswer): DogScores {
   if (answers.current_challenges.includes('Overexcited indoors')) score_arousal += 2;
   if (answers.current_challenges.includes('Difficulty settling')) score_arousal += 1;
 
-  // Anxiety scoring
   if (answers.current_challenges.includes('Fearful in new environments')) score_anxiety += 3;
   if (answers.current_challenges.includes('Destructive when alone')) score_anxiety += 2;
   if (answers.current_challenges.includes('Barking at noises')) score_anxiety += 1;
@@ -258,7 +253,6 @@ export function computeScores(answers: QuizAnswer): DogScores {
 
   if (answers.biggest_frustration === 'Anxiety-related behaviors') score_anxiety += 2;
 
-  // Impulse scoring
   if (answers.current_challenges.includes('Jumping on people')) score_impulse += 1;
   if (answers.current_challenges.includes('Pulling on leash')) score_impulse += 1;
   if (answers.current_challenges.includes('Ignoring recall')) score_impulse += 2;
@@ -268,13 +262,11 @@ export function computeScores(answers: QuizAnswer): DogScores {
   if (answers.command_response === 'Immediately') score_impulse -= 2;
   if (answers.command_response === 'Often ignores them') score_impulse += 2;
 
-  // Structure scoring
   if (answers.training_history === 'None') score_structure -= 2;
   if (answers.training_history === 'Group classes') score_structure += 0;
   if (answers.training_history === 'Private sessions') score_structure += 1;
   if (answers.training_history === 'Multiple programs') score_structure += 2;
 
-  // Clamp scores to 0-10
   const clamp = (val: number) => Math.max(0, Math.min(10, val));
 
   return {
@@ -287,14 +279,11 @@ export function computeScores(answers: QuizAnswer): DogScores {
   };
 }
 
-// Derive fields from scores
 export function deriveFields(scores: DogScores, answers: QuizAnswer): DerivedFields {
-  // Profile energy level
   let profile_energy_level: 'Low' | 'Medium' | 'High' = 'Medium';
   if (scores.score_energy <= 3) profile_energy_level = 'Low';
   else if (scores.score_energy >= 7) profile_energy_level = 'High';
 
-  // Primary and secondary issues
   const issues: { name: string; score: number }[] = [
     { name: 'Energy Management', score: scores.score_energy },
     { name: 'Focus & Attention', score: 10 - scores.score_focus },
@@ -309,7 +298,6 @@ export function deriveFields(scores: DogScores, answers: QuizAnswer): DerivedFie
   const primary_issue = issues[0].name;
   const secondary_issue = issues[1].name;
 
-  // Recommended session length
   let recommended_session_length = '10 min';
   if (scores.score_focus >= 7 && scores.score_arousal <= 4) {
     recommended_session_length = '15 min';
@@ -331,17 +319,14 @@ export function generateRecommendation(answers: QuizAnswer): TrainingRecommendat
   const secondaryTracks: string[] = [];
   const immediateFocus: string[] = [];
 
-  // Compute scores
   const scores = computeScores(answers);
   const derived = deriveFields(scores, answers);
 
-  // Rule 1: If age = "Puppy (0-6 months)" → Primary = Beginner Foundations
   if (answers.age === 'Puppy (0–6 months)') {
     primaryTrack = 'Beginner Foundations';
     reasoning.push('Young puppies benefit most from foundational training');
   }
 
-  // Rule 2: High arousal + difficulty settling → Primary = Calm & Focus
   if (
     scores.score_arousal >= 7 &&
     (answers.current_challenges.includes('Difficulty settling') ||
@@ -351,7 +336,6 @@ export function generateRecommendation(answers: QuizAnswer): TrainingRecommendat
     reasoning.push('High arousal dogs need to learn calmness and self-control first');
   }
 
-  // Rule 3: If challenges include "Ignoring recall" → Include Recall as a focus area
   if (answers.current_challenges.includes('Ignoring recall')) {
     if (!secondaryTracks.includes('Recall')) {
       secondaryTracks.push('Recall');
@@ -359,7 +343,6 @@ export function generateRecommendation(answers: QuizAnswer): TrainingRecommendat
     }
   }
 
-  // Rule 4: If challenges include "Pulling on leash" → Include Leash & Walks
   if (answers.current_challenges.includes('Pulling on leash')) {
     if (!secondaryTracks.includes('Leash & Walks')) {
       secondaryTracks.push('Leash & Walks');
@@ -367,7 +350,6 @@ export function generateRecommendation(answers: QuizAnswer): TrainingRecommendat
     }
   }
 
-  // Rule 5: If training_history = None or low structure → Ensure Beginner Foundations is included
   if (
     answers.training_history === 'None' ||
     scores.score_structure <= 3
@@ -378,25 +360,21 @@ export function generateRecommendation(answers: QuizAnswer): TrainingRecommendat
     }
   }
 
-  // Rule 6: If biggest_frustration = "Recall" → Primary = Recall
   if (answers.biggest_frustration === 'Recall') {
     primaryTrack = 'Recall';
     reasoning.push('Your goal aligns perfectly with focused recall training');
   }
 
-  // Rule 7: If biggest_frustration = "Walks" → Primary = Leash & Walks
   if (answers.biggest_frustration === 'Walks') {
     primaryTrack = 'Leash & Walks';
     reasoning.push('We\'ll focus on making walks calm and enjoyable');
   }
 
-  // Rule 8: If biggest_frustration = "Calm indoors" → Primary = Calm & Focus
   if (answers.biggest_frustration === 'Calm indoors') {
     primaryTrack = 'Calm & Focus';
     reasoning.push('Teaching calmness will transform your home environment');
   }
 
-  // Rule 9: High energy + low focus → Include Mental Stimulation
   if (scores.score_energy >= 7 && scores.score_focus <= 4) {
     if (!secondaryTracks.includes('Mental Stimulation')) {
       secondaryTracks.push('Mental Stimulation');
@@ -404,7 +382,6 @@ export function generateRecommendation(answers: QuizAnswer): TrainingRecommendat
     }
   }
 
-  // Rule 10: If biggest_frustration = "Listening in general" → Include Calm & Focus
   if (answers.biggest_frustration === 'Listening in general') {
     if (primaryTrack !== 'Calm & Focus' && !secondaryTracks.includes('Calm & Focus')) {
       secondaryTracks.push('Calm & Focus');
@@ -412,7 +389,6 @@ export function generateRecommendation(answers: QuizAnswer): TrainingRecommendat
     }
   }
 
-  // Rule 11: Based on "improve_first" answer
   if (answers.improve_first === 'Focus' && primaryTrack !== 'Calm & Focus') {
     if (!secondaryTracks.includes('Calm & Focus')) {
       secondaryTracks.push('Calm & Focus');
@@ -435,12 +411,10 @@ export function generateRecommendation(answers: QuizAnswer): TrainingRecommendat
     reasoning.push('Reliability starts with consistent recall training');
   }
 
-  // Add Everyday Obedience as secondary if not already primary
   if (primaryTrack !== 'Everyday Obedience' && secondaryTracks.length < 2) {
     secondaryTracks.push('Everyday Obedience');
   }
 
-  // Limit to 2-3 secondary tracks
   const limitedSecondaryTracks = secondaryTracks.slice(0, 3);
 
   return {

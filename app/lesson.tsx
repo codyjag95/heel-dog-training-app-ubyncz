@@ -19,7 +19,7 @@ export default function LessonScreen() {
     if (lesson) {
       setLastViewedLesson(lesson.id);
     }
-  }, [lesson]);
+  }, [lesson, setLastViewedLesson]);
 
   if (!lesson || !category) {
     return (
@@ -31,7 +31,6 @@ export default function LessonScreen() {
 
   const locked = isLessonLocked(lesson);
 
-  // Check prerequisites
   const getPrerequisiteNames = (): string[] => {
     if (!lesson.prerequisiteIds || lesson.prerequisiteIds.length === 0) {
       return [];
@@ -62,7 +61,6 @@ export default function LessonScreen() {
   if (locked) {
     return (
       <View style={[commonStyles.container]}>
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -115,7 +113,6 @@ export default function LessonScreen() {
 
   return (
     <View style={[commonStyles.container]}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -138,7 +135,6 @@ export default function LessonScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Lesson Image/Video */}
         {lesson.imageUrl && (
           <Image
             source={{ uri: lesson.imageUrl }}
@@ -146,7 +142,6 @@ export default function LessonScreen() {
           />
         )}
 
-        {/* Lesson Info */}
         <View style={styles.infoCard}>
           <View style={styles.infoRow}>
             <View style={styles.infoItem}>
@@ -170,13 +165,11 @@ export default function LessonScreen() {
           </View>
         </View>
 
-        {/* Description */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About This Lesson</Text>
           <Text style={styles.description}>{lesson.description}</Text>
         </View>
 
-        {/* Session Goal Preview */}
         {lesson.session_goal && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Session Goal</Text>
@@ -192,7 +185,6 @@ export default function LessonScreen() {
           </View>
         )}
 
-        {/* Steps Preview */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>What You&apos;ll Learn</Text>
           {lesson.steps.slice(0, 3).map((step, index) => (
@@ -208,7 +200,6 @@ export default function LessonScreen() {
           )}
         </View>
 
-        {/* Action Button */}
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={[buttonStyles.primaryButton, styles.button]}
