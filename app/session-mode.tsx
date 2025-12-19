@@ -7,10 +7,12 @@ import { useApp } from '@/contexts/AppContext';
 import { IconSymbol } from '@/components/IconSymbol';
 import * as Haptics from 'expo-haptics';
 
+type FeedbackType = 'good' | 'neutral' | 'bad' | null;
+
 export default function SessionModeScreen() {
   const router = useRouter();
   const { categoryId, lessonId } = useLocalSearchParams();
-  const { categories, completeLesson, updateStreak, addSessionNote } = useApp();
+  const { categories, completeLesson, updateStreak, addSessionNote, dogProfile } = useApp();
   
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
@@ -26,6 +28,12 @@ export default function SessionModeScreen() {
   const [wentWell, setWentWell] = useState('');
   const [needsWork, setNeedsWork] = useState('');
 
+  // Post-lesson feedback
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [lessonFeedback, setLessonFeedback] = useState<FeedbackType>(null);
+  const [showDifficultyOptions, setShowDifficultyOptions] = useState(false);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
+
   const category = categories.find(cat => cat.id === categoryId);
   const lesson = category?.lessons.find(l => l.id === lessonId);
 
@@ -34,6 +42,14 @@ export default function SessionModeScreen() {
     { label: '10 min', value: 10 * 60 },
     { label: '15 min', value: 15 * 60 },
     { label: 'No timer', value: null },
+  ];
+
+  const difficultyOptions = [
+    'Too many distractions',
+    'Commands unclear',
+    'Lost focus quickly',
+    'Too advanced',
+    'Other',
   ];
 
   // Timer logic
@@ -103,6 +119,50 @@ export default function SessionModeScreen() {
     completeLesson(lesson.id);
     updateStreak();
     setSessionComplete(true);
+    // Show feedback prompt after a brief delay
+    setTimeout(() => {
+      setShowFeedback(true);
+    }, 500);
+  };
+
+  const handleFeedbackSelection = (feedback: FeedbackType) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setLessonFeedback(feedback);
+    
+    // Store feedback on progress
+    const note = {
+      id: `note-${Date.now()}`,
+      lessonId: lesson.id,
+      date: new Date().toISOString(),
+      wentWell: feedback === 'good' ? 'Great session' : feedback === 'neutral' ? 'Good start' : 'Struggled',
+      struggled: feedback === 'bad' ? 'Needs more practice' : '',
+    };
+    addSessionNote(note);
+
+    if (feedback === 'bad') {
+      // Show difficulty options
+      setShowDifficultyOptions(true);
+    } else {
+      setShowFeedback(false);
+    }
+  };
+
+  const handleDifficultySelection = (difficulty: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedDifficulty(difficulty);
+    
+    // Store difficulty note
+    const note = {
+      id: `note-${Date.now()}-difficulty`,
+      lessonId: lesson.id,
+      date: new Date().toISOString(),
+      wentWell: '',
+      struggled: `What was hard: ${difficulty}`,
+    };
+    addSessionNote(note);
+    
+    setShowDifficultyOptions(false);
+    setShowFeedback(false);
   };
 
   const handleSaveAndReturn = () => {
@@ -140,6 +200,29 @@ export default function SessionModeScreen() {
       params: { categoryId: category.id },
     });
   };
+
+  // Get next lesson suggestion based on feedback
+  const getNextLessonSuggestion = () => {
+    if (lessonFeedback === 'good') {
+      // Suggest next lesson in category
+      const currentIndex = category.lessons.findIndex(l => l.id === lesson.id);
+      if (currentIndex < category.lessons.length - 1) {
+        return category.lessons[currentIndex + 1];
+      }
+    } else if (lessonFeedback === 'neutral') {
+      // Suggest repeating this lesson
+      return lesson;
+    } else if (lessonFeedback === 'bad') {
+      // Suggest an easier related lesson
+      const beginnerLessons = category.lessons.filter(l => l.difficulty === 'Beginner' && l.id !== lesson.id);
+      if (beginnerLessons.length > 0) {
+        return beginnerLessons[0];
+      }
+    }
+    return null;
+  };
+
+  const nextLessonSuggestion = getNextLessonSuggestion();
 
   // Get session steps from the new fields or fall back to the steps array
   const sessionSteps: string[] = [];
@@ -204,6 +287,53 @@ export default function SessionModeScreen() {
               Consistency beats perfection.
             </Text>
 
+            {/* Feedback Response */}
+            {lessonFeedback && !showFeedback && !showDifficultyOptions && (
+              <View style={styles.feedbackResponseCard}>
+                {lessonFeedback === 'good' && (
+                  <React.Fragment>
+                    <Text style={styles.feedbackResponseTitle}>Great work! 🎉</Text>
+                    <Text style={styles.feedbackResponseText}>
+                      {dogProfile?.name} is making excellent progress. Keep building on this momentum!
+                    </Text>
+                    {nextLessonSuggestion && (
+                      <View style={styles.suggestionCard}>
+                        <Text style={styles.suggestionLabel}>Next up:</Text>
+                        <Text style={styles.suggestionLesson}>{nextLessonSuggestion.name}</Text>
+                      </View>
+                    )}
+                  </React.Fragment>
+                )}
+                {lessonFeedback === 'neutral' && (
+                  <React.Fragment>
+                    <Text style={styles.feedbackResponseTitle}>Good start! 👍</Text>
+                    <Text style={styles.feedbackResponseText}>
+                      Consider repeating this lesson once more to build confidence and consistency.
+                    </Text>
+                    <View style={styles.suggestionCard}>
+                      <Text style={styles.suggestionLabel}>Suggestion:</Text>
+                      <Text style={styles.suggestionLesson}>Practice {lesson.name} again tomorrow</Text>
+                    </View>
+                  </React.Fragment>
+                )}
+                {lessonFeedback === 'bad' && (
+                  <React.Fragment>
+                    <Text style={styles.feedbackResponseTitle}>No worries! 💪</Text>
+                    <Text style={styles.feedbackResponseText}>
+                      Every dog learns at their own pace. Let&apos;s try a different approach.
+                    </Text>
+                    {nextLessonSuggestion && nextLessonSuggestion.id !== lesson.id && (
+                      <View style={styles.suggestionCard}>
+                        <Text style={styles.suggestionLabel}>Try this instead:</Text>
+                        <Text style={styles.suggestionLesson}>{nextLessonSuggestion.name}</Text>
+                        <Text style={styles.suggestionMeta}>An easier related lesson</Text>
+                      </View>
+                    )}
+                  </React.Fragment>
+                )}
+              </View>
+            )}
+
             {/* Notes Section */}
             <View style={styles.notesSection}>
               <Text style={styles.notesTitle}>Session Notes</Text>
@@ -258,6 +388,83 @@ export default function SessionModeScreen() {
             </View>
           </View>
         </ScrollView>
+
+        {/* Feedback Modal */}
+        <Modal
+          visible={showFeedback}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowFeedback(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.feedbackContainer}>
+              <Text style={styles.feedbackTitle}>How did {dogProfile?.name} do?</Text>
+              <View style={styles.feedbackOptions}>
+                <TouchableOpacity
+                  style={styles.feedbackButton}
+                  onPress={() => handleFeedbackSelection('good')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.feedbackEmoji}>🙂</Text>
+                  <Text style={styles.feedbackLabel}>Great</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={styles.feedbackButton}
+                  onPress={() => handleFeedbackSelection('neutral')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.feedbackEmoji}>😐</Text>
+                  <Text style={styles.feedbackLabel}>Okay</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={styles.feedbackButton}
+                  onPress={() => handleFeedbackSelection('bad')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.feedbackEmoji}>🙁</Text>
+                  <Text style={styles.feedbackLabel}>Struggled</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Difficulty Options Modal */}
+        <Modal
+          visible={showDifficultyOptions}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowDifficultyOptions(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.difficultyContainer}>
+              <Text style={styles.difficultyTitle}>What was hard?</Text>
+              <Text style={styles.difficultySubtitle}>This helps us suggest better lessons</Text>
+              {difficultyOptions.map((option, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.difficultyOption}
+                  onPress={() => handleDifficultySelection(option)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.difficultyOptionText}>{option}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                style={styles.skipButton}
+                onPress={() => {
+                  setShowDifficultyOptions(false);
+                  setShowFeedback(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.skipButtonText}>Skip</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -803,6 +1010,56 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     marginBottom: 40,
   },
+  feedbackResponseCard: {
+    width: '100%',
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 24,
+    marginBottom: 32,
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+    elevation: 4,
+  },
+  feedbackResponseTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  feedbackResponseText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 20,
+  },
+  suggestionCard: {
+    backgroundColor: colors.secondary,
+    borderRadius: 12,
+    padding: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  suggestionLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 6,
+  },
+  suggestionLesson: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  suggestionMeta: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
+  },
   notesSection: {
     width: '100%',
     marginBottom: 32,
@@ -880,5 +1137,87 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.text,
+  },
+  feedbackContainer: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 32,
+    width: '100%',
+    maxWidth: 350,
+    boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.4)',
+    elevation: 8,
+  },
+  feedbackTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  feedbackOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    gap: 12,
+  },
+  feedbackButton: {
+    alignItems: 'center',
+    backgroundColor: colors.secondary,
+    borderRadius: 16,
+    padding: 20,
+    flex: 1,
+  },
+  feedbackEmoji: {
+    fontSize: 48,
+    marginBottom: 8,
+  },
+  feedbackLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  difficultyContainer: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 350,
+    boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.4)',
+    elevation: 8,
+  },
+  difficultyTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  difficultySubtitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  difficultyOption: {
+    backgroundColor: colors.secondary,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  difficultyOptionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  skipButton: {
+    marginTop: 8,
+    padding: 12,
+    alignItems: 'center',
+  },
+  skipButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.textSecondary,
   },
 });
