@@ -1,6 +1,6 @@
 
 import { Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { ThemeProvider, DarkTheme } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
@@ -18,7 +18,7 @@ SplashScreen.setOptions({
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
   const [showCustomSplash, setShowCustomSplash] = useState(true);
-  const fadeAnim = new Animated.Value(1);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     async function prepare() {
@@ -48,7 +48,7 @@ export default function RootLayout() {
         });
       }, 300);
     }
-  }, [appIsReady]);
+  }, [appIsReady, fadeAnim]);
 
   if (showCustomSplash) {
     return (
