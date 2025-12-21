@@ -13,13 +13,11 @@ export default function QuizResultsScreen() {
   const { answers: answersParam } = useLocalSearchParams();
   const { dogProfile, setDogProfile, completeOnboarding } = useApp();
 
-  const answers: QuizAnswer = answersParam 
-    ? JSON.parse(answersParam as string) 
-    : { challenges: [], early_challenges: [], current_challenges: [] };
+  const answers: QuizAnswer = answersParam ? JSON.parse(answersParam as string) : { challenges: [], early_challenges: [] };
   const recommendation = generateRecommendation(answers);
 
   useEffect(() => {
-    // Save quiz answers and scores to dog profile
+    // Save quiz answers to dog profile
     if (dogProfile) {
       setDogProfile({
         ...dogProfile,
@@ -27,8 +25,6 @@ export default function QuizResultsScreen() {
         recommendedPrimaryTrack: recommendation.primaryTrack,
         recommendedSecondaryTracks: recommendation.secondaryTracks,
         immediateFocus: recommendation.immediateFocus,
-        scores: recommendation.scores,
-        derived: recommendation.derived,
       });
     }
   }, []);
@@ -62,27 +58,6 @@ export default function QuizResultsScreen() {
         <Text style={styles.subtitle}>
           Based on {dogProfile?.name}&apos;s profile, here&apos;s what we recommend
         </Text>
-
-        {/* Profile Summary */}
-        {recommendation.derived && (
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Profile Summary</Text>
-            <View style={styles.summaryCard}>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Energy Level:</Text>
-                <Text style={styles.summaryValue}>{recommendation.derived.profile_energy_level}</Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Primary Focus:</Text>
-                <Text style={styles.summaryValue}>{recommendation.derived.primary_issue}</Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Session Length:</Text>
-                <Text style={styles.summaryValue}>{recommendation.derived.recommended_session_length}</Text>
-              </View>
-            </View>
-          </View>
-        )}
 
         {/* Immediate Focus (if applicable) */}
         {recommendation.immediateFocus.length > 0 && (
@@ -171,7 +146,7 @@ export default function QuizResultsScreen() {
           onPress={handleStartTraining}
           activeOpacity={0.8}
         >
-          <Text style={buttonStyles.primaryButtonText}>Generate My Dog&apos;s Training Profile</Text>
+          <Text style={buttonStyles.primaryButtonText}>Start Training</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -234,30 +209,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginBottom: 12,
     lineHeight: 20,
-  },
-  summaryCard: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
-    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.2)',
-    elevation: 2,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  summaryLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  summaryValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
   },
   immediateFocusCard: {
     backgroundColor: colors.card,

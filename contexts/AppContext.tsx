@@ -25,7 +25,6 @@ interface AppContextType {
   sessionTemplates: SessionTemplate[];
   applySessionTemplate: (templateId: string) => Lesson[];
   togglePremium: () => void;
-  isPremiumUser: () => boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -42,16 +41,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     lessonViews: {},
     lessonCompletions: {},
     quizCompleted: false,
-    is_pro: false,
-    beta_override: false,
   });
   const [categories, setCategories] = useState<Category[]>(trainingCategories);
   const [analyticsEvents, setAnalyticsEvents] = useState<AnalyticsEvent[]>([]);
-
-  // Premium entitlement rule: user is premium if is_pro OR beta_override
-  const isPremiumUser = (): boolean => {
-    return userProgress.is_pro === true || userProgress.beta_override === true;
-  };
 
   const setDogProfile = (profile: DogProfile) => {
     console.log('Setting dog profile:', profile);
@@ -247,9 +239,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const isLessonLocked = (lesson: Lesson): boolean => {
-    // Premium lessons are locked for non-premium users
-    const userIsPremium = isPremiumUser();
-    if (lesson.isPremium && !userIsPremium) {
+    // Premium lessons are locked for free users
+    if (lesson.isPremium && !userProgress.isPremium) {
       return true;
     }
 
@@ -265,8 +256,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getTodaysFocus = (): { lesson: Lesson; category: Category } | null => {
-    const userIsPremium = isPremiumUser();
-    if (!userIsPremium || !dogProfile?.recommendedPrimaryTrack) {
+    if (!userProgress.isPremium || !dogProfile?.recommendedPrimaryTrack) {
       return null;
     }
 
@@ -307,8 +297,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getProgressInsights = (): string[] => {
-    const userIsPremium = isPremiumUser();
-    if (!userIsPremium) {
+    if (!userProgress.isPremium) {
       return [];
     }
 
@@ -449,7 +438,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     console.log('Toggling premium status');
     setUserProgress({
       ...userProgress,
-      is_pro: !userProgress.is_pro,
+      isPremium: !userProgress.isPremium,
     });
   };
 
@@ -478,7 +467,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sessionTemplates,
         applySessionTemplate,
         togglePremium,
-        isPremiumUser,
       }}
     >
       {children}
