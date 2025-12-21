@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, commonStyles } from '@/styles/commonStyles';
 import { useApp } from '@/contexts/AppContext';
@@ -8,7 +8,10 @@ import { IconSymbol } from '@/components/IconSymbol';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { dogProfile, userProgress } = useApp();
+  const { dogProfile, userProgress, togglePremium } = useApp();
+  const [starTapCount, setStarTapCount] = useState(0);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [unlockCode, setUnlockCode] = useState('');
 
   const handleUpgradeToPremium = () => {
     Alert.alert(
@@ -16,7 +19,7 @@ export default function SettingsScreen() {
       'Get full access to all lessons, no ads, and advanced training content.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Upgrade', onPress: () => console.log('Upgrade pressed') },
+        { text: 'Upgrade', onPress: () => router.push('/(tabs)/premium') },
       ]
     );
   };
@@ -43,6 +46,36 @@ export default function SettingsScreen() {
       'Dog management coming soon! You can add multiple dogs with Premium.',
       [{ text: 'OK' }]
     );
+  };
+
+  // Hidden admin unlock - tap star icon 5 times
+  const handleStarTap = () => {
+    const newCount = starTapCount + 1;
+    setStarTapCount(newCount);
+    
+    if (newCount >= 5) {
+      setShowUnlockModal(true);
+      setStarTapCount(0);
+    }
+  };
+
+  const handleUnlockSubmit = () => {
+    if (unlockCode.toUpperCase() === 'HEEL2025') {
+      togglePremium();
+      setShowUnlockModal(false);
+      setUnlockCode('');
+      Alert.alert(
+        'Premium Unlocked',
+        'Premium features have been activated!',
+        [{ text: 'OK' }]
+      );
+    } else {
+      Alert.alert(
+        'Invalid Code',
+        'The unlock code you entered is incorrect.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   return (
@@ -93,6 +126,18 @@ export default function SettingsScreen() {
                 color={colors.text}
               />
               <Text style={styles.settingText}>Manage Dogs</Text>
+              {!userProgress.isPremium && (
+                <TouchableOpacity onPress={handleStarTap} activeOpacity={1}>
+                  <View style={styles.premiumBadge}>
+                    <IconSymbol
+                      ios_icon_name="star.fill"
+                      android_material_icon_name="star"
+                      size={14}
+                      color={colors.text}
+                    />
+                  </View>
+                </TouchableOpacity>
+              )}
               <IconSymbol
                 ios_icon_name="chevron.right"
                 android_material_icon_name="chevron-right"
@@ -193,6 +238,58 @@ export default function SettingsScreen() {
           <Text style={styles.appInfoText}>Modern Dog Training</Text>
         </View>
       </ScrollView>
+
+      {/* Hidden Admin Unlock Modal */}
+      <Modal
+        visible={showUnlockModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowUnlockModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <IconSymbol
+              ios_icon_name="lock.open.fill"
+              android_material_icon_name="lock-open"
+              size={48}
+              color={colors.primary}
+            />
+            <Text style={styles.modalTitle}>Premium Unlock</Text>
+            <Text style={styles.modalText}>
+              Enter the unlock code to activate premium features
+            </Text>
+            
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Enter code"
+              placeholderTextColor={colors.textSecondary}
+              value={unlockCode}
+              onChangeText={setUnlockCode}
+              autoCapitalize="characters"
+              autoCorrect={false}
+            />
+
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={handleUnlockSubmit}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.modalButtonText}>Unlock</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => {
+                setShowUnlockModal(false);
+                setUnlockCode('');
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.modalCloseText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -277,6 +374,15 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 12,
   },
+  premiumBadge: {
+    backgroundColor: colors.primary,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
   premiumCard: {
     backgroundColor: colors.card,
     borderRadius: 16,
@@ -342,5 +448,72 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.textSecondary,
     marginBottom: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: colors.card,
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    maxWidth: 400,
+    width: '100%',
+    boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.5)',
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.text,
+    marginTop: 16,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  modalInput: {
+    backgroundColor: colors.secondary,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    width: '100%',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  modalCloseButton: {
+    marginTop: 12,
+    paddingVertical: 8,
+  },
+  modalCloseText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textSecondary,
   },
 });

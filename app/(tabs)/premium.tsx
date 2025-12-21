@@ -170,7 +170,7 @@ export default function PremiumScreen() {
                     <Text style={styles.pricingBadgeText}>Popular</Text>
                   </View>
                 </View>
-                <Text style={styles.pricingPrice}>$9.99/month</Text>
+                <Text style={styles.pricingPrice}>$6.99/month</Text>
                 <Text style={styles.pricingDescription}>Cancel anytime</Text>
                 {selectedPlan === 'monthly' && (
                   <View style={styles.selectedIndicator}>
@@ -199,8 +199,8 @@ export default function PremiumScreen() {
                     <Text style={styles.pricingBadgeText}>Best Value</Text>
                   </View>
                 </View>
-                <Text style={styles.pricingPrice}>$79.99/year</Text>
-                <Text style={styles.pricingDescription}>Save 33% • $6.67/month</Text>
+                <Text style={styles.pricingPrice}>$60/year</Text>
+                <Text style={styles.pricingDescription}>Save 14% • $5/month</Text>
                 {selectedPlan === 'yearly' && (
                   <View style={styles.selectedIndicator}>
                     <IconSymbol
