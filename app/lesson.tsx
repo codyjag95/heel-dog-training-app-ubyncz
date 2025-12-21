@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 import { useApp } from '@/contexts/AppContext';
@@ -30,6 +30,11 @@ export default function LessonScreen() {
   }
 
   const locked = isLessonLocked(lesson);
+  const isPremium = lesson.isPremium || false;
+  const isLockedDueToPremium = isPremium && !userProgress.isPremium;
+
+  // Debug logging
+  console.log(`Lesson: ${lesson.name}, isPremium: ${isPremium}, isLocked: ${locked}, lockReason: ${isLockedDueToPremium ? 'premium' : 'prerequisite'}`);
 
   // Check prerequisites
   const getPrerequisiteNames = (): string[] => {
@@ -61,120 +66,132 @@ export default function LessonScreen() {
 
   const handlePremiumLessonTap = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    console.log('Navigating to /premium-coming-soon');
     router.push('/premium-coming-soon');
   };
 
-  if (locked) {
-    // If it's a premium lesson, show the Premium Coming Soon flow
-    if (lesson.isPremium && !userProgress.isPremium) {
-      return (
-        <View style={[commonStyles.container]}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => router.back()}
-              activeOpacity={0.7}
-            >
-              <IconSymbol
-                ios_icon_name="chevron.left"
-                android_material_icon_name="chevron-left"
-                size={28}
-                color={colors.text}
+  // PRIORITY: If lesson is premium and user is not premium, show Premium Coming Soon
+  // regardless of prerequisite lock status
+  if (isLockedDueToPremium) {
+    return (
+      <View style={[commonStyles.container]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+            activeOpacity={0.7}
+          >
+            <IconSymbol
+              ios_icon_name="chevron.left"
+              android_material_icon_name="chevron-left"
+              size={28}
+              color={colors.text}
+            />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{lesson.name}</Text>
+          <View style={styles.headerSpacer} />
+        </View>
+
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Lesson Image/Video */}
+          {lesson.imageUrl && (
+            <View style={styles.premiumImageContainer}>
+              <Image
+                source={{ uri: lesson.imageUrl }}
+                style={styles.lessonImage}
               />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>{lesson.name}</Text>
-            <View style={styles.headerSpacer} />
+              <View style={styles.premiumImageOverlay}>
+                <IconSymbol
+                  ios_icon_name="lock.fill"
+                  android_material_icon_name="lock"
+                  size={48}
+                  color={colors.text}
+                />
+              </View>
+            </View>
+          )}
+
+          {/* Lesson Info */}
+          <View style={styles.infoCard}>
+            <View style={styles.infoRow}>
+              <View style={styles.infoItem}>
+                <IconSymbol
+                  ios_icon_name="clock.fill"
+                  android_material_icon_name="schedule"
+                  size={20}
+                  color={colors.primary}
+                />
+                <Text style={styles.infoText}>{lesson.estimatedTime}</Text>
+              </View>
+              <View style={styles.infoItem}>
+                <IconSymbol
+                  ios_icon_name="chart.bar.fill"
+                  android_material_icon_name="bar-chart"
+                  size={20}
+                  color={colors.primary}
+                />
+                <Text style={styles.infoText}>{lesson.difficulty}</Text>
+              </View>
+              <View style={styles.premiumBadge}>
+                <IconSymbol
+                  ios_icon_name="lock.fill"
+                  android_material_icon_name="lock"
+                  size={16}
+                  color={colors.text}
+                />
+                <Text style={styles.premiumText}>Premium</Text>
+              </View>
+            </View>
           </View>
 
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Lesson Image/Video */}
-            {lesson.imageUrl && (
-              <View style={styles.premiumImageContainer}>
-                <Image
-                  source={{ uri: lesson.imageUrl }}
-                  style={styles.lessonImage}
-                />
-                <View style={styles.premiumImageOverlay}>
-                  <IconSymbol
-                    ios_icon_name="lock.fill"
-                    android_material_icon_name="lock"
-                    size={48}
-                    color={colors.text}
-                  />
-                </View>
-              </View>
-            )}
+          {/* Description */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>About This Lesson</Text>
+            <Text style={styles.description}>{lesson.description}</Text>
+          </View>
 
-            {/* Lesson Info */}
-            <View style={styles.infoCard}>
-              <View style={styles.infoRow}>
-                <View style={styles.infoItem}>
-                  <IconSymbol
-                    ios_icon_name="clock.fill"
-                    android_material_icon_name="schedule"
-                    size={20}
-                    color={colors.primary}
-                  />
-                  <Text style={styles.infoText}>{lesson.estimatedTime}</Text>
-                </View>
-                <View style={styles.infoItem}>
-                  <IconSymbol
-                    ios_icon_name="chart.bar.fill"
-                    android_material_icon_name="bar-chart"
-                    size={20}
-                    color={colors.primary}
-                  />
-                  <Text style={styles.infoText}>{lesson.difficulty}</Text>
-                </View>
-                <View style={styles.premiumBadge}>
-                  <IconSymbol
-                    ios_icon_name="lock.fill"
-                    android_material_icon_name="lock"
-                    size={16}
-                    color={colors.text}
-                  />
-                  <Text style={styles.premiumText}>Premium</Text>
-                </View>
-              </View>
+          {/* Premium CTA */}
+          <View style={styles.premiumCtaCard}>
+            <IconSymbol
+              ios_icon_name="star.fill"
+              android_material_icon_name="star"
+              size={48}
+              color={colors.primary}
+            />
+            <Text style={styles.premiumCtaTitle}>Premium Lesson</Text>
+            <Text style={styles.premiumCtaText}>
+              This advanced lesson is part of our Premium training program, launching soon.
+            </Text>
+            <TouchableOpacity
+              style={[buttonStyles.primaryButton, styles.premiumCtaButton]}
+              onPress={handlePremiumLessonTap}
+              activeOpacity={0.8}
+            >
+              <Text style={buttonStyles.primaryButtonText}>Learn More</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Debug Info (only in dev) */}
+          {__DEV__ && (
+            <View style={styles.debugInfo}>
+              <Text style={styles.debugText}>Debug Info:</Text>
+              <Text style={styles.debugText}>isPremium: {isPremium.toString()}</Text>
+              <Text style={styles.debugText}>isLocked: {locked.toString()}</Text>
+              <Text style={styles.debugText}>lockReason: {isLockedDueToPremium ? 'premium' : 'prerequisite'}</Text>
             </View>
+          )}
+        </ScrollView>
+      </View>
+    );
+  }
 
-            {/* Description */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>About This Lesson</Text>
-              <Text style={styles.description}>{lesson.description}</Text>
-            </View>
-
-            {/* Premium CTA */}
-            <View style={styles.premiumCtaCard}>
-              <IconSymbol
-                ios_icon_name="star.fill"
-                android_material_icon_name="star"
-                size={48}
-                color={colors.primary}
-              />
-              <Text style={styles.premiumCtaTitle}>Premium Lesson</Text>
-              <Text style={styles.premiumCtaText}>
-                This advanced lesson is part of our Premium training program, launching soon.
-              </Text>
-              <TouchableOpacity
-                style={[buttonStyles.primaryButton, styles.premiumCtaButton]}
-                onPress={handlePremiumLessonTap}
-                activeOpacity={0.8}
-              >
-                <Text style={buttonStyles.primaryButtonText}>Learn More</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </View>
-      );
-    }
-
-    // Otherwise, show prerequisite lock
+  // If locked due to prerequisites (not premium), show prerequisite lock
+  if (locked) {
     return (
       <View style={[commonStyles.container]}>
         {/* Header */}
@@ -224,6 +241,7 @@ export default function LessonScreen() {
     );
   }
 
+  // Unlocked lesson - show full content
   return (
     <View style={[commonStyles.container]}>
       {/* Header */}
@@ -573,5 +591,18 @@ const styles = StyleSheet.create({
   },
   premiumCtaButton: {
     width: '100%',
+  },
+  debugInfo: {
+    backgroundColor: colors.secondary,
+    marginHorizontal: 20,
+    marginTop: 32,
+    borderRadius: 12,
+    padding: 16,
+  },
+  debugText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 4,
   },
 });

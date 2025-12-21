@@ -1,20 +1,39 @@
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors, commonStyles } from '@/styles/commonStyles';
+import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 import { useApp } from '@/contexts/AppContext';
 import { IconSymbol } from '@/components/IconSymbol';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { dogProfile, userProgress, allDogs, switchDog, removeDog, togglePremium } = useApp();
   const [adminTapCount, setAdminTapCount] = useState(0);
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [codeInput, setCodeInput] = useState('');
+  const [isTesterMode, setIsTesterMode] = useState(false);
+
+  // Check tester mode on mount
+  React.useEffect(() => {
+    checkTesterMode();
+  }, []);
+
+  const checkTesterMode = async () => {
+    try {
+      const testerMode = await AsyncStorage.getItem('tester_mode_enabled');
+      setIsTesterMode(testerMode === 'true');
+    } catch (error) {
+      console.error('Error checking tester mode:', error);
+    }
+  };
 
   const handleUpgradeToPremium = () => {
     Alert.alert(
       'Upgrade to Premium',
-      'Get full access to all lessons, no ads, and advanced training content.',
+      'Get full access to all lessons, no ads, and advanced training content.\n\nMonthly: $4.99\nYearly: $39.99',
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Upgrade', onPress: () => console.log('Upgrade pressed') },
@@ -97,9 +116,39 @@ export default function SettingsScreen() {
     
     if (newCount >= 7) {
       setAdminTapCount(0);
-      router.push('/admin-waitlist');
+      setShowCodeModal(true);
     }
   };
+
+  const handleCodeSubmit = async () => {
+    if (codeInput.toUpperCase() === 'JAGARRIOS') {
+      try {
+        await AsyncStorage.setItem('tester_mode_enabled', 'true');
+        setIsTesterMode(true);
+        setShowCodeModal(false);
+        setCodeInput('');
+        Alert.alert('Success', 'Tester mode enabled! You now have access to admin tools.', [
+          { text: 'OK', onPress: () => router.push('/admin-waitlist') }
+        ]);
+      } catch (error) {
+        console.error('Error enabling tester mode:', error);
+        Alert.alert('Error', 'Failed to enable tester mode');
+      }
+    } else {
+      Alert.alert('Invalid Code', 'The code you entered is incorrect.');
+      setCodeInput('');
+    }
+  };
+
+  const handleOpenPremiumComingSoon = () => {
+    router.push('/premium-coming-soon');
+  };
+
+  const handleOpenAdminWaitlist = () => {
+    router.push('/admin-waitlist');
+  };
+
+  const isDev = __DEV__ || Platform.OS === 'ios'; // Show in dev and TestFlight (iOS)
 
   return (
     <View style={[commonStyles.container]}>
@@ -250,6 +299,9 @@ export default function SettingsScreen() {
               <Text style={styles.premiumDescription}>
                 Unlock all lessons, remove ads, and get advanced training content
               </Text>
+              <Text style={styles.premiumPricing}>
+                Monthly: $4.99 • Yearly: $39.99
+              </Text>
               <TouchableOpacity
                 style={styles.premiumButton}
                 onPress={handleUpgradeToPremium}
@@ -316,29 +368,79 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Debug Section (Remove in production) */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Debug</Text>
-          <TouchableOpacity
-            style={styles.settingItem}
-            onPress={handleDebugTogglePremium}
-            activeOpacity={0.7}
-          >
-            <IconSymbol
-              ios_icon_name="wrench.fill"
-              android_material_icon_name="build"
-              size={24}
-              color={colors.text}
-            />
-            <Text style={styles.settingText}>Toggle Premium (Debug)</Text>
-            <IconSymbol
-              ios_icon_name="chevron.right"
-              android_material_icon_name="chevron-right"
-              size={20}
-              color={colors.textSecondary}
-            />
-          </TouchableOpacity>
-        </View>
+        {/* Debug Section (Dev/TestFlight only) */}
+        {isDev && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Debug (Dev/TestFlight)</Text>
+            
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={handleOpenPremiumComingSoon}
+              activeOpacity={0.7}
+            >
+              <IconSymbol
+                ios_icon_name="star.circle.fill"
+                android_material_icon_name="star-circle"
+                size={24}
+                color={colors.text}
+              />
+              <Text style={styles.settingText}>Open Premium Coming Soon</Text>
+              <IconSymbol
+                ios_icon_name="chevron.right"
+                android_material_icon_name="chevron-right"
+                size={20}
+                color={colors.textSecondary}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={handleDebugTogglePremium}
+              activeOpacity={0.7}
+            >
+              <IconSymbol
+                ios_icon_name="wrench.fill"
+                android_material_icon_name="build"
+                size={24}
+                color={colors.text}
+              />
+              <Text style={styles.settingText}>Toggle Premium (Debug)</Text>
+              <IconSymbol
+                ios_icon_name="chevron.right"
+                android_material_icon_name="chevron-right"
+                size={20}
+                color={colors.textSecondary}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Admin Access (Tester Mode) */}
+        {isTesterMode && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Admin Tools</Text>
+            
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={handleOpenAdminWaitlist}
+              activeOpacity={0.7}
+            >
+              <IconSymbol
+                ios_icon_name="list.bullet.clipboard.fill"
+                android_material_icon_name="assignment"
+                size={24}
+                color={colors.text}
+              />
+              <Text style={styles.settingText}>Admin Waitlist</Text>
+              <IconSymbol
+                ios_icon_name="chevron.right"
+                android_material_icon_name="chevron-right"
+                size={20}
+                color={colors.textSecondary}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* App Info */}
         <TouchableOpacity 
@@ -346,10 +448,57 @@ export default function SettingsScreen() {
           onPress={handleAppVersionTap}
           activeOpacity={0.8}
         >
-          <Text style={styles.appInfoText}>HEEL v1.0.0</Text>
+          <Text style={styles.appInfoText}>HEEL v{Constants.expoConfig?.version || '1.0.0'}</Text>
           <Text style={styles.appInfoText}>Modern Dog Training</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Code Entry Modal */}
+      <Modal
+        visible={showCodeModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowCodeModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Enter Tester Code</Text>
+            <Text style={styles.modalSubtitle}>Enter the code to access admin tools</Text>
+            
+            <TextInput
+              style={styles.codeInput}
+              value={codeInput}
+              onChangeText={setCodeInput}
+              placeholder="Enter code"
+              placeholderTextColor={colors.textSecondary}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              autoFocus={true}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalButtonCancel]}
+                onPress={() => {
+                  setShowCodeModal(false);
+                  setCodeInput('');
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.modalButtonTextCancel}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalButtonSubmit]}
+                onPress={handleCodeSubmit}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.modalButtonText}>Submit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -540,6 +689,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.textSecondary,
     lineHeight: 20,
+    marginBottom: 12,
+  },
+  premiumPricing: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.primary,
     marginBottom: 16,
   },
   premiumButton: {
@@ -579,5 +734,71 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.textSecondary,
     marginBottom: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  codeInput: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  modalButtonCancel: {
+    backgroundColor: colors.secondary,
+  },
+  modalButtonSubmit: {
+    backgroundColor: colors.primary,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  modalButtonTextCancel: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.textSecondary,
   },
 });
