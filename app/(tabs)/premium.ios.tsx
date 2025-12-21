@@ -1,12 +1,10 @@
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Linking } from 'react-native';
-import { colors, commonStyles } from '@/styles/commonStyles';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
 
 export default function PremiumScreen() {
-  const [showMobileModal, setShowMobileModal] = useState(false);
-
   const features = [
     'Full access to all training lessons',
     'No advertisements',
@@ -15,23 +13,6 @@ export default function PremiumScreen() {
     'Priority support',
     'New lessons added monthly',
   ];
-
-  const handleBuyPremium = () => {
-    // Show modal directing users to mobile app
-    setShowMobileModal(true);
-  };
-
-  const handleOpenTestFlight = () => {
-    // Replace with your actual TestFlight link
-    const testFlightURL = 'https://testflight.apple.com/join/your-testflight-code';
-    Linking.openURL(testFlightURL).catch(err => console.error('Failed to open TestFlight:', err));
-  };
-
-  const handleOpenAppStore = () => {
-    // Replace with your actual App Store link when published
-    const appStoreURL = 'https://apps.apple.com/app/heel-dog-training/idYOUR_APP_ID';
-    Linking.openURL(appStoreURL).catch(err => console.error('Failed to open App Store:', err));
-  };
 
   return (
     <View style={[commonStyles.container]}>
@@ -75,7 +56,7 @@ export default function PremiumScreen() {
                 <Text style={styles.pricingBadgeText}>Popular</Text>
               </View>
             </View>
-            <Text style={styles.pricingPrice}>$6.99/month</Text>
+            <Text style={styles.pricingPrice}>$9.99/month</Text>
             <Text style={styles.pricingDescription}>Cancel anytime</Text>
           </TouchableOpacity>
 
@@ -86,67 +67,20 @@ export default function PremiumScreen() {
                 <Text style={styles.pricingBadgeText}>Best Value</Text>
               </View>
             </View>
-            <Text style={styles.pricingPrice}>$60/year</Text>
-            <Text style={styles.pricingDescription}>Save 14% • $5/month</Text>
+            <Text style={styles.pricingPrice}>$79.99/year</Text>
+            <Text style={styles.pricingDescription}>Save 33% • $6.67/month</Text>
           </TouchableOpacity>
         </View>
 
         {/* CTA Button */}
-        <TouchableOpacity style={styles.ctaButton} onPress={handleBuyPremium} activeOpacity={0.8}>
-          <Text style={styles.ctaButtonText}>Buy Premium</Text>
+        <TouchableOpacity style={styles.ctaButton} activeOpacity={0.8}>
+          <Text style={styles.ctaButtonText}>Start Free Trial</Text>
         </TouchableOpacity>
 
         <Text style={styles.disclaimer}>
           7-day free trial, then auto-renews. Cancel anytime.
         </Text>
       </ScrollView>
-
-      {/* Mobile App Modal */}
-      <Modal
-        visible={showMobileModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowMobileModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <IconSymbol
-              ios_icon_name="iphone"
-              android_material_icon_name="phone-iphone"
-              size={48}
-              color={colors.primary}
-            />
-            <Text style={styles.modalTitle}>Premium Available in iOS App</Text>
-            <Text style={styles.modalText}>
-              Premium subscriptions are available exclusively in the HEEL iOS app. Download the app to unlock all premium features.
-            </Text>
-            
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={handleOpenTestFlight}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.modalButtonText}>Open TestFlight</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.modalButton, styles.modalButtonSecondary]}
-              onPress={handleOpenAppStore}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.modalButtonTextSecondary}>Open App Store</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => setShowMobileModal(false)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.modalCloseText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -270,71 +204,5 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 18,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: colors.card,
-    borderRadius: 20,
-    padding: 32,
-    alignItems: 'center',
-    maxWidth: 400,
-    width: '100%',
-    boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.5)',
-    elevation: 8,
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text,
-    marginTop: 16,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  modalText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 24,
-  },
-  modalButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  modalButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  modalButtonSecondary: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  modalButtonTextSecondary: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.primary,
-  },
-  modalCloseButton: {
-    marginTop: 12,
-    paddingVertical: 8,
-  },
-  modalCloseText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textSecondary,
   },
 });

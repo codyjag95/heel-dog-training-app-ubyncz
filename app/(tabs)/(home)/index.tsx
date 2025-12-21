@@ -79,13 +79,9 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* Training Tips Card */}
-        <TouchableOpacity
-          style={styles.trainingTipsCard}
-          onPress={() => router.push('/training-tips')}
-          activeOpacity={0.7}
-        >
-          <View style={styles.trainingTipsIcon}>
+        {/* Free Training Tip */}
+        <View style={styles.trainingTipCard}>
+          <View style={styles.trainingTipIcon}>
             <IconSymbol
               ios_icon_name="lightbulb.fill"
               android_material_icon_name="lightbulb"
@@ -93,19 +89,13 @@ export default function HomeScreen() {
               color={colors.primary}
             />
           </View>
-          <View style={styles.trainingTipsContent}>
-            <Text style={styles.trainingTipsLabel}>Training Tips & Advice</Text>
-            <Text style={styles.trainingTipsText}>
-              Essential tips for better training results
+          <View style={styles.trainingTipContent}>
+            <Text style={styles.trainingTipLabel}>Training Tip</Text>
+            <Text style={styles.trainingTipText}>
+              Train before meals. Dogs are more focused and motivated when training happens before feeding, not after.
             </Text>
           </View>
-          <IconSymbol
-            ios_icon_name="chevron.right"
-            android_material_icon_name="chevron-right"
-            size={20}
-            color={colors.textSecondary}
-          />
-        </TouchableOpacity>
+        </View>
 
         {/* Today's Focus (Premium) */}
         {userProgress.isPremium && todaysFocus && (
@@ -425,19 +415,19 @@ const styles = StyleSheet.create({
     color: colors.primary,
     marginLeft: 6,
   },
-  trainingTipsCard: {
+  trainingTipCard: {
     backgroundColor: colors.card,
     borderRadius: 16,
     padding: 20,
     marginBottom: 24,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
     elevation: 4,
     borderLeftWidth: 4,
     borderLeftColor: colors.primary,
   },
-  trainingTipsIcon: {
+  trainingTipIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
@@ -446,20 +436,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 16,
   },
-  trainingTipsContent: {
+  trainingTipContent: {
     flex: 1,
   },
-  trainingTipsLabel: {
-    fontSize: 16,
+  trainingTipLabel: {
+    fontSize: 12,
     fontWeight: '700',
-    color: colors.text,
-    marginBottom: 4,
+    color: colors.primary,
+    marginBottom: 6,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
-  trainingTipsText: {
-    fontSize: 14,
+  trainingTipText: {
+    fontSize: 15,
     fontWeight: '500',
-    color: colors.textSecondary,
-    lineHeight: 20,
+    color: colors.text,
+    lineHeight: 22,
   },
   todaysFocusSection: {
     marginBottom: 24,

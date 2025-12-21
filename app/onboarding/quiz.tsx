@@ -1,14 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 import { quizQuestions, QuizAnswer } from '@/data/quizData';
 import { IconSymbol } from '@/components/IconSymbol';
 import * as Haptics from 'expo-haptics';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const QUIZ_STORAGE_KEY = '@heel_quiz_progress';
 
 export default function QuizScreen() {
   const router = useRouter();
@@ -16,66 +13,15 @@ export default function QuizScreen() {
   const [answers, setAnswers] = useState<QuizAnswer>({
     challenges: [],
     early_challenges: [],
+    current_challenges: [],
   });
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Load saved quiz progress on mount
-  useEffect(() => {
-    loadQuizProgress();
-  }, []);
-
-  // Save quiz progress whenever answers change
-  useEffect(() => {
-    if (!isLoading) {
-      saveQuizProgress();
-    }
-  }, [answers, currentQuestionIndex, isLoading]);
-
-  const loadQuizProgress = async () => {
-    try {
-      const savedData = await AsyncStorage.getItem(QUIZ_STORAGE_KEY);
-      if (savedData) {
-        const { savedAnswers, savedIndex } = JSON.parse(savedData);
-        setAnswers(savedAnswers);
-        setCurrentQuestionIndex(savedIndex);
-        console.log('Loaded quiz progress:', savedIndex);
-      }
-    } catch (error) {
-      console.error('Error loading quiz progress:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const saveQuizProgress = async () => {
-    try {
-      const dataToSave = {
-        savedAnswers: answers,
-        savedIndex: currentQuestionIndex,
-      };
-      await AsyncStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(dataToSave));
-      console.log('Saved quiz progress:', currentQuestionIndex);
-    } catch (error) {
-      console.error('Error saving quiz progress:', error);
-    }
-  };
-
-  const clearQuizProgress = async () => {
-    try {
-      await AsyncStorage.removeItem(QUIZ_STORAGE_KEY);
-      console.log('Cleared quiz progress');
-    } catch (error) {
-      console.error('Error clearing quiz progress:', error);
-    }
-  };
+  const [textInput, setTextInput] = useState('');
 
   const currentQuestion = quizQuestions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
 
   const handleSingleChoice = (option: string) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
     const newAnswers = {
       ...answers,
@@ -87,9 +33,9 @@ export default function QuizScreen() {
     setTimeout(() => {
       if (currentQuestionIndex < quizQuestions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
+        setTextInput('');
       } else {
         // Quiz complete, navigate to results
-        clearQuizProgress();
         router.push({
           pathname: '/onboarding/quiz-results',
           params: { answers: JSON.stringify(newAnswers) },
@@ -99,40 +45,22 @@ export default function QuizScreen() {
   };
 
   const handleMultiChoice = (option: string) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
     const fieldName = currentQuestion.saveAs;
     let currentSelections = [...(answers[fieldName] as string[] || [])];
     
-    if (fieldName === 'challenges') {
-      if (option === 'None of the above') {
-        // If "None of the above" is selected, clear all other selections
-        currentSelections = currentSelections.includes(option) ? [] : [option];
+    if (option === 'None of the above') {
+      // If "None of the above" is selected, clear all other selections
+      currentSelections = currentSelections.includes(option) ? [] : [option];
+    } else {
+      // Remove "None of the above" if selecting other options
+      currentSelections = currentSelections.filter(c => c !== 'None of the above');
+      
+      if (currentSelections.includes(option)) {
+        currentSelections = currentSelections.filter(c => c !== option);
       } else {
-        // Remove "None of the above" if selecting other options
-        currentSelections = currentSelections.filter(c => c !== 'None of the above');
-        
-        if (currentSelections.includes(option)) {
-          currentSelections = currentSelections.filter(c => c !== option);
-        } else {
-          currentSelections.push(option);
-        }
-      }
-    } else if (fieldName === 'early_challenges') {
-      if (option === 'Neither / already resolved') {
-        // If "Neither / already resolved" is selected, clear all other selections
-        currentSelections = currentSelections.includes(option) ? [] : [option];
-      } else {
-        // Remove "Neither / already resolved" if selecting other options
-        currentSelections = currentSelections.filter(c => c !== 'Neither / already resolved');
-        
-        if (currentSelections.includes(option)) {
-          currentSelections = currentSelections.filter(c => c !== option);
-        } else {
-          currentSelections.push(option);
-        }
+        currentSelections.push(option);
       }
     }
 
@@ -142,16 +70,40 @@ export default function QuizScreen() {
     });
   };
 
-  const handleNext = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
+  const handleTextSubmit = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     
+    const newAnswers = {
+      ...answers,
+      [currentQuestion.saveAs]: textInput.trim() || undefined,
+    };
+    setAnswers(newAnswers);
+
     if (currentQuestionIndex < quizQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setTextInput('');
     } else {
       // Quiz complete, navigate to results
-      clearQuizProgress();
+      router.push({
+        pathname: '/onboarding/quiz-results',
+        params: { answers: JSON.stringify(newAnswers) },
+      });
+    }
+  };
+
+  const handleNext = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
+    if (currentQuestion.type === 'text') {
+      handleTextSubmit();
+      return;
+    }
+
+    if (currentQuestionIndex < quizQuestions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setTextInput('');
+    } else {
+      // Quiz complete, navigate to results
       router.push({
         pathname: '/onboarding/quiz-results',
         params: { answers: JSON.stringify(answers) },
@@ -160,12 +112,15 @@ export default function QuizScreen() {
   };
 
   const handleBack = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
+      // Load previous text input if it exists
+      const prevQuestion = quizQuestions[currentQuestionIndex - 1];
+      if (prevQuestion.type === 'text') {
+        setTextInput((answers[prevQuestion.saveAs] as string) || '');
+      }
     } else {
       router.back();
     }
@@ -174,28 +129,25 @@ export default function QuizScreen() {
   const isAnswered = () => {
     if (currentQuestion.type === 'single') {
       return answers[currentQuestion.saveAs] !== undefined;
-    } else {
+    } else if (currentQuestion.type === 'multi') {
       const fieldValue = answers[currentQuestion.saveAs];
       return Array.isArray(fieldValue) && fieldValue.length > 0;
+    } else if (currentQuestion.type === 'text') {
+      // Text questions are optional, so always allow next
+      return true;
     }
+    return false;
   };
 
   const isOptionSelected = (option: string): boolean => {
     if (currentQuestion.type === 'single') {
       return answers[currentQuestion.saveAs] === option;
-    } else {
+    } else if (currentQuestion.type === 'multi') {
       const fieldValue = answers[currentQuestion.saveAs];
       return Array.isArray(fieldValue) && fieldValue.includes(option);
     }
+    return false;
   };
-
-  if (isLoading) {
-    return (
-      <View style={[commonStyles.container, styles.container]}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={[commonStyles.container, styles.container]}>
@@ -230,61 +182,77 @@ export default function QuizScreen() {
       >
         <Text style={styles.question}>{currentQuestion.question}</Text>
 
-        <View style={styles.optionsContainer}>
-          {currentQuestion.options.map((option, index) => {
-            const isSelected = isOptionSelected(option);
+        {currentQuestion.type === 'text' ? (
+          <View style={styles.textInputContainer}>
+            <TextInput
+              style={styles.textInput}
+              value={textInput}
+              onChangeText={setTextInput}
+              placeholder={currentQuestion.placeholder || 'Type here...'}
+              placeholderTextColor={colors.textSecondary}
+              autoCapitalize="words"
+              autoCorrect={false}
+              returnKeyType="next"
+              onSubmitEditing={handleTextSubmit}
+            />
+          </View>
+        ) : (
+          <View style={styles.optionsContainer}>
+            {currentQuestion.options?.map((option, index) => {
+              const isSelected = isOptionSelected(option);
 
-            return (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.optionCard,
-                  isSelected && styles.optionCardSelected,
-                ]}
-                onPress={() => {
-                  if (currentQuestion.type === 'single') {
-                    handleSingleChoice(option);
-                  } else {
-                    handleMultiChoice(option);
-                  }
-                }}
-                activeOpacity={0.7}
-              >
-                <View style={styles.optionContent}>
-                  <Text
-                    style={[
-                      styles.optionText,
-                      isSelected && styles.optionTextSelected,
-                    ]}
-                  >
-                    {option}
-                  </Text>
-                  {isSelected && (
-                    <IconSymbol
-                      ios_icon_name="checkmark.circle.fill"
-                      android_material_icon_name="check-circle"
-                      size={24}
-                      color={colors.primary}
-                    />
-                  )}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.optionCard,
+                    isSelected && styles.optionCardSelected,
+                  ]}
+                  onPress={() => {
+                    if (currentQuestion.type === 'single') {
+                      handleSingleChoice(option);
+                    } else {
+                      handleMultiChoice(option);
+                    }
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.optionContent}>
+                    <Text
+                      style={[
+                        styles.optionText,
+                        isSelected && styles.optionTextSelected,
+                      ]}
+                    >
+                      {option}
+                    </Text>
+                    {isSelected && (
+                      <IconSymbol
+                        ios_icon_name="checkmark.circle.fill"
+                        android_material_icon_name="check-circle"
+                        size={24}
+                        color={colors.primary}
+                      />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
       </ScrollView>
 
-      {/* Next Button (for multi-select) */}
-      {currentQuestion.type === 'multi' && (
+      {/* Next Button (for multi-select and text) */}
+      {(currentQuestion.type === 'multi' || currentQuestion.type === 'text') && (
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[
               buttonStyles.primaryButton,
               styles.button,
-              !isAnswered() && styles.buttonDisabled,
+              !isAnswered() && currentQuestion.type === 'multi' && styles.buttonDisabled,
             ]}
             onPress={handleNext}
-            disabled={!isAnswered()}
+            disabled={!isAnswered() && currentQuestion.type === 'multi'}
             activeOpacity={0.8}
           >
             <Text style={buttonStyles.primaryButtonText}>
@@ -382,6 +350,20 @@ const styles = StyleSheet.create({
   optionTextSelected: {
     color: colors.text,
   },
+  textInputContainer: {
+    marginBottom: 20,
+  },
+  textInput: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 20,
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    borderWidth: 2,
+    borderColor: colors.secondary,
+    minHeight: 60,
+  },
   buttonContainer: {
     paddingHorizontal: 20,
     paddingBottom: 40,
@@ -391,10 +373,5 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.5,
-  },
-  loadingText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: colors.textSecondary,
   },
 });

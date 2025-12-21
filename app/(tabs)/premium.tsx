@@ -1,16 +1,12 @@
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { colors, commonStyles } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
 import { useApp } from '@/contexts/AppContext';
-import * as Haptics from 'expo-haptics';
-
-type PricingOption = 'monthly' | 'yearly' | null;
 
 export default function PremiumScreen() {
-  const { userProgress, togglePremium } = useApp();
-  const [selectedPlan, setSelectedPlan] = useState<PricingOption>(null);
+  const { userProgress } = useApp();
 
   const features = [
     {
@@ -64,40 +60,6 @@ export default function PremiumScreen() {
       description: 'Get help faster with premium customer support',
     },
   ];
-
-  const handleSelectPlan = (plan: PricingOption) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedPlan(plan);
-  };
-
-  const handleStartTrial = () => {
-    if (!selectedPlan) {
-      Alert.alert('Select a Plan', 'Please select a subscription plan to continue.');
-      return;
-    }
-
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    
-    // For demo purposes, toggle premium status
-    // In production, this would integrate with actual payment processing
-    Alert.alert(
-      'Demo Mode',
-      'In production, this would process your payment. For now, we\'ll toggle premium status.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Continue',
-          onPress: () => {
-            togglePremium();
-            Alert.alert('Success!', 'Premium features activated!');
-          },
-        },
-      ]
-    );
-  };
 
   return (
     <View style={[commonStyles.container]}>
@@ -156,77 +118,32 @@ export default function PremiumScreen() {
             <View style={styles.pricingSection}>
               <Text style={styles.sectionTitle}>Choose Your Plan</Text>
               
-              <TouchableOpacity
-                style={[
-                  styles.pricingCard,
-                  selectedPlan === 'monthly' && styles.pricingCardSelected,
-                ]}
-                onPress={() => handleSelectPlan('monthly')}
-                activeOpacity={0.8}
-              >
+              <TouchableOpacity style={styles.pricingCard} activeOpacity={0.8}>
                 <View style={styles.pricingHeader}>
                   <Text style={styles.pricingTitle}>Monthly</Text>
                   <View style={styles.pricingBadge}>
                     <Text style={styles.pricingBadgeText}>Popular</Text>
                   </View>
                 </View>
-                <Text style={styles.pricingPrice}>$6.99/month</Text>
+                <Text style={styles.pricingPrice}>$9.99/month</Text>
                 <Text style={styles.pricingDescription}>Cancel anytime</Text>
-                {selectedPlan === 'monthly' && (
-                  <View style={styles.selectedIndicator}>
-                    <IconSymbol
-                      ios_icon_name="checkmark.circle.fill"
-                      android_material_icon_name="check-circle"
-                      size={24}
-                      color={colors.primary}
-                    />
-                  </View>
-                )}
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.pricingCard,
-                  styles.pricingCardHighlight,
-                  selectedPlan === 'yearly' && styles.pricingCardSelected,
-                ]}
-                onPress={() => handleSelectPlan('yearly')}
-                activeOpacity={0.8}
-              >
+              <TouchableOpacity style={[styles.pricingCard, styles.pricingCardHighlight]} activeOpacity={0.8}>
                 <View style={styles.pricingHeader}>
                   <Text style={styles.pricingTitle}>Yearly</Text>
                   <View style={[styles.pricingBadge, styles.pricingBadgeHighlight]}>
                     <Text style={styles.pricingBadgeText}>Best Value</Text>
                   </View>
                 </View>
-                <Text style={styles.pricingPrice}>$60/year</Text>
-                <Text style={styles.pricingDescription}>Save 14% • $5/month</Text>
-                {selectedPlan === 'yearly' && (
-                  <View style={styles.selectedIndicator}>
-                    <IconSymbol
-                      ios_icon_name="checkmark.circle.fill"
-                      android_material_icon_name="check-circle"
-                      size={24}
-                      color={colors.primary}
-                    />
-                  </View>
-                )}
+                <Text style={styles.pricingPrice}>$79.99/year</Text>
+                <Text style={styles.pricingDescription}>Save 33% • $6.67/month</Text>
               </TouchableOpacity>
             </View>
 
             {/* CTA Button */}
-            <TouchableOpacity
-              style={[
-                styles.ctaButton,
-                !selectedPlan && styles.ctaButtonDisabled,
-              ]}
-              onPress={handleStartTrial}
-              disabled={!selectedPlan}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.ctaButtonText}>
-                {selectedPlan ? 'Start Free Trial' : 'Select a Plan'}
-              </Text>
+            <TouchableOpacity style={styles.ctaButton} activeOpacity={0.8}>
+              <Text style={styles.ctaButtonText}>Start Free Trial</Text>
             </TouchableOpacity>
 
             <Text style={styles.disclaimer}>
@@ -341,14 +258,9 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
     elevation: 4,
-    position: 'relative',
   },
   pricingCardHighlight: {
-    borderColor: colors.textSecondary,
-  },
-  pricingCardSelected: {
     borderColor: colors.primary,
-    backgroundColor: colors.secondary,
   },
   pricingHeader: {
     flexDirection: 'row',
@@ -386,11 +298,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.textSecondary,
   },
-  selectedIndicator: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-  },
   ctaButton: {
     backgroundColor: colors.primary,
     paddingVertical: 18,
@@ -399,9 +306,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     boxShadow: '0px 4px 12px rgba(255, 59, 48, 0.3)',
     elevation: 4,
-  },
-  ctaButtonDisabled: {
-    opacity: 0.5,
   },
   ctaButtonText: {
     fontSize: 18,
