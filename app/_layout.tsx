@@ -37,6 +37,8 @@ export default function RootLayout() {
           <Stack.Screen name="lesson" options={{ headerShown: false }} />
           <Stack.Screen name="session-mode" options={{ headerShown: false }} />
           <Stack.Screen name="training-tips" options={{ headerShown: false }} />
+          <Stack.Screen name="premium-coming-soon" options={{ headerShown: false }} />
+          <Stack.Screen name="admin-waitlist" options={{ headerShown: false }} />
           <Stack.Screen 
             name="modal" 
             options={{ 

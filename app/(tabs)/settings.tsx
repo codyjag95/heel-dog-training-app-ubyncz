@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, commonStyles } from '@/styles/commonStyles';
@@ -9,6 +9,7 @@ import { IconSymbol } from '@/components/IconSymbol';
 export default function SettingsScreen() {
   const router = useRouter();
   const { dogProfile, userProgress, allDogs, switchDog, removeDog, togglePremium } = useApp();
+  const [adminTapCount, setAdminTapCount] = useState(0);
 
   const handleUpgradeToPremium = () => {
     Alert.alert(
@@ -88,6 +89,16 @@ export default function SettingsScreen() {
       `Premium ${!userProgress.isPremium ? 'enabled' : 'disabled'}`,
       [{ text: 'OK' }]
     );
+  };
+
+  const handleAppVersionTap = () => {
+    const newCount = adminTapCount + 1;
+    setAdminTapCount(newCount);
+    
+    if (newCount >= 7) {
+      setAdminTapCount(0);
+      router.push('/admin-waitlist');
+    }
   };
 
   return (
@@ -330,10 +341,14 @@ export default function SettingsScreen() {
         </View>
 
         {/* App Info */}
-        <View style={styles.appInfo}>
+        <TouchableOpacity 
+          style={styles.appInfo}
+          onPress={handleAppVersionTap}
+          activeOpacity={0.8}
+        >
           <Text style={styles.appInfoText}>HEEL v1.0.0</Text>
           <Text style={styles.appInfoText}>Modern Dog Training</Text>
-        </View>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );

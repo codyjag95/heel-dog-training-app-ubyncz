@@ -59,7 +59,122 @@ export default function LessonScreen() {
     });
   };
 
+  const handlePremiumLessonTap = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push('/premium-coming-soon');
+  };
+
   if (locked) {
+    // If it's a premium lesson, show the Premium Coming Soon flow
+    if (lesson.isPremium && !userProgress.isPremium) {
+      return (
+        <View style={[commonStyles.container]}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+              activeOpacity={0.7}
+            >
+              <IconSymbol
+                ios_icon_name="chevron.left"
+                android_material_icon_name="chevron-left"
+                size={28}
+                color={colors.text}
+              />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>{lesson.name}</Text>
+            <View style={styles.headerSpacer} />
+          </View>
+
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Lesson Image/Video */}
+            {lesson.imageUrl && (
+              <View style={styles.premiumImageContainer}>
+                <Image
+                  source={{ uri: lesson.imageUrl }}
+                  style={styles.lessonImage}
+                />
+                <View style={styles.premiumImageOverlay}>
+                  <IconSymbol
+                    ios_icon_name="lock.fill"
+                    android_material_icon_name="lock"
+                    size={48}
+                    color={colors.text}
+                  />
+                </View>
+              </View>
+            )}
+
+            {/* Lesson Info */}
+            <View style={styles.infoCard}>
+              <View style={styles.infoRow}>
+                <View style={styles.infoItem}>
+                  <IconSymbol
+                    ios_icon_name="clock.fill"
+                    android_material_icon_name="schedule"
+                    size={20}
+                    color={colors.primary}
+                  />
+                  <Text style={styles.infoText}>{lesson.estimatedTime}</Text>
+                </View>
+                <View style={styles.infoItem}>
+                  <IconSymbol
+                    ios_icon_name="chart.bar.fill"
+                    android_material_icon_name="bar-chart"
+                    size={20}
+                    color={colors.primary}
+                  />
+                  <Text style={styles.infoText}>{lesson.difficulty}</Text>
+                </View>
+                <View style={styles.premiumBadge}>
+                  <IconSymbol
+                    ios_icon_name="lock.fill"
+                    android_material_icon_name="lock"
+                    size={16}
+                    color={colors.text}
+                  />
+                  <Text style={styles.premiumText}>Premium</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Description */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>About This Lesson</Text>
+              <Text style={styles.description}>{lesson.description}</Text>
+            </View>
+
+            {/* Premium CTA */}
+            <View style={styles.premiumCtaCard}>
+              <IconSymbol
+                ios_icon_name="star.fill"
+                android_material_icon_name="star"
+                size={48}
+                color={colors.primary}
+              />
+              <Text style={styles.premiumCtaTitle}>Premium Lesson</Text>
+              <Text style={styles.premiumCtaText}>
+                This advanced lesson is part of our Premium training program, launching soon.
+              </Text>
+              <TouchableOpacity
+                style={[buttonStyles.primaryButton, styles.premiumCtaButton]}
+                onPress={handlePremiumLessonTap}
+                activeOpacity={0.8}
+              >
+                <Text style={buttonStyles.primaryButtonText}>Learn More</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      );
+    }
+
+    // Otherwise, show prerequisite lock
     return (
       <View style={[commonStyles.container]}>
         {/* Header */}
@@ -88,11 +203,7 @@ export default function LessonScreen() {
             color={colors.textSecondary}
           />
           <Text style={styles.lockedTitle}>Lesson Locked</Text>
-          {lesson.isPremium && !userProgress.isPremium ? (
-            <Text style={styles.lockedText}>
-              This is a premium lesson. Upgrade to access all content.
-            </Text>
-          ) : prerequisiteNames.length > 0 ? (
+          {prerequisiteNames.length > 0 ? (
             <>
               <Text style={styles.lockedText}>
                 Complete these lessons first:
@@ -272,6 +383,21 @@ const styles = StyleSheet.create({
     height: 240,
     resizeMode: 'cover',
   },
+  premiumImageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 240,
+  },
+  premiumImageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   infoCard: {
     backgroundColor: colors.card,
     marginHorizontal: 20,
@@ -284,6 +410,7 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    alignItems: 'center',
   },
   infoItem: {
     flexDirection: 'row',
@@ -294,6 +421,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.text,
     marginLeft: 8,
+  },
+  premiumBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  premiumText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.text,
+    marginLeft: 6,
   },
   section: {
     paddingHorizontal: 20,
@@ -401,5 +542,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: colors.textSecondary,
+  },
+  premiumCtaCard: {
+    backgroundColor: colors.card,
+    marginHorizontal: 20,
+    marginTop: 32,
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+    elevation: 4,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  premiumCtaTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: colors.text,
+    marginTop: 16,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  premiumCtaText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  premiumCtaButton: {
+    width: '100%',
   },
 });
