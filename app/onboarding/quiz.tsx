@@ -1,11 +1,14 @@
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 import { quizQuestions, QuizAnswer } from '@/data/quizData';
 import { IconSymbol } from '@/components/IconSymbol';
 import * as Haptics from 'expo-haptics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const QUIZ_STORAGE_KEY = '@heel_quiz_progress';
 
 export default function QuizScreen() {
   const router = useRouter();
@@ -14,12 +17,65 @@ export default function QuizScreen() {
     challenges: [],
     early_challenges: [],
   });
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load saved quiz progress on mount
+  useEffect(() => {
+    loadQuizProgress();
+  }, []);
+
+  // Save quiz progress whenever answers change
+  useEffect(() => {
+    if (!isLoading) {
+      saveQuizProgress();
+    }
+  }, [answers, currentQuestionIndex, isLoading]);
+
+  const loadQuizProgress = async () => {
+    try {
+      const savedData = await AsyncStorage.getItem(QUIZ_STORAGE_KEY);
+      if (savedData) {
+        const { savedAnswers, savedIndex } = JSON.parse(savedData);
+        setAnswers(savedAnswers);
+        setCurrentQuestionIndex(savedIndex);
+        console.log('Loaded quiz progress:', savedIndex);
+      }
+    } catch (error) {
+      console.error('Error loading quiz progress:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveQuizProgress = async () => {
+    try {
+      const dataToSave = {
+        savedAnswers: answers,
+        savedIndex: currentQuestionIndex,
+      };
+      await AsyncStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(dataToSave));
+      console.log('Saved quiz progress:', currentQuestionIndex);
+    } catch (error) {
+      console.error('Error saving quiz progress:', error);
+    }
+  };
+
+  const clearQuizProgress = async () => {
+    try {
+      await AsyncStorage.removeItem(QUIZ_STORAGE_KEY);
+      console.log('Cleared quiz progress');
+    } catch (error) {
+      console.error('Error clearing quiz progress:', error);
+    }
+  };
 
   const currentQuestion = quizQuestions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
 
   const handleSingleChoice = (option: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     
     const newAnswers = {
       ...answers,
@@ -33,6 +89,7 @@ export default function QuizScreen() {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
       } else {
         // Quiz complete, navigate to results
+        clearQuizProgress();
         router.push({
           pathname: '/onboarding/quiz-results',
           params: { answers: JSON.stringify(newAnswers) },
@@ -42,7 +99,9 @@ export default function QuizScreen() {
   };
 
   const handleMultiChoice = (option: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     
     const fieldName = currentQuestion.saveAs;
     let currentSelections = [...(answers[fieldName] as string[] || [])];
@@ -84,12 +143,15 @@ export default function QuizScreen() {
   };
 
   const handleNext = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
     
     if (currentQuestionIndex < quizQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
       // Quiz complete, navigate to results
+      clearQuizProgress();
       router.push({
         pathname: '/onboarding/quiz-results',
         params: { answers: JSON.stringify(answers) },
@@ -98,7 +160,9 @@ export default function QuizScreen() {
   };
 
   const handleBack = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
@@ -124,6 +188,14 @@ export default function QuizScreen() {
       return Array.isArray(fieldValue) && fieldValue.includes(option);
     }
   };
+
+  if (isLoading) {
+    return (
+      <View style={[commonStyles.container, styles.container]}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={[commonStyles.container, styles.container]}>
@@ -319,5 +391,10 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.5,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.textSecondary,
   },
 });

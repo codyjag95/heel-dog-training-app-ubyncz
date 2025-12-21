@@ -1,6 +1,12 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { trainingCategories, DogProfile, UserProgress, Category, SessionNote, AnalyticsEvent, Lesson, SessionTemplate } from '@/data/trainingData';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const USER_PROGRESS_KEY = '@heel_user_progress';
+const DOG_PROFILE_KEY = '@heel_dog_profile';
+const ALL_DOGS_KEY = '@heel_all_dogs';
+const ONBOARDING_KEY = '@heel_onboarding_complete';
 
 interface AppContextType {
   dogProfile: DogProfile | null;
@@ -44,6 +50,72 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
   const [categories, setCategories] = useState<Category[]>(trainingCategories);
   const [analyticsEvents, setAnalyticsEvents] = useState<AnalyticsEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load persisted data on mount
+  useEffect(() => {
+    loadPersistedData();
+  }, []);
+
+  // Save data whenever it changes
+  useEffect(() => {
+    if (!isLoading) {
+      savePersistedData();
+    }
+  }, [userProgress, dogProfile, allDogs, hasCompletedOnboarding, isLoading]);
+
+  const loadPersistedData = async () => {
+    try {
+      const [progressData, profileData, dogsData, onboardingData] = await Promise.all([
+        AsyncStorage.getItem(USER_PROGRESS_KEY),
+        AsyncStorage.getItem(DOG_PROFILE_KEY),
+        AsyncStorage.getItem(ALL_DOGS_KEY),
+        AsyncStorage.getItem(ONBOARDING_KEY),
+      ]);
+
+      if (progressData) {
+        const progress = JSON.parse(progressData);
+        setUserProgress(progress);
+        console.log('Loaded user progress:', progress);
+      }
+
+      if (profileData) {
+        const profile = JSON.parse(profileData);
+        setDogProfileState(profile);
+        console.log('Loaded dog profile:', profile);
+      }
+
+      if (dogsData) {
+        const dogs = JSON.parse(dogsData);
+        setAllDogs(dogs);
+        console.log('Loaded all dogs:', dogs);
+      }
+
+      if (onboardingData) {
+        const completed = JSON.parse(onboardingData);
+        setHasCompletedOnboarding(completed);
+        console.log('Loaded onboarding status:', completed);
+      }
+    } catch (error) {
+      console.error('Error loading persisted data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const savePersistedData = async () => {
+    try {
+      await Promise.all([
+        AsyncStorage.setItem(USER_PROGRESS_KEY, JSON.stringify(userProgress)),
+        AsyncStorage.setItem(DOG_PROFILE_KEY, JSON.stringify(dogProfile)),
+        AsyncStorage.setItem(ALL_DOGS_KEY, JSON.stringify(allDogs)),
+        AsyncStorage.setItem(ONBOARDING_KEY, JSON.stringify(hasCompletedOnboarding)),
+      ]);
+      console.log('Saved persisted data');
+    } catch (error) {
+      console.error('Error saving persisted data:', error);
+    }
+  };
 
   const setDogProfile = (profile: DogProfile) => {
     console.log('Setting dog profile:', profile);
@@ -106,22 +178,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       // Update categories with completion status and unlock logic
       const updatedCategories = categories.map(category => {
-        const updatedLessons = category.lessons.map(lesson => {
+        const updatedLessons = category.lessons.map((lesson, lessonIndex) => {
           if (lesson.id === lessonId) {
             return { ...lesson, isCompleted: true };
           }
           
-          // Check if lesson should be unlocked
+          // STRICT SEQUENTIAL LOCKING: Check if lesson should be unlocked
+          // A lesson is only unlocked if ALL previous lessons in the category are completed
+          const allPreviousCompleted = category.lessons
+            .slice(0, lessonIndex)
+            .every(prevLesson => newCompletedLessons.includes(prevLesson.id));
+          
+          // Also check prerequisite IDs if specified
+          let prerequisitesMet = true;
           if (lesson.prerequisiteIds && lesson.prerequisiteIds.length > 0) {
-            const allPrerequisitesComplete = lesson.prerequisiteIds.every(prereqId =>
+            prerequisitesMet = lesson.prerequisiteIds.every(prereqId =>
               newCompletedLessons.includes(prereqId)
             );
-            if (allPrerequisitesComplete && lesson.isLocked) {
-              return { ...lesson, isLocked: false };
-            }
           }
           
-          return lesson;
+          // Lesson is locked if:
+          // 1. It's premium and user is not premium, OR
+          // 2. Not all previous lessons are completed, OR
+          // 3. Prerequisites are not met
+          const shouldBeLocked = 
+            (lesson.isPremium && !userProgress.isPremium) ||
+            !allPreviousCompleted ||
+            !prerequisitesMet;
+          
+          return { ...lesson, isLocked: shouldBeLocked };
         });
 
         return {
@@ -242,6 +327,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // Premium lessons are locked for free users
     if (lesson.isPremium && !userProgress.isPremium) {
       return true;
+    }
+
+    // Find the category and lesson index
+    for (const category of categories) {
+      const lessonIndex = category.lessons.findIndex(l => l.id === lesson.id);
+      if (lessonIndex !== -1) {
+        // Check if all previous lessons in the category are completed
+        const allPreviousCompleted = category.lessons
+          .slice(0, lessonIndex)
+          .every(prevLesson => userProgress.completedLessons.includes(prevLesson.id));
+        
+        if (!allPreviousCompleted) {
+          return true;
+        }
+      }
     }
 
     // Check prerequisites
