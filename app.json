@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.heel.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +27,8 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.heel.app"
+      "package": "com.heel.app",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/images/final_quest_240x240.png",
@@ -35,7 +37,6 @@
     "plugins": [
       "expo-font",
       "expo-router",
-      "expo-web-browser",
       [
         "expo-splash-screen",
         {
@@ -48,9 +49,6 @@
     "scheme": "heel",
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "router": {}
     }
   }
 }
