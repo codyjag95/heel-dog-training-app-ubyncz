@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
@@ -7,11 +7,15 @@ import { useApp } from '@/contexts/AppContext';
 import { QuizAnswer, generateRecommendation } from '@/data/quizData';
 import { IconSymbol } from '@/components/IconSymbol';
 import * as Haptics from 'expo-haptics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const PREMIUM_INTRO_SHOWN_KEY = '@heel_premium_intro_shown';
 
 export default function QuizResultsScreen() {
   const router = useRouter();
   const { answers: answersParam } = useLocalSearchParams();
   const { dogProfile, setDogProfile, completeOnboarding } = useApp();
+  const [premiumIntroShown, setPremiumIntroShown] = useState(false);
 
   const answers: QuizAnswer = answersParam ? JSON.parse(answersParam as string) : { challenges: [], early_challenges: [] };
   const recommendation = generateRecommendation(answers);
@@ -27,12 +31,30 @@ export default function QuizResultsScreen() {
         immediateFocus: recommendation.immediateFocus,
       });
     }
+
+    // Check if premium intro has been shown
+    checkPremiumIntroShown();
   }, []);
+
+  const checkPremiumIntroShown = async () => {
+    try {
+      const shown = await AsyncStorage.getItem(PREMIUM_INTRO_SHOWN_KEY);
+      setPremiumIntroShown(shown === 'true');
+    } catch (error) {
+      console.error('Error checking premium intro status:', error);
+    }
+  };
 
   const handleStartTraining = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     completeOnboarding();
-    router.replace('/(tabs)/(home)/');
+    
+    // Navigate to premium intro if not shown yet
+    if (!premiumIntroShown) {
+      router.replace('/onboarding/premium-intro');
+    } else {
+      router.replace('/(tabs)/(home)/');
+    }
   };
 
   return (
@@ -146,7 +168,7 @@ export default function QuizResultsScreen() {
           onPress={handleStartTraining}
           activeOpacity={0.8}
         >
-          <Text style={buttonStyles.primaryButtonText}>Start Training</Text>
+          <Text style={buttonStyles.primaryButtonText}>Continue</Text>
         </TouchableOpacity>
       </View>
     </View>

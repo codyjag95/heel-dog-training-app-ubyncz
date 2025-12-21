@@ -31,6 +31,7 @@ interface AppContextType {
   sessionTemplates: SessionTemplate[];
   applySessionTemplate: (templateId: string) => Lesson[];
   togglePremium: () => void;
+  toggleTrainingTips: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -47,6 +48,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     lessonViews: {},
     lessonCompletions: {},
     quizCompleted: false,
+    showTrainingTips: true,
   });
   const [categories, setCategories] = useState<Category[]>(trainingCategories);
   const [analyticsEvents, setAnalyticsEvents] = useState<AnalyticsEvent[]>([]);
@@ -542,6 +544,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const toggleTrainingTips = () => {
+    console.log('Toggling training tips');
+    setUserProgress({
+      ...userProgress,
+      showTrainingTips: !userProgress.showTrainingTips,
+    });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -567,6 +577,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sessionTemplates,
         applySessionTemplate,
         togglePremium,
+        toggleTrainingTips,
       }}
     >
       {children}

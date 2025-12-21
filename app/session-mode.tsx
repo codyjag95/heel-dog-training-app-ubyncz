@@ -21,7 +21,7 @@ const TRAINING_TIPS = [
 export default function SessionModeScreen() {
   const router = useRouter();
   const { categoryId, lessonId } = useLocalSearchParams();
-  const { categories, completeLesson, updateStreak, addSessionNote } = useApp();
+  const { categories, completeLesson, updateStreak, addSessionNote, userProgress } = useApp();
   
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
@@ -52,18 +52,20 @@ export default function SessionModeScreen() {
     { label: '15 min', value: 15 * 60 },
   ];
 
-  // Show random training tip on mount
+  // Show random training tip on mount (only if enabled)
   useEffect(() => {
-    const randomTip = TRAINING_TIPS[Math.floor(Math.random() * TRAINING_TIPS.length)];
-    setCurrentTip(randomTip);
-    
-    // Show tip after 2 seconds
-    const timer = setTimeout(() => {
-      setShowTrainingTip(true);
-    }, 2000);
+    if (userProgress.showTrainingTips) {
+      const randomTip = TRAINING_TIPS[Math.floor(Math.random() * TRAINING_TIPS.length)];
+      setCurrentTip(randomTip);
+      
+      // Show tip after 2 seconds
+      const timer = setTimeout(() => {
+        setShowTrainingTip(true);
+      }, 2000);
 
-    return () => clearTimeout(timer);
-  }, []);
+      return () => clearTimeout(timer);
+    }
+  }, [userProgress.showTrainingTips]);
 
   // Timer logic
   useEffect(() => {
@@ -453,7 +455,26 @@ export default function SessionModeScreen() {
           />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Session Mode</Text>
-        <View style={styles.headerSpacer} />
+        
+        {/* Compact Timer Icon */}
+        <TouchableOpacity
+          style={styles.timerIconButton}
+          onPress={() => setShowTimerPicker(true)}
+          activeOpacity={0.7}
+        >
+          {selectedDuration === null ? (
+            <IconSymbol
+              ios_icon_name="timer"
+              android_material_icon_name="timer"
+              size={28}
+              color={colors.text}
+            />
+          ) : (
+            <View style={styles.compactTimerDisplay}>
+              <Text style={styles.compactTimerText}>{formatTime(timeRemaining)}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -466,86 +487,6 @@ export default function SessionModeScreen() {
           <Text style={styles.lessonTitle}>{lesson.name}</Text>
           {lesson.session_goal && (
             <Text style={styles.sessionGoal}>{lesson.session_goal}</Text>
-          )}
-        </View>
-
-        {/* Timer Section with Icon */}
-        <View style={styles.timerCard}>
-          <View style={styles.timerHeaderRow}>
-            <Text style={styles.sectionTitle}>Session Timer</Text>
-            <Text style={styles.optionalLabel}>(Optional)</Text>
-          </View>
-          
-          {selectedDuration === null ? (
-            <TouchableOpacity
-              style={styles.timerIconButton}
-              onPress={() => setShowTimerPicker(true)}
-              activeOpacity={0.7}
-            >
-              <IconSymbol
-                ios_icon_name="timer"
-                android_material_icon_name="timer"
-                size={48}
-                color={colors.primary}
-              />
-              <Text style={styles.timerIconText}>Tap to set timer</Text>
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.timerContainer}>
-              <View style={styles.timerDisplay}>
-                <Text style={styles.timerText}>{formatTime(timeRemaining)}</Text>
-              </View>
-              
-              <View style={styles.timerControls}>
-                <TouchableOpacity
-                  style={styles.controlButton}
-                  onPress={handleStartPauseTimer}
-                  activeOpacity={0.7}
-                >
-                  <IconSymbol
-                    ios_icon_name={isTimerRunning ? 'pause.fill' : 'play.fill'}
-                    android_material_icon_name={isTimerRunning ? 'pause' : 'play-arrow'}
-                    size={24}
-                    color={colors.text}
-                  />
-                  <Text style={styles.controlButtonText}>
-                    {isTimerRunning ? 'Pause' : 'Start'}
-                  </Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={styles.controlButton}
-                  onPress={handleResetTimer}
-                  activeOpacity={0.7}
-                >
-                  <IconSymbol
-                    ios_icon_name="arrow.clockwise"
-                    android_material_icon_name="refresh"
-                    size={24}
-                    color={colors.text}
-                  />
-                  <Text style={styles.controlButtonText}>Reset</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={styles.controlButton}
-                  onPress={() => {
-                    setSelectedDuration(null);
-                    setTimeRemaining(0);
-                    setIsTimerRunning(false);
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <IconSymbol
-                    ios_icon_name="xmark"
-                    android_material_icon_name="close"
-                    size={24}
-                    color={colors.text}
-                  />
-                  <Text style={styles.controlButtonText}>Change</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
           )}
         </View>
 
@@ -644,20 +585,21 @@ export default function SessionModeScreen() {
           )}
         </View>
 
-        {/* Training Tips */}
+        {/* Training Tips - Lightweight Text-Only */}
         {lesson.trainingTips && lesson.trainingTips.length > 0 && (
           <View style={styles.tipsSection}>
             <View style={styles.tipsSectionHeader}>
               <IconSymbol
                 ios_icon_name="lightbulb.fill"
                 android_material_icon_name="lightbulb"
-                size={20}
+                size={18}
                 color={colors.primary}
               />
-              <Text style={styles.tipsSectionTitle}>Training Tips</Text>
+              <Text style={styles.tipsSectionTitle}>Tips</Text>
             </View>
             {lesson.trainingTips.map((tip, index) => (
-              <View key={index} style={styles.tipCard}>
+              <View key={index} style={styles.tipItem}>
+                <Text style={styles.tipBullet}>•</Text>
                 <Text style={styles.tipText}>{tip}</Text>
               </View>
             ))}
@@ -721,43 +663,101 @@ export default function SessionModeScreen() {
                 />
               </TouchableOpacity>
             ))}
+            
+            {selectedDuration !== null && (
+              <React.Fragment>
+                <View style={styles.timerDivider} />
+                <View style={styles.timerControls}>
+                  <TouchableOpacity
+                    style={styles.timerControlButton}
+                    onPress={handleStartPauseTimer}
+                    activeOpacity={0.7}
+                  >
+                    <IconSymbol
+                      ios_icon_name={isTimerRunning ? 'pause.fill' : 'play.fill'}
+                      android_material_icon_name={isTimerRunning ? 'pause' : 'play-arrow'}
+                      size={20}
+                      color={colors.text}
+                    />
+                    <Text style={styles.timerControlText}>
+                      {isTimerRunning ? 'Pause' : 'Start'}
+                    </Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={styles.timerControlButton}
+                    onPress={handleResetTimer}
+                    activeOpacity={0.7}
+                  >
+                    <IconSymbol
+                      ios_icon_name="arrow.clockwise"
+                      android_material_icon_name="refresh"
+                      size={20}
+                      color={colors.text}
+                    />
+                    <Text style={styles.timerControlText}>Reset</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={styles.timerControlButton}
+                    onPress={() => {
+                      setSelectedDuration(null);
+                      setTimeRemaining(0);
+                      setIsTimerRunning(false);
+                      setShowTimerPicker(false);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <IconSymbol
+                      ios_icon_name="xmark"
+                      android_material_icon_name="close"
+                      size={20}
+                      color={colors.text}
+                    />
+                    <Text style={styles.timerControlText}>Clear</Text>
+                  </TouchableOpacity>
+                </View>
+              </React.Fragment>
+            )}
           </View>
         </TouchableOpacity>
       </Modal>
 
-      {/* Training Tip Popup */}
-      <Modal
-        visible={showTrainingTip}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowTrainingTip(false)}
-      >
-        <TouchableOpacity
-          style={styles.tipModalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowTrainingTip(false)}
+      {/* Training Tip Popup - Only if enabled */}
+      {userProgress.showTrainingTips && (
+        <Modal
+          visible={showTrainingTip}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowTrainingTip(false)}
         >
-          <View style={styles.tipPopupContainer}>
-            <View style={styles.tipPopupHeader}>
-              <IconSymbol
-                ios_icon_name="lightbulb.fill"
-                android_material_icon_name="lightbulb"
-                size={28}
-                color={colors.primary}
-              />
-              <Text style={styles.tipPopupTitle}>Training Tip</Text>
+          <TouchableOpacity
+            style={styles.tipModalOverlay}
+            activeOpacity={1}
+            onPress={() => setShowTrainingTip(false)}
+          >
+            <View style={styles.tipPopupContainer}>
+              <View style={styles.tipPopupHeader}>
+                <IconSymbol
+                  ios_icon_name="lightbulb.fill"
+                  android_material_icon_name="lightbulb"
+                  size={28}
+                  color={colors.primary}
+                />
+                <Text style={styles.tipPopupTitle}>Training Tip</Text>
+              </View>
+              <Text style={styles.tipPopupText}>{currentTip}</Text>
+              <TouchableOpacity
+                style={styles.tipPopupButton}
+                onPress={() => setShowTrainingTip(false)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.tipPopupButtonText}>Got it</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.tipPopupText}>{currentTip}</Text>
-            <TouchableOpacity
-              style={styles.tipPopupButton}
-              onPress={() => setShowTrainingTip(false)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.tipPopupButtonText}>Got it</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+          </TouchableOpacity>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -792,6 +792,24 @@ const styles = StyleSheet.create({
   headerSpacer: {
     width: 40,
   },
+  timerIconButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compactTimerDisplay: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  compactTimerText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.text,
+    fontVariant: ['tabular-nums'],
+  },
   scrollView: {
     flex: 1,
   },
@@ -820,74 +838,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 24,
   },
-  timerCard: {
-    backgroundColor: colors.card,
-    marginHorizontal: 20,
-    marginTop: 20,
-    borderRadius: 16,
-    padding: 20,
-    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
-    elevation: 4,
-  },
-  timerHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    gap: 8,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  optionalLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.textSecondary,
-  },
-  timerIconButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 32,
-    gap: 12,
-  },
-  timerIconText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  timerContainer: {
-    alignItems: 'center',
-  },
-  timerDisplay: {
-    backgroundColor: colors.secondary,
-    borderRadius: 16,
-    padding: 32,
-    marginBottom: 20,
-    width: '100%',
-    alignItems: 'center',
-  },
-  timerText: {
-    fontSize: 48,
-    fontWeight: '800',
-    color: colors.primary,
-    fontVariant: ['tabular-nums'],
-  },
-  timerControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-  },
-  controlButton: {
-    alignItems: 'center',
-    padding: 8,
-  },
-  controlButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.text,
-    marginTop: 4,
-  },
   stepsSection: {
     paddingHorizontal: 20,
     marginTop: 32,
@@ -897,6 +847,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
   },
   viewAllText: {
     fontSize: 14,
@@ -970,27 +925,33 @@ const styles = StyleSheet.create({
   tipsSectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
-    gap: 8,
+    marginBottom: 12,
+    gap: 6,
   },
   tipsSectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
     color: colors.text,
   },
-  tipCard: {
-    backgroundColor: colors.secondary,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.primary,
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+    paddingLeft: 4,
+  },
+  tipBullet: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+    marginRight: 8,
+    marginTop: 2,
   },
   tipText: {
     fontSize: 14,
     fontWeight: '500',
     color: colors.textSecondary,
     lineHeight: 20,
+    flex: 1,
   },
   actionButtons: {
     paddingHorizontal: 20,
@@ -1179,6 +1140,27 @@ const styles = StyleSheet.create({
   timerOptionText: {
     flex: 1,
     fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  timerDivider: {
+    height: 1,
+    backgroundColor: colors.secondary,
+    marginVertical: 16,
+  },
+  timerControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    gap: 8,
+  },
+  timerControlButton: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 8,
+    gap: 4,
+  },
+  timerControlText: {
+    fontSize: 12,
     fontWeight: '600',
     color: colors.text,
   },

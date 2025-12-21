@@ -8,7 +8,7 @@ import { IconSymbol } from '@/components/IconSymbol';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { dogProfile, userProgress, allDogs, switchDog, removeDog, togglePremium } = useApp();
+  const { dogProfile, userProgress, allDogs, switchDog, removeDog, togglePremium, toggleTrainingTips } = useApp();
   const [starTapCount, setStarTapCount] = useState(0);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [unlockCode, setUnlockCode] = useState('');
@@ -302,6 +302,34 @@ export default function SettingsScreen() {
               size={20}
               color={colors.textSecondary}
             />
+          </TouchableOpacity>
+        </View>
+
+        {/* Training Preferences Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Training Preferences</Text>
+          
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={toggleTrainingTips}
+            activeOpacity={0.7}
+          >
+            <IconSymbol
+              ios_icon_name="lightbulb.fill"
+              android_material_icon_name="lightbulb"
+              size={24}
+              color={colors.text}
+            />
+            <Text style={styles.settingText}>Random Training Tips</Text>
+            <View style={[
+              styles.toggle,
+              userProgress.showTrainingTips && styles.toggleActive
+            ]}>
+              <View style={[
+                styles.toggleThumb,
+                userProgress.showTrainingTips && styles.toggleThumbActive
+              ]} />
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -684,5 +712,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.textSecondary,
+  },
+  toggle: {
+    width: 50,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.secondary,
+    padding: 2,
+    justifyContent: 'center',
+  },
+  toggleActive: {
+    backgroundColor: colors.primary,
+  },
+  toggleThumb: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.textSecondary,
+  },
+  toggleThumbActive: {
+    backgroundColor: colors.text,
+    alignSelf: 'flex-end',
   },
 });

@@ -3492,6 +3492,7 @@ export interface UserProgress {
   lessonViews: { [lessonId: string]: number };
   lessonCompletions: { [lessonId: string]: number };
   quizCompleted: boolean;
+  showTrainingTips?: boolean;
 }
 
 export interface AnalyticsEvent {
