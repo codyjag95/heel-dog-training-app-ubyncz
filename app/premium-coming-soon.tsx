@@ -4,9 +4,6 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert,
 import { useRouter } from 'expo-router';
 import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
-import * as Haptics from 'expo-haptics';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
 
 interface WaitlistEntry {
   email: string;
@@ -33,69 +30,111 @@ export default function PremiumComingSoonScreen() {
   };
 
   const handleNotifyMe = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
-    // Validate email
-    if (!email.trim()) {
-      setEmailError('Email address is required');
-      return;
-    }
-
-    if (!validateEmail(email.trim())) {
-      setEmailError('Please enter a valid email address');
-      return;
-    }
-
-    setEmailError('');
-    setLoading(true);
-
     try {
-      // Check if email already exists
-      const existingWaitlist = await AsyncStorage.getItem('premium_waitlist');
-      const waitlist: WaitlistEntry[] = existingWaitlist ? JSON.parse(existingWaitlist) : [];
+      // Haptics with error handling
+      try {
+        const Haptics = await import('expo-haptics');
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } catch (hapticsError) {
+        console.warn('Haptics not available:', hapticsError);
+      }
       
-      const emailExists = waitlist.some(entry => entry.email.toLowerCase() === email.trim().toLowerCase());
-      
-      if (emailExists) {
-        // Show success state even for duplicates
-        setSuccess(true);
-        setLoading(false);
+      // Validate email
+      if (!email.trim()) {
+        setEmailError('Email address is required');
         return;
       }
 
-      // Create new waitlist entry
-      const newEntry: WaitlistEntry = {
-        email: email.trim().toLowerCase(),
-        created_at: new Date().toISOString(),
-        source: 'lesson_lock',
-        platform: Platform.OS,
-        app_version: Constants.expoConfig?.version || '1.0.0',
-        wants_push: wantsPush,
-      };
-
-      // Add OneSignal player ID if available (placeholder for now)
-      // In production, this would be retrieved from OneSignal SDK
-      // const playerId = await getOneSignalPlayerId();
-      // if (playerId) {
-      //   newEntry.onesignal_player_id = playerId;
-      // }
-
-      // Save to waitlist
-      waitlist.push(newEntry);
-      await AsyncStorage.setItem('premium_waitlist', JSON.stringify(waitlist));
-
-      // Request push permissions if user opted in
-      if (wantsPush) {
-        // In production, this would request push permissions via OneSignal
-        // await requestPushPermissions();
-        console.log('Push notification permission would be requested here');
+      if (!validateEmail(email.trim())) {
+        setEmailError('Please enter a valid email address');
+        return;
       }
 
-      setSuccess(true);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setEmailError('');
+      setLoading(true);
+
+      try {
+        // AsyncStorage with error handling
+        const AsyncStorage = await import('@react-native-async-storage/async-storage');
+        const storage = AsyncStorage.default;
+        
+        // Check if email already exists
+        const existingWaitlist = await storage.getItem('premium_waitlist');
+        const waitlist: WaitlistEntry[] = existingWaitlist ? JSON.parse(existingWaitlist) : [];
+        
+        const emailExists = waitlist.some(entry => entry.email.toLowerCase() === email.trim().toLowerCase());
+        
+        if (emailExists) {
+          // Show success state even for duplicates
+          setSuccess(true);
+          setLoading(false);
+          return;
+        }
+
+        // Get app version with error handling
+        let appVersion = '1.0.0';
+        try {
+          const Constants = await import('expo-constants');
+          appVersion = Constants.default.expoConfig?.version || '1.0.0';
+        } catch (constantsError) {
+          console.warn('Constants not available:', constantsError);
+        }
+
+        // Create new waitlist entry
+        const newEntry: WaitlistEntry = {
+          email: email.trim().toLowerCase(),
+          created_at: new Date().toISOString(),
+          source: 'lesson_lock',
+          platform: Platform.OS,
+          app_version: appVersion,
+          wants_push: wantsPush,
+        };
+
+        // NOTE: OneSignal player ID retrieval DISABLED for isolation build
+        // Uncomment below to re-enable after confirming app launches
+        /*
+        try {
+          const playerId = await getOneSignalPlayerId();
+          if (playerId) {
+            newEntry.onesignal_player_id = playerId;
+          }
+        } catch (oneSignalError) {
+          console.warn('OneSignal not available:', oneSignalError);
+        }
+        */
+
+        // Save to waitlist
+        waitlist.push(newEntry);
+        await storage.setItem('premium_waitlist', JSON.stringify(waitlist));
+
+        // NOTE: Push notification permission request DISABLED for isolation build
+        // Uncomment below to re-enable after confirming app launches
+        /*
+        if (wantsPush) {
+          try {
+            await requestPushPermissions();
+          } catch (pushError) {
+            console.warn('Push permissions not available:', pushError);
+          }
+        }
+        */
+
+        setSuccess(true);
+        
+        // Success haptics with error handling
+        try {
+          const Haptics = await import('expo-haptics');
+          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } catch (hapticsError) {
+          console.warn('Haptics not available:', hapticsError);
+        }
+      } catch (storageError) {
+        console.error('Error saving to waitlist:', storageError);
+        Alert.alert('Error', 'Failed to save. Please try again.');
+      }
     } catch (error) {
-      console.error('Error saving to waitlist:', error);
-      Alert.alert('Error', 'Failed to save. Please try again.');
+      console.error('Error in handleNotifyMe:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -214,9 +253,14 @@ export default function PremiumComingSoonScreen() {
         {/* Push Notification Toggle */}
         <TouchableOpacity
           style={styles.checkboxContainer}
-          onPress={() => {
+          onPress={async () => {
             setWantsPush(!wantsPush);
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            try {
+              const Haptics = await import('expo-haptics');
+              await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            } catch (error) {
+              console.warn('Haptics not available:', error);
+            }
           }}
           activeOpacity={0.7}
         >

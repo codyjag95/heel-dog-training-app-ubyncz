@@ -5,8 +5,6 @@ import { useRouter } from 'expo-router';
 import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 import { useApp } from '@/contexts/AppContext';
 import { IconSymbol } from '@/components/IconSymbol';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -15,15 +13,29 @@ export default function SettingsScreen() {
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [codeInput, setCodeInput] = useState('');
   const [isTesterMode, setIsTesterMode] = useState(false);
+  const [appVersion, setAppVersion] = useState('1.0.0');
 
   // Check tester mode on mount
   React.useEffect(() => {
     checkTesterMode();
+    loadAppVersion();
   }, []);
+
+  const loadAppVersion = async () => {
+    try {
+      const Constants = await import('expo-constants');
+      const version = Constants.default.expoConfig?.version || '1.0.0';
+      setAppVersion(version);
+    } catch (error) {
+      console.warn('Error loading app version:', error);
+    }
+  };
 
   const checkTesterMode = async () => {
     try {
-      const testerMode = await AsyncStorage.getItem('tester_mode_enabled');
+      const AsyncStorage = await import('@react-native-async-storage/async-storage');
+      const storage = AsyncStorage.default;
+      const testerMode = await storage.getItem('tester_mode_enabled');
       setIsTesterMode(testerMode === 'true');
     } catch (error) {
       console.error('Error checking tester mode:', error);
@@ -116,7 +128,9 @@ export default function SettingsScreen() {
   const handleCodeSubmit = async () => {
     if (codeInput.toUpperCase() === 'JAGARRIOS') {
       try {
-        await AsyncStorage.setItem('tester_mode_enabled', 'true');
+        const AsyncStorage = await import('@react-native-async-storage/async-storage');
+        const storage = AsyncStorage.default;
+        await storage.setItem('tester_mode_enabled', 'true');
         setIsTesterMode(true);
         setShowCodeModal(false);
         setCodeInput('');
@@ -438,7 +452,7 @@ export default function SettingsScreen() {
           onPress={handleAppVersionTap}
           activeOpacity={0.8}
         >
-          <Text style={styles.appInfoText}>HEEL v{Constants.expoConfig?.version || '1.0.0'}</Text>
+          <Text style={styles.appInfoText}>HEEL v{appVersion}</Text>
           <Text style={styles.appInfoText}>Modern Dog Training</Text>
         </TouchableOpacity>
       </ScrollView>

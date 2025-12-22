@@ -46,338 +46,398 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [analyticsEvents, setAnalyticsEvents] = useState<AnalyticsEvent[]>([]);
 
   const setDogProfile = (profile: DogProfile) => {
-    console.log('Setting dog profile:', profile);
-    setDogProfileState(profile);
-    
-    // Update allDogs array
-    setAllDogs(prevDogs => {
-      const existingIndex = prevDogs.findIndex(d => d.id === profile.id);
-      if (existingIndex >= 0) {
-        const updated = [...prevDogs];
-        updated[existingIndex] = profile;
-        return updated;
-      } else {
-        return [...prevDogs, profile];
-      }
-    });
+    try {
+      console.log('Setting dog profile:', profile);
+      setDogProfileState(profile);
+      
+      // Update allDogs array
+      setAllDogs(prevDogs => {
+        const existingIndex = prevDogs.findIndex(d => d.id === profile.id);
+        if (existingIndex >= 0) {
+          const updated = [...prevDogs];
+          updated[existingIndex] = profile;
+          return updated;
+        } else {
+          return [...prevDogs, profile];
+        }
+      });
+    } catch (error) {
+      console.error('Error setting dog profile:', error);
+    }
   };
 
   const addDog = (dog: DogProfile) => {
-    console.log('Adding new dog:', dog);
-    const newDog = { ...dog, id: dog.id || `dog-${Date.now()}` };
-    setAllDogs(prev => [...prev, newDog]);
-    setDogProfileState(newDog);
+    try {
+      console.log('Adding new dog:', dog);
+      const newDog = { ...dog, id: dog.id || `dog-${Date.now()}` };
+      setAllDogs(prev => [...prev, newDog]);
+      setDogProfileState(newDog);
+    } catch (error) {
+      console.error('Error adding dog:', error);
+    }
   };
 
   const switchDog = (dogId: string) => {
-    console.log('Switching to dog:', dogId);
-    const dog = allDogs.find(d => d.id === dogId);
-    if (dog) {
-      setDogProfileState(dog);
+    try {
+      console.log('Switching to dog:', dogId);
+      const dog = allDogs.find(d => d.id === dogId);
+      if (dog) {
+        setDogProfileState(dog);
+      }
+    } catch (error) {
+      console.error('Error switching dog:', error);
     }
   };
 
   const removeDog = (dogId: string) => {
-    console.log('Removing dog:', dogId);
-    setAllDogs(prev => prev.filter(d => d.id !== dogId));
-    if (dogProfile?.id === dogId) {
-      const remaining = allDogs.filter(d => d.id !== dogId);
-      setDogProfileState(remaining.length > 0 ? remaining[0] : null);
+    try {
+      console.log('Removing dog:', dogId);
+      setAllDogs(prev => prev.filter(d => d.id !== dogId));
+      if (dogProfile?.id === dogId) {
+        const remaining = allDogs.filter(d => d.id !== dogId);
+        setDogProfileState(remaining.length > 0 ? remaining[0] : null);
+      }
+    } catch (error) {
+      console.error('Error removing dog:', error);
     }
   };
 
   const completeLesson = (lessonId: string) => {
-    console.log('Completing lesson:', lessonId);
-    
-    if (!userProgress.completedLessons.includes(lessonId)) {
-      const newCompletedLessons = [...userProgress.completedLessons, lessonId];
-      const newLessonCompletions = {
-        ...userProgress.lessonCompletions,
-        [lessonId]: (userProgress.lessonCompletions[lessonId] || 0) + 1,
-      };
+    try {
+      console.log('Completing lesson:', lessonId);
+      
+      if (!userProgress.completedLessons.includes(lessonId)) {
+        const newCompletedLessons = [...userProgress.completedLessons, lessonId];
+        const newLessonCompletions = {
+          ...userProgress.lessonCompletions,
+          [lessonId]: (userProgress.lessonCompletions[lessonId] || 0) + 1,
+        };
 
-      setUserProgress({
-        ...userProgress,
-        completedLessons: newCompletedLessons,
-        totalSessions: userProgress.totalSessions + 1,
-        lessonCompletions: newLessonCompletions,
-        lastTrainingDate: new Date().toISOString(),
-      });
-
-      // Update categories with completion status and unlock logic
-      const updatedCategories = categories.map(category => {
-        const updatedLessons = category.lessons.map(lesson => {
-          if (lesson.id === lessonId) {
-            return { ...lesson, isCompleted: true };
-          }
-          
-          // Check if lesson should be unlocked
-          if (lesson.prerequisiteIds && lesson.prerequisiteIds.length > 0) {
-            const allPrerequisitesComplete = lesson.prerequisiteIds.every(prereqId =>
-              newCompletedLessons.includes(prereqId)
-            );
-            if (allPrerequisitesComplete && lesson.isLocked) {
-              return { ...lesson, isLocked: false };
-            }
-          }
-          
-          return lesson;
+        setUserProgress({
+          ...userProgress,
+          completedLessons: newCompletedLessons,
+          totalSessions: userProgress.totalSessions + 1,
+          lessonCompletions: newLessonCompletions,
+          lastTrainingDate: new Date().toISOString(),
         });
 
-        return {
-          ...category,
-          lessons: updatedLessons,
-          completedCount: updatedLessons.filter(l => l.isCompleted).length,
-        };
-      });
-      
-      setCategories(updatedCategories);
+        // Update categories with completion status and unlock logic
+        const updatedCategories = categories.map(category => {
+          const updatedLessons = category.lessons.map(lesson => {
+            if (lesson.id === lessonId) {
+              return { ...lesson, isCompleted: true };
+            }
+            
+            // Check if lesson should be unlocked
+            if (lesson.prerequisiteIds && lesson.prerequisiteIds.length > 0) {
+              const allPrerequisitesComplete = lesson.prerequisiteIds.every(prereqId =>
+                newCompletedLessons.includes(prereqId)
+              );
+              if (allPrerequisitesComplete && lesson.isLocked) {
+                return { ...lesson, isLocked: false };
+              }
+            }
+            
+            return lesson;
+          });
 
-      // Track analytics
-      trackAnalytics({
-        type: 'lesson_completion',
-        timestamp: new Date().toISOString(),
-        lessonId,
-      });
+          return {
+            ...category,
+            lessons: updatedLessons,
+            completedCount: updatedLessons.filter(l => l.isCompleted).length,
+          };
+        });
+        
+        setCategories(updatedCategories);
+
+        // Track analytics
+        trackAnalytics({
+          type: 'lesson_completion',
+          timestamp: new Date().toISOString(),
+          lessonId,
+        });
+      }
+    } catch (error) {
+      console.error('Error completing lesson:', error);
     }
   };
 
   const completeOnboarding = () => {
-    console.log('Completing onboarding');
-    setHasCompletedOnboarding(true);
-    setUserProgress({
-      ...userProgress,
-      quizCompleted: true,
-    });
-    
-    // Track analytics
-    trackAnalytics({
-      type: 'quiz_completion',
-      timestamp: new Date().toISOString(),
-    });
+    try {
+      console.log('Completing onboarding');
+      setHasCompletedOnboarding(true);
+      setUserProgress({
+        ...userProgress,
+        quizCompleted: true,
+      });
+      
+      // Track analytics
+      trackAnalytics({
+        type: 'quiz_completion',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+    }
   };
 
   const addSessionNote = (note: SessionNote) => {
-    console.log('Adding session note:', note);
-    if (dogProfile) {
-      const existingNotes = dogProfile.sessionNotes || [];
-      setDogProfileState({
-        ...dogProfile,
-        sessionNotes: [...existingNotes, note],
-      });
+    try {
+      console.log('Adding session note:', note);
+      if (dogProfile) {
+        const existingNotes = dogProfile.sessionNotes || [];
+        setDogProfileState({
+          ...dogProfile,
+          sessionNotes: [...existingNotes, note],
+        });
+      }
+    } catch (error) {
+      console.error('Error adding session note:', error);
     }
   };
 
   const getSessionNotes = (lessonId: string): SessionNote[] => {
-    if (!dogProfile || !dogProfile.sessionNotes) {
+    try {
+      if (!dogProfile || !dogProfile.sessionNotes) {
+        return [];
+      }
+      return dogProfile.sessionNotes.filter(note => note.lessonId === lessonId);
+    } catch (error) {
+      console.error('Error getting session notes:', error);
       return [];
     }
-    return dogProfile.sessionNotes.filter(note => note.lessonId === lessonId);
   };
 
   const setLastViewedLesson = (lessonId: string) => {
-    console.log('Setting last viewed lesson:', lessonId);
-    if (dogProfile) {
-      setDogProfileState({
-        ...dogProfile,
-        lastViewedLesson: lessonId,
+    try {
+      console.log('Setting last viewed lesson:', lessonId);
+      if (dogProfile) {
+        setDogProfileState({
+          ...dogProfile,
+          lastViewedLesson: lessonId,
+        });
+      }
+
+      // Track lesson view
+      const newLessonViews = {
+        ...userProgress.lessonViews,
+        [lessonId]: (userProgress.lessonViews[lessonId] || 0) + 1,
+      };
+      setUserProgress({
+        ...userProgress,
+        lessonViews: newLessonViews,
       });
+
+      // Track analytics
+      trackAnalytics({
+        type: 'lesson_view',
+        timestamp: new Date().toISOString(),
+        lessonId,
+      });
+    } catch (error) {
+      console.error('Error setting last viewed lesson:', error);
     }
-
-    // Track lesson view
-    const newLessonViews = {
-      ...userProgress.lessonViews,
-      [lessonId]: (userProgress.lessonViews[lessonId] || 0) + 1,
-    };
-    setUserProgress({
-      ...userProgress,
-      lessonViews: newLessonViews,
-    });
-
-    // Track analytics
-    trackAnalytics({
-      type: 'lesson_view',
-      timestamp: new Date().toISOString(),
-      lessonId,
-    });
   };
 
   const trackAnalytics = (event: AnalyticsEvent) => {
-    console.log('Analytics event:', event);
-    setAnalyticsEvents([...analyticsEvents, event]);
+    try {
+      console.log('Analytics event:', event);
+      setAnalyticsEvents([...analyticsEvents, event]);
+    } catch (error) {
+      console.error('Error tracking analytics:', error);
+    }
   };
 
   const updateStreak = () => {
-    const today = new Date().toDateString();
-    const lastTrainingDate = userProgress.lastTrainingDate
-      ? new Date(userProgress.lastTrainingDate).toDateString()
-      : null;
+    try {
+      const today = new Date().toDateString();
+      const lastTrainingDate = userProgress.lastTrainingDate
+        ? new Date(userProgress.lastTrainingDate).toDateString()
+        : null;
 
-    if (lastTrainingDate === today) {
-      // Already trained today, no change
-      return;
+      if (lastTrainingDate === today) {
+        // Already trained today, no change
+        return;
+      }
+
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toDateString();
+
+      let newStreak = userProgress.currentStreak;
+      if (lastTrainingDate === yesterdayStr) {
+        // Consecutive day
+        newStreak += 1;
+      } else if (lastTrainingDate !== today) {
+        // Streak broken
+        newStreak = 1;
+      }
+
+      setUserProgress({
+        ...userProgress,
+        currentStreak: newStreak,
+        lastTrainingDate: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Error updating streak:', error);
     }
-
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toDateString();
-
-    let newStreak = userProgress.currentStreak;
-    if (lastTrainingDate === yesterdayStr) {
-      // Consecutive day
-      newStreak += 1;
-    } else if (lastTrainingDate !== today) {
-      // Streak broken
-      newStreak = 1;
-    }
-
-    setUserProgress({
-      ...userProgress,
-      currentStreak: newStreak,
-      lastTrainingDate: new Date().toISOString(),
-    });
   };
 
   const isLessonLocked = (lesson: Lesson): boolean => {
-    // Premium lessons are locked for free users
-    if (lesson.isPremium && !userProgress.isPremium) {
-      return true;
-    }
+    try {
+      // Premium lessons are locked for free users
+      if (lesson.isPremium && !userProgress.isPremium) {
+        return true;
+      }
 
-    // Check prerequisites
-    if (lesson.prerequisiteIds && lesson.prerequisiteIds.length > 0) {
-      const allPrerequisitesComplete = lesson.prerequisiteIds.every(prereqId =>
-        userProgress.completedLessons.includes(prereqId)
-      );
-      return !allPrerequisitesComplete;
-    }
+      // Check prerequisites
+      if (lesson.prerequisiteIds && lesson.prerequisiteIds.length > 0) {
+        const allPrerequisitesComplete = lesson.prerequisiteIds.every(prereqId =>
+          userProgress.completedLessons.includes(prereqId)
+        );
+        return !allPrerequisitesComplete;
+      }
 
-    return lesson.isLocked;
+      return lesson.isLocked;
+    } catch (error) {
+      console.error('Error checking lesson lock status:', error);
+      return true; // Default to locked on error
+    }
   };
 
   const getTodaysFocus = (): { lesson: Lesson; category: Category } | null => {
-    if (!userProgress.isPremium || !dogProfile?.recommendedPrimaryTrack) {
-      return null;
-    }
+    try {
+      if (!userProgress.isPremium || !dogProfile?.recommendedPrimaryTrack) {
+        return null;
+      }
 
-    // Find the recommended category
-    const recommendedCategory = categories.find(
-      cat => cat.name === dogProfile.recommendedPrimaryTrack
-    );
+      // Find the recommended category
+      const recommendedCategory = categories.find(
+        cat => cat.name === dogProfile.recommendedPrimaryTrack
+      );
 
-    if (!recommendedCategory) {
-      return null;
-    }
+      if (!recommendedCategory) {
+        return null;
+      }
 
-    // Find the next incomplete lesson in the recommended track
-    const nextLesson = recommendedCategory.lessons.find(
-      lesson => !lesson.isCompleted && !isLessonLocked(lesson)
-    );
+      // Find the next incomplete lesson in the recommended track
+      const nextLesson = recommendedCategory.lessons.find(
+        lesson => !lesson.isCompleted && !isLessonLocked(lesson)
+      );
 
-    if (nextLesson) {
-      return { lesson: nextLesson, category: recommendedCategory };
-    }
+      if (nextLesson) {
+        return { lesson: nextLesson, category: recommendedCategory };
+      }
 
-    // If all lessons in primary track are complete, check secondary tracks
-    if (dogProfile.recommendedSecondaryTracks) {
-      for (const trackName of dogProfile.recommendedSecondaryTracks) {
-        const secondaryCategory = categories.find(cat => cat.name === trackName);
-        if (secondaryCategory) {
-          const nextSecondaryLesson = secondaryCategory.lessons.find(
-            lesson => !lesson.isCompleted && !isLessonLocked(lesson)
-          );
-          if (nextSecondaryLesson) {
-            return { lesson: nextSecondaryLesson, category: secondaryCategory };
+      // If all lessons in primary track are complete, check secondary tracks
+      if (dogProfile.recommendedSecondaryTracks) {
+        for (const trackName of dogProfile.recommendedSecondaryTracks) {
+          const secondaryCategory = categories.find(cat => cat.name === trackName);
+          if (secondaryCategory) {
+            const nextSecondaryLesson = secondaryCategory.lessons.find(
+              lesson => !lesson.isCompleted && !isLessonLocked(lesson)
+            );
+            if (nextSecondaryLesson) {
+              return { lesson: nextSecondaryLesson, category: secondaryCategory };
+            }
           }
         }
       }
-    }
 
-    return null;
+      return null;
+    } catch (error) {
+      console.error('Error getting today\'s focus:', error);
+      return null;
+    }
   };
 
   const getProgressInsights = (): string[] => {
-    if (!userProgress.isPremium) {
+    try {
+      if (!userProgress.isPremium) {
+        return [];
+      }
+
+      const insights: string[] = [];
+
+      // Streak insight
+      if (userProgress.currentStreak >= 7) {
+        insights.push(`🔥 Amazing! ${userProgress.currentStreak}-day training streak`);
+      } else if (userProgress.currentStreak >= 3) {
+        insights.push(`💪 Building momentum with a ${userProgress.currentStreak}-day streak`);
+      }
+
+      // Recall progress
+      const recallCategory = categories.find(cat => cat.id === 'recall');
+      if (recallCategory) {
+        const recallProgress = recallCategory.lessons.length > 0
+          ? (recallCategory.completedCount / recallCategory.lessons.length) * 100
+          : 0;
+        if (recallProgress > 50 && recallProgress < 100) {
+          insights.push('📍 Recall consistency improving');
+        } else if (recallProgress === 100) {
+          insights.push('✅ Recall mastery achieved');
+        }
+      }
+
+      // Calm & Focus progress
+      const calmCategory = categories.find(cat => cat.id === 'calm-focus');
+      if (calmCategory) {
+        const calmProgress = calmCategory.lessons.length > 0
+          ? (calmCategory.completedCount / calmCategory.lessons.length) * 100
+          : 0;
+        if (calmProgress > 50 && calmProgress < 100) {
+          insights.push('🧘 Calm behaviors trending up');
+        } else if (calmProgress === 100) {
+          insights.push('✨ Calmness mastered');
+        }
+      }
+
+      // Most skipped category
+      const categoryViews: { [key: string]: number } = {};
+      const categoryCompletions: { [key: string]: number } = {};
+
+      categories.forEach(category => {
+        let views = 0;
+        let completions = 0;
+        category.lessons.forEach(lesson => {
+          views += userProgress.lessonViews[lesson.id] || 0;
+          completions += userProgress.lessonCompletions[lesson.id] || 0;
+        });
+        categoryViews[category.name] = views;
+        categoryCompletions[category.name] = completions;
+      });
+
+      // Find category with most views but fewest completions
+      let maxGap = 0;
+      let skippedCategory = '';
+      Object.keys(categoryViews).forEach(catName => {
+        const gap = categoryViews[catName] - categoryCompletions[catName];
+        if (gap > maxGap && gap > 3) {
+          maxGap = gap;
+          skippedCategory = catName;
+        }
+      });
+
+      if (skippedCategory) {
+        insights.push(`💡 Consider revisiting ${skippedCategory}`);
+      }
+
+      // Total progress
+      const totalLessons = categories.reduce((acc, cat) => acc + cat.lessons.length, 0);
+      const completedLessons = categories.reduce((acc, cat) => acc + cat.completedCount, 0);
+      const overallProgress = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
+
+      if (overallProgress > 75) {
+        insights.push('🎯 Nearing completion of all training');
+      } else if (overallProgress > 50) {
+        insights.push('📈 Over halfway through your training journey');
+      }
+
+      return insights.slice(0, 4); // Limit to 4 insights
+    } catch (error) {
+      console.error('Error getting progress insights:', error);
       return [];
     }
-
-    const insights: string[] = [];
-
-    // Streak insight
-    if (userProgress.currentStreak >= 7) {
-      insights.push(`🔥 Amazing! ${userProgress.currentStreak}-day training streak`);
-    } else if (userProgress.currentStreak >= 3) {
-      insights.push(`💪 Building momentum with a ${userProgress.currentStreak}-day streak`);
-    }
-
-    // Recall progress
-    const recallCategory = categories.find(cat => cat.id === 'recall');
-    if (recallCategory) {
-      const recallProgress = recallCategory.lessons.length > 0
-        ? (recallCategory.completedCount / recallCategory.lessons.length) * 100
-        : 0;
-      if (recallProgress > 50 && recallProgress < 100) {
-        insights.push('📍 Recall consistency improving');
-      } else if (recallProgress === 100) {
-        insights.push('✅ Recall mastery achieved');
-      }
-    }
-
-    // Calm & Focus progress
-    const calmCategory = categories.find(cat => cat.id === 'calm-focus');
-    if (calmCategory) {
-      const calmProgress = calmCategory.lessons.length > 0
-        ? (calmCategory.completedCount / calmCategory.lessons.length) * 100
-        : 0;
-      if (calmProgress > 50 && calmProgress < 100) {
-        insights.push('🧘 Calm behaviors trending up');
-      } else if (calmProgress === 100) {
-        insights.push('✨ Calmness mastered');
-      }
-    }
-
-    // Most skipped category
-    const categoryViews: { [key: string]: number } = {};
-    const categoryCompletions: { [key: string]: number } = {};
-
-    categories.forEach(category => {
-      let views = 0;
-      let completions = 0;
-      category.lessons.forEach(lesson => {
-        views += userProgress.lessonViews[lesson.id] || 0;
-        completions += userProgress.lessonCompletions[lesson.id] || 0;
-      });
-      categoryViews[category.name] = views;
-      categoryCompletions[category.name] = completions;
-    });
-
-    // Find category with most views but fewest completions
-    let maxGap = 0;
-    let skippedCategory = '';
-    Object.keys(categoryViews).forEach(catName => {
-      const gap = categoryViews[catName] - categoryCompletions[catName];
-      if (gap > maxGap && gap > 3) {
-        maxGap = gap;
-        skippedCategory = catName;
-      }
-    });
-
-    if (skippedCategory) {
-      insights.push(`💡 Consider revisiting ${skippedCategory}`);
-    }
-
-    // Total progress
-    const totalLessons = categories.reduce((acc, cat) => acc + cat.lessons.length, 0);
-    const completedLessons = categories.reduce((acc, cat) => acc + cat.completedCount, 0);
-    const overallProgress = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
-
-    if (overallProgress > 75) {
-      insights.push('🎯 Nearing completion of all training');
-    } else if (overallProgress > 50) {
-      insights.push('📈 Over halfway through your training journey');
-    }
-
-    return insights.slice(0, 4); // Limit to 4 insights
   };
 
   const sessionTemplates: SessionTemplate[] = [
@@ -416,30 +476,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   ];
 
   const applySessionTemplate = (templateId: string): Lesson[] => {
-    const template = sessionTemplates.find(t => t.id === templateId);
-    if (!template) {
-      return [];
-    }
+    try {
+      const template = sessionTemplates.find(t => t.id === templateId);
+      if (!template) {
+        return [];
+      }
 
-    const lessons: Lesson[] = [];
-    for (const category of categories) {
-      for (const lessonId of template.lessonIds) {
-        const lesson = category.lessons.find(l => l.id === lessonId);
-        if (lesson) {
-          lessons.push(lesson);
+      const lessons: Lesson[] = [];
+      for (const category of categories) {
+        for (const lessonId of template.lessonIds) {
+          const lesson = category.lessons.find(l => l.id === lessonId);
+          if (lesson) {
+            lessons.push(lesson);
+          }
         }
       }
-    }
 
-    return lessons;
+      return lessons;
+    } catch (error) {
+      console.error('Error applying session template:', error);
+      return [];
+    }
   };
 
   const togglePremium = () => {
-    console.log('Toggling premium status');
-    setUserProgress({
-      ...userProgress,
-      isPremium: !userProgress.isPremium,
-    });
+    try {
+      console.log('Toggling premium status');
+      setUserProgress({
+        ...userProgress,
+        isPremium: !userProgress.isPremium,
+      });
+    } catch (error) {
+      console.error('Error toggling premium:', error);
+    }
   };
 
   return (
