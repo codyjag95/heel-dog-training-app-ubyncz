@@ -40,6 +40,24 @@ export default function CategoryScreen() {
     }
   };
 
+  const handleLessonPress = (lesson: any) => {
+    // ALWAYS navigate - no dead taps
+    // If lesson is premium and user is not premium, go to Premium Coming Soon
+    if (lesson.isPremium && !userProgress.isPremium) {
+      console.log('Premium lesson tapped, navigating to /premium-coming-soon');
+      router.push('/premium-coming-soon');
+    } else {
+      // Otherwise go to lesson detail
+      router.push({
+        pathname: '/lesson',
+        params: {
+          categoryId: category.id,
+          lessonId: lesson.id
+        }
+      });
+    }
+  };
+
   return (
     <View style={[commonStyles.container]}>
       {/* Header */}
@@ -103,22 +121,8 @@ export default function CategoryScreen() {
           {sortedLessons.map((lesson, index) => (
             <TouchableOpacity
               key={index}
-              style={[
-                styles.lessonCard,
-                lesson.isLocked && styles.lessonCardLocked
-              ]}
-              onPress={() => {
-                if (!lesson.isLocked) {
-                  router.push({
-                    pathname: '/lesson',
-                    params: {
-                      categoryId: category.id,
-                      lessonId: lesson.id
-                    }
-                  });
-                }
-              }}
-              disabled={lesson.isLocked}
+              style={styles.lessonCard}
+              onPress={() => handleLessonPress(lesson)}
               activeOpacity={0.7}
             >
               {lesson.imageUrl && (
@@ -127,7 +131,7 @@ export default function CategoryScreen() {
                     source={{ uri: lesson.imageUrl }}
                     style={styles.lessonImage}
                   />
-                  {lesson.isPremium && (
+                  {lesson.isPremium && !userProgress.isPremium && (
                     <View style={styles.premiumOverlay}>
                       <IconSymbol
                         ios_icon_name="lock.fill"
@@ -156,7 +160,7 @@ export default function CategoryScreen() {
                     <Text style={styles.difficultyText}>{lesson.difficulty}</Text>
                   </View>
                   <Text style={styles.timeText}>{lesson.estimatedTime}</Text>
-                  {lesson.isPremium && (
+                  {lesson.isPremium && !userProgress.isPremium && (
                     <View style={styles.premiumBadge}>
                       <IconSymbol
                         ios_icon_name="lock.fill"
@@ -276,9 +280,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
     elevation: 4,
-  },
-  lessonCardLocked: {
-    opacity: 0.6,
   },
   imageContainer: {
     position: 'relative',

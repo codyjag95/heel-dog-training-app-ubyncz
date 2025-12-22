@@ -31,14 +31,7 @@ export default function SettingsScreen() {
   };
 
   const handleUpgradeToPremium = () => {
-    Alert.alert(
-      'Upgrade to Premium',
-      'Get full access to all lessons, no ads, and advanced training content.\n\nMonthly: $4.99\nYearly: $39.99',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Upgrade', onPress: () => console.log('Upgrade pressed') },
-      ]
-    );
+    router.push('/premium-coming-soon');
   };
 
   const handleRestorePurchase = () => {
@@ -61,10 +54,10 @@ export default function SettingsScreen() {
     if (!userProgress.isPremium && allDogs.length >= 1) {
       Alert.alert(
         'Premium Feature',
-        'Multi-dog management is a Premium feature. Upgrade to add more dogs.',
+        'Multi-dog management is a Premium feature coming soon.',
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Upgrade', onPress: () => router.push('/(tabs)/premium') },
+          { text: 'Learn More', onPress: () => router.push('/premium-coming-soon') },
         ]
       );
       return;
@@ -294,20 +287,17 @@ export default function SettingsScreen() {
                   size={32}
                   color={colors.primary}
                 />
-                <Text style={styles.premiumTitle}>Upgrade to Premium</Text>
+                <Text style={styles.premiumTitle}>Premium Coming Soon</Text>
               </View>
               <Text style={styles.premiumDescription}>
-                Unlock all lessons, remove ads, and get advanced training content
-              </Text>
-              <Text style={styles.premiumPricing}>
-                Monthly: $4.99 • Yearly: $39.99
+                Premium will unlock advanced lessons, roadmaps, and analytics.
               </Text>
               <TouchableOpacity
                 style={styles.premiumButton}
                 onPress={handleUpgradeToPremium}
                 activeOpacity={0.8}
               >
-                <Text style={styles.premiumButtonText}>Upgrade Now</Text>
+                <Text style={styles.premiumButtonText}>Get Notified</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -412,67 +402,6 @@ export default function SettingsScreen() {
                 color={colors.textSecondary}
               />
             </TouchableOpacity>
-          </View>
-        )}
-
-        {/* Debug: IAP Section (Tester Mode Only) */}
-        {isTesterMode && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Debug: IAP</Text>
-            
-            <View style={styles.iapDebugCard}>
-              <Text style={styles.iapDebugTitle}>In-App Purchase Debug Info</Text>
-              
-              <View style={styles.iapDebugSection}>
-                <Text style={styles.iapDebugLabel}>Active Product IDs:</Text>
-                <Text style={styles.iapDebugValue}>• Monthly: heel_premium_monthly</Text>
-                <Text style={styles.iapDebugValue}>• Yearly: heel_premium_yearly</Text>
-              </View>
-
-              <View style={styles.iapDebugSection}>
-                <Text style={styles.iapDebugLabel}>Store Prices (Live):</Text>
-                <Text style={styles.iapDebugValue}>• Monthly: [Not connected to store]</Text>
-                <Text style={styles.iapDebugValue}>• Yearly: [Not connected to store]</Text>
-              </View>
-
-              <View style={styles.iapDebugSection}>
-                <Text style={styles.iapDebugLabel}>UI Price Source:</Text>
-                <Text style={styles.iapDebugValue}>⚠️ Hardcoded fallback strings</Text>
-                <Text style={styles.iapDebugValueSmall}>
-                  (No RevenueCat/StoreKit integration detected)
-                </Text>
-              </View>
-
-              <View style={styles.iapDebugSection}>
-                <Text style={styles.iapDebugLabel}>Current Pricing:</Text>
-                <Text style={styles.iapDebugValue}>• Monthly: $4.99/mo</Text>
-                <Text style={styles.iapDebugValue}>• Yearly: $39.99/yr</Text>
-              </View>
-
-              <View style={styles.iapDebugSection}>
-                <Text style={styles.iapDebugLabel}>Environment:</Text>
-                <Text style={styles.iapDebugValue}>
-                  {__DEV__ ? '🟡 Development/Preview' : '🟢 Production Build'}
-                </Text>
-                <Text style={styles.iapDebugValueSmall}>
-                  {__DEV__ 
-                    ? 'Preview mode cannot display live StoreKit prices. Test in TestFlight for real pricing.'
-                    : 'Production build can connect to App Store/Play Store for live prices.'}
-                </Text>
-              </View>
-
-              <View style={styles.iapWarningBox}>
-                <IconSymbol
-                  ios_icon_name="exclamationmark.triangle.fill"
-                  android_material_icon_name="warning"
-                  size={20}
-                  color={colors.primary}
-                />
-                <Text style={styles.iapWarningText}>
-                  No IAP SDK integrated. To display live prices, integrate RevenueCat or StoreKit and update product IDs in App Store Connect.
-                </Text>
-              </View>
-            </View>
           </View>
         )}
 
@@ -750,12 +679,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.textSecondary,
     lineHeight: 20,
-    marginBottom: 12,
-  },
-  premiumPricing: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.primary,
     marginBottom: 16,
   },
   premiumButton: {
@@ -784,57 +707,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.text,
     marginLeft: 12,
-  },
-  iapDebugCard: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 20,
-    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
-    elevation: 4,
-  },
-  iapDebugTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 16,
-  },
-  iapDebugSection: {
-    marginBottom: 16,
-  },
-  iapDebugLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.textSecondary,
-    marginBottom: 6,
-  },
-  iapDebugValue: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.text,
-    marginBottom: 2,
-  },
-  iapDebugValueSmall: {
-    fontSize: 12,
-    fontWeight: '400',
-    color: colors.textSecondary,
-    marginTop: 4,
-    fontStyle: 'italic',
-  },
-  iapWarningBox: {
-    backgroundColor: colors.secondary,
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginTop: 8,
-  },
-  iapWarningText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: colors.text,
-    marginLeft: 12,
-    flex: 1,
-    lineHeight: 18,
   },
   appInfo: {
     alignItems: 'center',

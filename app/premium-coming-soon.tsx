@@ -185,7 +185,7 @@ export default function PremiumComingSoonScreen() {
 
         <Text style={styles.title}>Premium Training — Coming Soon</Text>
         <Text style={styles.subtitle}>
-          Advanced lessons, full training roadmap, and deeper analytics are dropping soon.
+          Premium will unlock advanced lessons, roadmaps, and analytics.
         </Text>
 
         <Text style={styles.body}>Want a heads up the moment it&apos;s available?</Text>

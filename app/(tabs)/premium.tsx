@@ -4,8 +4,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput,
 import { colors, commonStyles } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
 import { useApp } from '@/contexts/AppContext';
+import { useRouter } from 'expo-router';
 
 export default function PremiumScreen() {
+  const router = useRouter();
   const { userProgress, togglePremium } = useApp();
   const [tapCount, setTapCount] = useState(0);
   const [showCodeModal, setShowCodeModal] = useState(false);
@@ -41,6 +43,10 @@ export default function PremiumScreen() {
       );
       setCodeInput('');
     }
+  };
+
+  const handleJoinWaitlist = () => {
+    router.push('/premium-coming-soon');
   };
 
   const features = [
@@ -113,7 +119,7 @@ export default function PremiumScreen() {
             />
           </TouchableOpacity>
           <Text style={styles.title}>HEEL Premium</Text>
-          <Text style={styles.subtitle}>Unlock your dog&apos;s full potential</Text>
+          <Text style={styles.subtitle}>Coming Soon</Text>
         </View>
 
         {userProgress.isPremium && (
@@ -125,6 +131,22 @@ export default function PremiumScreen() {
               color={colors.primary}
             />
             <Text style={styles.activeText}>You&apos;re a Premium Member!</Text>
+          </View>
+        )}
+
+        {/* Coming Soon Banner */}
+        {!userProgress.isPremium && (
+          <View style={styles.comingSoonBanner}>
+            <IconSymbol
+              ios_icon_name="clock.fill"
+              android_material_icon_name="schedule"
+              size={32}
+              color={colors.primary}
+            />
+            <Text style={styles.comingSoonTitle}>Premium Coming Soon</Text>
+            <Text style={styles.comingSoonText}>
+              Premium will unlock advanced lessons, roadmaps, and analytics.
+            </Text>
           </View>
         )}
 
@@ -151,40 +173,17 @@ export default function PremiumScreen() {
 
         {!userProgress.isPremium && (
           <>
-            {/* Pricing */}
-            <View style={styles.pricingSection}>
-              <Text style={styles.sectionTitle}>Choose Your Plan</Text>
-              
-              <TouchableOpacity style={styles.pricingCard} activeOpacity={0.8}>
-                <View style={styles.pricingHeader}>
-                  <Text style={styles.pricingTitle}>Monthly</Text>
-                  <View style={styles.pricingBadge}>
-                    <Text style={styles.pricingBadgeText}>Popular</Text>
-                  </View>
-                </View>
-                <Text style={styles.pricingPrice}>$4.99/month</Text>
-                <Text style={styles.pricingDescription}>Cancel anytime</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={[styles.pricingCard, styles.pricingCardHighlight]} activeOpacity={0.8}>
-                <View style={styles.pricingHeader}>
-                  <Text style={styles.pricingTitle}>Yearly</Text>
-                  <View style={[styles.pricingBadge, styles.pricingBadgeHighlight]}>
-                    <Text style={styles.pricingBadgeText}>Best Value</Text>
-                  </View>
-                </View>
-                <Text style={styles.pricingPrice}>$39.99/year</Text>
-                <Text style={styles.pricingDescription}>Save 33% • $3.33/month</Text>
-              </TouchableOpacity>
-            </View>
-
             {/* CTA Button */}
-            <TouchableOpacity style={styles.ctaButton} activeOpacity={0.8}>
-              <Text style={styles.ctaButtonText}>Start Free Trial</Text>
+            <TouchableOpacity 
+              style={styles.ctaButton} 
+              activeOpacity={0.8}
+              onPress={handleJoinWaitlist}
+            >
+              <Text style={styles.ctaButtonText}>Join the Waitlist</Text>
             </TouchableOpacity>
 
             <Text style={styles.disclaimer}>
-              7-day free trial, then auto-renews. Cancel anytime.
+              Join the waitlist to be notified when Premium launches.
             </Text>
           </>
         )}
@@ -287,6 +286,32 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginLeft: 12,
   },
+  comingSoonBanner: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    marginBottom: 32,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+    elevation: 4,
+  },
+  comingSoonTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: colors.text,
+    marginTop: 16,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  comingSoonText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
   featuresSection: {
     marginBottom: 32,
   },
@@ -330,58 +355,6 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: colors.textSecondary,
     lineHeight: 20,
-  },
-  pricingSection: {
-    marginBottom: 24,
-  },
-  pricingCard: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 16,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
-    elevation: 4,
-  },
-  pricingCardHighlight: {
-    borderColor: colors.primary,
-  },
-  pricingHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  pricingTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  pricingBadge: {
-    backgroundColor: colors.secondary,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  pricingBadgeHighlight: {
-    backgroundColor: colors.primary,
-  },
-  pricingBadgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  pricingPrice: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  pricingDescription: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.textSecondary,
   },
   ctaButton: {
     backgroundColor: colors.primary,
