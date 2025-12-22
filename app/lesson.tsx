@@ -6,11 +6,13 @@ import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 import { useApp } from '@/contexts/AppContext';
 import { IconSymbol } from '@/components/IconSymbol';
 import * as Haptics from 'expo-haptics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LessonScreen() {
   const router = useRouter();
   const { categoryId, lessonId } = useLocalSearchParams();
   const { categories, setLastViewedLesson, isLessonLocked, userProgress } = useApp();
+  const [isTesterMode, setIsTesterMode] = useState(false);
 
   const category = categories.find(cat => cat.id === categoryId);
   const lesson = category?.lessons.find(l => l.id === lessonId);
@@ -19,7 +21,17 @@ export default function LessonScreen() {
     if (lesson) {
       setLastViewedLesson(lesson.id);
     }
+    checkTesterMode();
   }, [lesson]);
+
+  const checkTesterMode = async () => {
+    try {
+      const testerMode = await AsyncStorage.getItem('tester_mode_enabled');
+      setIsTesterMode(testerMode === 'true');
+    } catch (error) {
+      console.error('Error checking tester mode:', error);
+    }
+  };
 
   if (!lesson || !category) {
     return (
@@ -176,13 +188,17 @@ export default function LessonScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Debug Info (only in dev) */}
-          {__DEV__ && (
-            <View style={styles.debugInfo}>
-              <Text style={styles.debugText}>Debug Info:</Text>
-              <Text style={styles.debugText}>isPremium: {isPremium.toString()}</Text>
-              <Text style={styles.debugText}>isLocked: {locked.toString()}</Text>
-              <Text style={styles.debugText}>lockReason: {isLockedDueToPremium ? 'premium' : 'prerequisite'}</Text>
+          {/* Admin Debug Info (only when tester mode enabled) */}
+          {isTesterMode && (
+            <View style={styles.adminDebugInfo}>
+              <Text style={styles.adminDebugTitle}>🔧 Admin Debug Info</Text>
+              <Text style={styles.adminDebugText}>isPremium: {isPremium.toString()}</Text>
+              <Text style={styles.adminDebugText}>isLocked: {locked.toString()}</Text>
+              <Text style={styles.adminDebugText}>lockReason: {isLockedDueToPremium ? 'premium' : 'prerequisite'}</Text>
+              <Text style={styles.adminDebugText}>Route pushed: /premium-coming-soon</Text>
+              <Text style={styles.adminDebugTextSmall}>
+                (This debug panel only visible in tester mode)
+              </Text>
             </View>
           )}
         </ScrollView>
@@ -235,6 +251,17 @@ export default function LessonScreen() {
             <Text style={styles.lockedText}>
               This lesson is currently locked.
             </Text>
+          )}
+
+          {/* Admin Debug Info (only when tester mode enabled) */}
+          {isTesterMode && (
+            <View style={styles.adminDebugInfo}>
+              <Text style={styles.adminDebugTitle}>🔧 Admin Debug Info</Text>
+              <Text style={styles.adminDebugText}>isPremium: {isPremium.toString()}</Text>
+              <Text style={styles.adminDebugText}>isLocked: {locked.toString()}</Text>
+              <Text style={styles.adminDebugText}>lockReason: prerequisite</Text>
+              <Text style={styles.adminDebugText}>Route pushed: N/A (locked by prereq)</Text>
+            </View>
           )}
         </View>
       </View>
@@ -355,6 +382,17 @@ export default function LessonScreen() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Admin Debug Info (only when tester mode enabled) */}
+        {isTesterMode && (
+          <View style={styles.adminDebugInfo}>
+            <Text style={styles.adminDebugTitle}>🔧 Admin Debug Info</Text>
+            <Text style={styles.adminDebugText}>isPremium: {isPremium.toString()}</Text>
+            <Text style={styles.adminDebugText}>isLocked: {locked.toString()}</Text>
+            <Text style={styles.adminDebugText}>lockReason: N/A (unlocked)</Text>
+            <Text style={styles.adminDebugText}>Route pushed: /session-mode</Text>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -592,17 +630,33 @@ const styles = StyleSheet.create({
   premiumCtaButton: {
     width: '100%',
   },
-  debugInfo: {
+  adminDebugInfo: {
     backgroundColor: colors.secondary,
     marginHorizontal: 20,
     marginTop: 32,
     borderRadius: 12,
     padding: 16,
+    borderWidth: 2,
+    borderColor: colors.primary,
   },
-  debugText: {
-    fontSize: 12,
+  adminDebugTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.primary,
+    marginBottom: 12,
+  },
+  adminDebugText: {
+    fontSize: 13,
     fontWeight: '600',
     color: colors.text,
     marginBottom: 4,
+    fontFamily: 'monospace',
+  },
+  adminDebugTextSmall: {
+    fontSize: 11,
+    fontWeight: '400',
+    color: colors.textSecondary,
+    marginTop: 8,
+    fontStyle: 'italic',
   },
 });
