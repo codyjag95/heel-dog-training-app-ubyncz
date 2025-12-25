@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 import { useApp } from '@/contexts/AppContext';
 import { IconSymbol } from '@/components/IconSymbol';
+import { testSentry, captureMessage } from '@/utils/sentryHelper';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -153,6 +154,42 @@ export default function SettingsScreen() {
 
   const handleOpenAdminWaitlist = () => {
     router.push('/admin-waitlist');
+  };
+
+  const handleTestSentry = () => {
+    Alert.alert(
+      'Test Sentry',
+      'This will send a test error to Sentry. Check your Sentry dashboard to confirm it was received.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Send Test',
+          onPress: () => {
+            testSentry();
+            Alert.alert('Test Sent', 'Check your Sentry dashboard for the test error.');
+          },
+        },
+      ]
+    );
+  };
+
+  const handleTestCrash = () => {
+    Alert.alert(
+      'Test Crash',
+      'This will intentionally crash the app to test crash reporting. The app will restart.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Crash App',
+          style: 'destructive',
+          onPress: () => {
+            captureMessage('Intentional crash test initiated', 'warning');
+            // Intentional crash for testing
+            throw new Error('Intentional crash test - this is for testing Sentry crash reporting');
+          },
+        },
+      ]
+    );
   };
 
   const isDev = __DEV__ || Platform.OS === 'ios'; // Show in dev and TestFlight (iOS)
@@ -416,6 +453,46 @@ export default function SettingsScreen() {
                 color={colors.textSecondary}
               />
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={handleTestSentry}
+              activeOpacity={0.7}
+            >
+              <IconSymbol
+                ios_icon_name="exclamationmark.triangle.fill"
+                android_material_icon_name="warning"
+                size={24}
+                color={colors.text}
+              />
+              <Text style={styles.settingText}>Test Sentry Integration</Text>
+              <IconSymbol
+                ios_icon_name="chevron.right"
+                android_material_icon_name="chevron-right"
+                size={20}
+                color={colors.textSecondary}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={handleTestCrash}
+              activeOpacity={0.7}
+            >
+              <IconSymbol
+                ios_icon_name="xmark.circle.fill"
+                android_material_icon_name="error"
+                size={24}
+                color={colors.primary}
+              />
+              <Text style={[styles.settingText, { color: colors.primary }]}>Test Crash (Sentry)</Text>
+              <IconSymbol
+                ios_icon_name="chevron.right"
+                android_material_icon_name="chevron-right"
+                size={20}
+                color={colors.textSecondary}
+              />
+            </TouchableOpacity>
           </View>
         )}
 
@@ -454,6 +531,7 @@ export default function SettingsScreen() {
         >
           <Text style={styles.appInfoText}>HEEL v{appVersion}</Text>
           <Text style={styles.appInfoText}>Modern Dog Training</Text>
+          <Text style={styles.appInfoText}>Crash Reporting: Sentry</Text>
         </TouchableOpacity>
       </ScrollView>
 
