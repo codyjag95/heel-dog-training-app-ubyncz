@@ -21,6 +21,10 @@ export const CATEGORY_ICONS: { [key: string]: keyof typeof Ionicons.glyphMap } =
   'potty_training': 'home',                  // House training
   'biting_nipping': 'alert-circle',          // Warning/correction
   'handler_skills': 'person',               // Human handler
+  'socialization': 'people-outline',          // Social/people
+  'reactive_dog': 'flash-outline',           // Reactivity/energy
+  'cooperative_care': 'medical-outline',     // Vet/care
+  'tricks': 'star',                          // Fun/tricks
 };
 
 // Tab bar icon mappings

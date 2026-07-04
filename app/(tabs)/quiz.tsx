@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -30,6 +30,7 @@ export default function QuizScreen() {
     quizAnswers,
   } = useApp();
 
+  const scrollViewRef = useRef<ScrollView>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   const [textInput, setTextInput] = useState('');
   const [breed, setBreed] = useState('');
@@ -91,6 +92,7 @@ export default function QuizScreen() {
         setTextInput('');
         setSelectedAnswers([]);
         incrementQuestionIndex();
+        scrollViewRef.current?.scrollTo({ y: 0, animated: true });
       }
       return;
     }
@@ -115,6 +117,7 @@ export default function QuizScreen() {
 
       setSelectedAnswers([]);
       incrementQuestionIndex();
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
 
       // Check if this was the last question
       if (currentQuestionIndex === totalQuestions - 1) {
@@ -163,6 +166,7 @@ export default function QuizScreen() {
         </View>
 
         <ScrollView
+          ref={scrollViewRef}
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}

@@ -9,17 +9,17 @@ export const everydayObedienceLessons: Lesson[] = [
     difficulty: 1,
     isPremium: false,
     steps: [
-      'Say your dog\'s name once in a happy, upbeat tone — never repeat it if they don\'t respond, just wait and try again in a few seconds',
+      'Say your dog\'s name once in a happy, upbeat tone. Never repeat it if they don\'t respond, just wait and try again in a few seconds',
       'The instant they look at you (even a quick glance counts), mark with "yes!" in an excited voice',
-      'Deliver a treat within 1 second of marking — speed matters here because you\'re teaching them that looking at you pays off immediately',
-      'Start in a quiet room with zero distractions — no TV, no other people, no toys on the floor. You want easy wins first',
+      'Deliver a treat within 1 second of marking. Speed matters here because you\'re teaching them that looking at you pays off immediately',
+      'Start in a quiet room with zero distractions: no TV, no other people, no toys on the floor. You want easy wins first',
       'Once they\'re nailing it at home, practice in the yard, then on a quiet street, then near mild distractions like a parked car or distant person',
-      'Aim for 10-15 reps per session, 2-3 sessions per day — short and frequent beats long and boring'
+      'Aim for 10-15 reps per session, 2-3 sessions per day. Short and frequent beats long and boring'
     ],
     tips: [
       'Never use their name when scolding or calling them for something unpleasant like nail trims. Their name should always predict good things',
       'If your dog is ignoring their name, you may have "poisoned" it by overusing it. Try a nickname or new word to rebuild the association',
-      'High-energy breeds like Aussies and Border Collies often learn this fast but get bored with repetition — keep sessions to 2-3 minutes max',
+      'High-energy breeds like Aussies and Border Collies often learn this fast but get bored with repetition, so keep sessions to 2-3 minutes max',
       'Pro tip: say their name randomly throughout the day and reward every single response. This builds a habit of checking in with you'
     ]
   },
@@ -31,18 +31,18 @@ export const everydayObedienceLessons: Lesson[] = [
     difficulty: 1,
     isPremium: false,
     steps: [
-      'Hold a treat right at your dog\'s nose — close enough they can smell it but can\'t snatch it from your fingers',
-      'Slowly arc the treat up and back over their head. Their nose follows up, and their butt naturally drops down — that\'s physics doing the work for you',
-      'The moment their butt touches the ground, say "sit" and mark with "yes!" — naming the behavior as it happens helps them connect the word to the action',
+      'Hold a treat right at your dog\'s nose, close enough they can smell it but can\'t snatch it from your fingers',
+      'Slowly arc the treat up and back over their head. Their nose follows up, and their butt naturally drops down. That\'s physics doing the work for you',
+      'The moment their butt touches the ground, say "sit" and mark with "yes!" Naming the behavior as it happens helps them connect the word to the action',
       'Deliver the treat immediately while they\'re still sitting. If you wait too long, they\'ll pop up and think standing is what earned the reward',
-      'Release with "okay" or "free" before they break position on their own — this teaches them that you decide when the behavior ends',
+      'Release with "okay" or "free" before they break position on their own. This teaches them that you decide when the behavior ends',
       'After 20+ successful lure reps, start fading the treat: use the same hand motion but with an empty hand, then reward from your pocket'
     ],
     tips: [
-      'Don\'t push their butt down — it creates resistance and doesn\'t teach them to think. Let the lure do the work naturally',
+      'Don\'t push their butt down. It creates resistance and doesn\'t teach them to think. Let the lure do the work naturally',
       'If they back up instead of sitting, practice against a wall so they have nowhere to go but down',
       'Practice before meals when they\'re hungry and motivated. A dog with a full belly has less reason to work for treats',
-      'Once reliable at home, ask for sits in new locations — the yard, the sidewalk, the pet store. Dogs don\'t generalize well, so a "sit" at home doesn\'t automatically mean they know "sit" at the park'
+      'Once reliable at home, ask for sits in new locations: the yard, the sidewalk, the pet store. Dogs don\'t generalize well, so a "sit" at home doesn\'t automatically mean they know "sit" at the park'
     ]
   },
   {
@@ -54,17 +54,17 @@ export const everydayObedienceLessons: Lesson[] = [
     isPremium: false,
     steps: [
       'Start with your dog in a sit. Hold a treat at their nose and slowly draw it straight down to the floor between their front paws',
-      'Once the treat reaches the floor, slowly drag it forward along the ground — like drawing an "L" shape. This encourages their body to slide into a down',
-      'Be patient — some dogs take 10-20 seconds to figure this out. Don\'t push them or repeat the cue. Just hold the lure position and wait',
-      'The instant both elbows touch the ground, mark "yes!" and reward. Even a sloppy down counts at first — you can shape better form later',
+      'Once the treat reaches the floor, slowly drag it forward along the ground, like drawing an "L" shape. This encourages their body to slide into a down',
+      'Be patient, because some dogs take 10-20 seconds to figure this out. Don\'t push them or repeat the cue. Just hold the lure position and wait',
+      'The instant both elbows touch the ground, mark "yes!" and reward. Even a sloppy down counts at first, and you can shape better form later',
       'Release with "okay" before they get up on their own. If they pop up before you release, just reset with another sit and try again',
-      'Practice on carpet or a soft surface first — hard floors can make dogs reluctant to lie down because it\'s uncomfortable on their joints'
+      'Practice on carpet or a soft surface first, since hard floors can make dogs reluctant to lie down because it\'s uncomfortable on their joints'
     ],
     tips: [
-      '"Down" is harder than sit because it\'s a more vulnerable position. Anxious dogs or dogs in new environments may resist — that\'s normal, not defiance',
-      'If the lure isn\'t working, try luring under your bent knee while sitting on the floor — they have to flatten out to get under your leg',
-      'Herding breeds like Aussies often offer a "sphinx down" (up on elbows, ready to spring). That\'s fine for training purposes — don\'t worry about a perfectly relaxed down yet',
-      'Use one clear cue: "down." Avoid "lay down," "lie down," or "get down" — those extra words just add confusion'
+      '"Down" is harder than sit because it\'s a more vulnerable position. Anxious dogs or dogs in new environments may resist, and that\'s normal, not defiance',
+      'If the lure isn\'t working, try luring under your bent knee while sitting on the floor. They have to flatten out to get under your leg',
+      'Herding breeds like Aussies often offer a "sphinx down" (up on elbows, ready to spring). That\'s fine for training purposes. Don\'t worry about a perfectly relaxed down yet',
+      'Use one clear cue: "down." Avoid "lay down," "lie down," or "get down," because those extra words just add confusion'
     ]
   },
   {
@@ -76,16 +76,16 @@ export const everydayObedienceLessons: Lesson[] = [
     isPremium: false,
     steps: [
       'Put your dog in a sit or down. Hold your palm out flat as a visual "stay" signal and say "stay" once in a calm, steady voice',
-      'Count to 3 silently, then calmly step back to your dog, mark "yes!" and reward. Don\'t call them to you — go to them',
+      'Count to 3 silently, then calmly step back to your dog, mark "yes!" and reward. Don\'t call them to you. Go to them',
       'If they hold for 3 seconds easily, build to 5, then 8, then 12. Increase in small increments and vary them so it\'s not always longer',
       'Throw in easy reps between hard ones. After a 15-second stay, do a 3-second one. This keeps frustration low and confidence high',
-      'Reward while they\'re still in position — don\'t wait until after you release them, or they\'ll learn that breaking the stay is what gets the treat',
+      'Reward while they\'re still in position. Don\'t wait until after you release them, or they\'ll learn that breaking the stay is what gets the treat',
       'Once they can hold 30+ seconds reliably, you\'re ready to start adding distance (next lesson)'
     ],
     tips: [
-      'If they break the stay, they\'re not being stubborn — you asked for too much too soon. Drop back to a duration they can succeed at',
+      'If they break the stay, they\'re not being stubborn. You asked for too much too soon. Drop back to a duration they can succeed at',
       'Build duration before distance. A dog who can\'t hold a 10-second stay next to you definitely can\'t hold one from across the room',
-      'Practice in boring locations first — the kitchen, the hallway. Save the park for later when they\'ve built the skill',
+      'Practice in boring locations first, like the kitchen or the hallway. Save the park for later when they\'ve built the skill',
       'End the session before your dog wants to quit. Five successful 10-second stays is better than one failed 30-second attempt'
     ]
   },
@@ -99,15 +99,15 @@ export const everydayObedienceLessons: Lesson[] = [
     steps: [
       'Start with a solid 10-15 second stay right next to your dog. If they can\'t do this reliably, go back to the duration lesson first',
       'Take one small step backward while facing your dog. Immediately step back to them, mark "yes!" and reward. That\'s it for the first few reps',
-      'Gradually increase: 2 steps back, then 3, then 5 feet. Always return to your dog to reward — never call them to you during stay training',
-      'Mix up your distances — don\'t always go farther. Do 5 feet, then 2 feet, then 7 feet, then 1 foot. Unpredictability builds reliability',
+      'Gradually increase: 2 steps back, then 3, then 5 feet. Always return to your dog to reward. Never call them to you during stay training',
+      'Mix up your distances and don\'t always go farther. Do 5 feet, then 2 feet, then 7 feet, then 1 foot. Unpredictability builds reliability',
       'Once they can hold a stay at 10+ feet, practice turning your back briefly and then returning. This is much harder for dogs than you facing them',
-      'If they break at any point, calmly walk them back to the spot, re-cue the stay, and try an easier distance. No frustration — just reset'
+      'If they break at any point, calmly walk them back to the spot, re-cue the stay, and try an easier distance. No frustration, just reset'
     ],
     tips: [
       'Move slowly and deliberately when stepping away. Quick movements can look like an invitation to follow you',
-      'Avoid staring directly at your dog from a distance — sustained eye contact from far away can feel like pressure and cause them to break',
-      'Herding breeds often want to follow you (it\'s literally their job). They may need extra patience with distance work — it goes against their instincts',
+      'Avoid staring directly at your dog from a distance. Sustained eye contact from far away can feel like pressure and cause them to break',
+      'Herding breeds often want to follow you (it\'s literally their job). They may need extra patience with distance work because it goes against their instincts',
       'Great places to practice: hallways (limited escape routes), fenced yards, and quiet rooms. Save busy environments for when they\'re solid'
     ]
   },
@@ -119,8 +119,8 @@ export const everydayObedienceLessons: Lesson[] = [
     difficulty: 2,
     isPremium: false,
     steps: [
-      'Hold a treat in your closed fist and present it to your dog. They\'ll sniff, lick, and paw at your hand — just wait. Don\'t say anything yet',
-      'The instant they pull their nose away from your fist — even slightly — mark "yes!" and reward from your other hand. The treat in the closed fist is never the reward',
+      'Hold a treat in your closed fist and present it to your dog. They\'ll sniff, lick, and paw at your hand, so just wait. Don\'t say anything yet',
+      'The instant they pull their nose away from your fist, even slightly, mark "yes!" and reward from your other hand. The treat in the closed fist is never the reward',
       'Repeat until they\'re backing off your closed fist quickly. Then add the cue: say "leave it" right before presenting your fist',
       'Next level: place a treat on the floor and cover it with your hand. Mark and reward from the other hand when they look away from it',
       'Graduate to a treat on the floor uncovered. If they go for it, cover it quickly. Reward from your other hand when they resist',
@@ -128,9 +128,9 @@ export const everydayObedienceLessons: Lesson[] = [
     ],
     tips: [
       'Always reward from a different source than the "leave it" item. This teaches them that leaving something alone pays better than grabbing it',
-      'Build up gradually — don\'t rush from covered treat to uncovered treat on the floor. Each step might take a full session or more',
+      'Build up gradually and don\'t rush from covered treat to uncovered treat on the floor. Each step might take a full session or more',
       'Practice with different items: toys, tissues, food wrappers. Dogs need to learn "leave it" is a universal concept, not just about one treat',
-      'This skill can literally save your dog\'s life — think chicken bones on the sidewalk, rat poison in the park, or medications dropped on the floor'
+      'This skill can literally save your dog\'s life. Think chicken bones on the sidewalk, rat poison in the park, or medications dropped on the floor'
     ]
   },
   {
@@ -144,15 +144,15 @@ export const everydayObedienceLessons: Lesson[] = [
       'Stand at a doorway with your dog. Before reaching for the handle, ask them to "wait" in a calm voice',
       'Slowly reach for the door handle. If your dog stays put, crack the door open slightly. If they move toward it, close it gently and reset',
       'The door opening is the reward. When they hold their wait as the door opens, mark "yes!" and release with "okay, let\'s go!" to walk through together',
-      'Practice at every door in your house — front door, back door, bedroom doors. Each one is a new training opportunity',
+      'Practice at every door in your house: the front door, back door, and bedroom doors. Each one is a new training opportunity',
       'Extend to car doors: ask for "wait" before they jump in or out. This prevents bolting into traffic or parking lots',
       'Also practice at gates, elevator doors, and before crossing streets. The pattern is always: pause first, then you give permission to proceed'
     ],
     tips: [
-      '"Wait" means a temporary pause — "stay" means hold that position until I come back and release you. Teaching both gives your dog two distinct skills',
+      '"Wait" means a temporary pause, while "stay" means hold that position until I come back and release you. Teaching both gives your dog two distinct skills',
       'This is a critical safety behavior. A dog who waits at doors won\'t bolt into the street when a guest opens the front door',
-      'Be consistent — don\'t sometimes let them push through and sometimes make them wait. Every time the door opens, they wait first',
-      'For high-drive dogs (Aussies, Labs, etc.), this builds impulse control that transfers to other situations. It\'s not just about doors — it\'s about learning to pause before acting'
+      'Be consistent and don\'t sometimes let them push through and sometimes make them wait. Every time the door opens, they wait first',
+      'For high-drive dogs (Aussies, Labs, etc.), this builds impulse control that transfers to other situations. It\'s not just about doors. It\'s about learning to pause before acting'
     ]
   },
   {
@@ -164,10 +164,10 @@ export const everydayObedienceLessons: Lesson[] = [
     isPremium: false,
     steps: [
       'Start during play. Let your dog take a low-value toy (something they like but aren\'t obsessed with)',
-      'Hold a high-value treat near their nose — something smelly like cheese, hot dog, or freeze-dried liver. Most dogs will drop the toy to investigate',
+      'Hold a high-value treat near their nose, something smelly like cheese, hot dog, or freeze-dried liver. Most dogs will drop the toy to investigate',
       'The moment they open their mouth and the toy falls, say "drop it" and give them the treat. Naming it as they do it builds the association',
       'Here\'s the key: give the toy right back after they drop it. This teaches them that "drop it" doesn\'t mean you\'re taking their stuff away forever',
-      'Gradually work up to higher-value items: better toys, chew items, things they find outside. Always trade up — your treat needs to beat what they have',
+      'Gradually work up to higher-value items: better toys, chew items, things they find outside. Always trade up, because your treat needs to beat what they have',
       'Practice regularly before you actually need it. You don\'t want the first real test to be a chicken bone on the sidewalk'
     ],
     tips: [
@@ -185,17 +185,17 @@ export const everydayObedienceLessons: Lesson[] = [
     difficulty: 3,
     isPremium: false,
     steps: [
-      'Choose one designated spot — a dog bed, crate, or mat. Keep it in the same location while they\'re learning',
-      'Toss a treat onto the bed and let your dog walk over to get it. As they step onto the bed, say "bed" (or "crate," "place" — pick one word and stick with it)',
+      'Choose one designated spot, such as a dog bed, crate, or mat. Keep it in the same location while they\'re learning',
+      'Toss a treat onto the bed and let your dog walk over to get it. As they step onto the bed, say "bed" (or "crate" or "place"). Pick one word and stick with it',
       'Once all four paws are on the bed, mark "yes!" and drop 2-3 more treats between their paws. You want being on the bed to feel like a jackpot',
       'Ask for a "down" on the bed, then reward several times for staying there. Start with just 5-10 seconds of relaxing on the bed before releasing',
       'Gradually reduce the lure. Instead of tossing a treat, point toward the bed. Then just say "bed" without pointing. Reward when they go',
       'Build duration: once they go to their bed on cue, start extending how long they stay there before you release with "okay"'
     ],
     tips: [
-      'Make the bed the best place in the house — surprise treats, chews, and calm praise should all happen there regularly',
+      'Make the bed the best place in the house. Surprise treats, chews, and calm praise should all happen there regularly',
       'Never send your dog to their bed as punishment. It should always be a positive place, not a time-out spot',
-      'This skill is incredibly useful in daily life: doorbell rings, cooking dinner, guests visiting, eating meals — having a "go-to spot" solves so many problems',
+      'This skill is incredibly useful in daily life: doorbell rings, cooking dinner, guests visiting, eating meals. Having a "go-to spot" solves so many problems',
       'For anxious or high-energy dogs, pair the bed with a long-lasting chew (frozen Kong, bully stick) to build positive associations and calm settling behavior'
     ]
   },
@@ -207,15 +207,15 @@ export const everydayObedienceLessons: Lesson[] = [
     difficulty: 1,
     isPremium: false,
     steps: [
-      'Hold a treat in your closed fist at your dog\'s chest level. Most dogs will paw at your hand to get it — that\'s the behavior you\'re capturing',
+      'Hold a treat in your closed fist at your dog\'s chest level. Most dogs will paw at your hand to get it. That\'s the behavior you\'re capturing',
       'The instant a paw touches your hand, mark "yes!" and open your fist to give the treat. They just learned that pawing your hand = reward',
       'After 10+ successful reps, start holding your open palm out instead of a closed fist. When they put their paw in your hand, mark and reward',
       'Add the cue "shake" once they\'re reliably offering their paw. Say it just before they lift their paw so they connect the word to the action',
-      'Practice with both paws — add "other paw" for variety. This keeps their brain engaged and makes the trick more impressive',
+      'Practice with both paws and add "other paw" for variety. This keeps their brain engaged and makes the trick more impressive',
       'Use shake as a greeting behavior: when people want to say hi to your dog, ask for a shake instead of letting them jump'
     ],
     tips: [
-      'This is a great confidence-builder — dogs pick it up fast, and the success feels good for both of you',
+      'This is a great confidence-builder. Dogs pick it up fast, and the success feels good for both of you',
       'If your dog doesn\'t paw naturally, try holding the treat lower or gently tickling the back of their front leg to encourage a paw lift',
       'Most dogs offer the paw closest to the treat hand, so switch hands to get them practicing with both paws',
       'Fun party trick that also serves a purpose: it\'s an easy way to redirect a jumpy dog into polite greeting behavior'
@@ -230,8 +230,8 @@ export const everydayObedienceLessons: Lesson[] = [
     difficulty: 1,
     isPremium: true,
     steps: [
-      'Present your flat, open palm about 2 inches from your dog\'s nose. Most dogs will naturally investigate and bump it with their nose — that\'s exactly what you want',
-      'The instant their nose touches your palm, mark "yes!" and reward. The timing is crucial here — you\'re marking the moment of contact, not the approach',
+      'Present your flat, open palm about 2 inches from your dog\'s nose. Most dogs will naturally investigate and bump it with their nose. That\'s exactly what you want',
+      'The instant their nose touches your palm, mark "yes!" and reward. The timing is crucial here. You\'re marking the moment of contact, not the approach',
       'If your dog is hesitant, rub a treat on your palm to make it smell interesting. Reward the slightest nose movement toward your hand at first',
       'After 15-20 successful touches up close, start moving your hand to different positions: left, right, up high, down low. They should follow and touch wherever your palm goes',
       'Add the cue "touch" once they\'re reliably bumping your hand. This becomes an incredibly versatile tool for guiding your dog\'s movement',
@@ -241,7 +241,7 @@ export const everydayObedienceLessons: Lesson[] = [
     tips: [
       'Touch is one of the most underrated skills in dog training. It\'s a communication tool that lets you guide your dog without pulling, pushing, or luring with food',
       'For fearful dogs, touch is a game-changer in scary situations. Instead of freezing at the vet or shutting down at the groomer, they can focus on the familiar "touch my hand" game',
-      'Herding breeds and Aussies especially love this — it gives them a job and a way to "work" with you. You can chain touches together for a fun, mentally stimulating exercise',
+      'Herding breeds and Aussies especially love this because it gives them a job and a way to "work" with you. You can chain touches together for a fun, mentally stimulating exercise',
       'If your dog mouths or licks your hand instead of bumping with their nose, only reward clean nose touches. They\'ll figure out the distinction quickly'
     ]
   },
@@ -256,14 +256,14 @@ export const everydayObedienceLessons: Lesson[] = [
       'First, define the position: your dog\'s shoulder should be aligned with your left leg, facing the same direction as you. This is the formal "heel" position',
       'Start stationary. Lure your dog into position at your left side using a treat held at your left hip. When they\'re aligned, mark "yes!" and reward. Do this 10+ times before moving',
       'Take one single step forward with your left foot. Use the treat at your hip to keep them glued to your side. Mark and reward for staying in position during that one step',
-      'Build very slowly: 1 step, then 2 steps, then 3. The common mistake is adding too many steps too fast. This is precision work — think of it like teaching a dance',
-      'Practice left turns (you turn into the dog — they need to slow down), right turns (they need to speed up to stay with you), and stops (they should sit automatically when you stop)',
+      'Build very slowly: 1 step, then 2 steps, then 3. The common mistake is adding too many steps too fast. This is precision work, so think of it like teaching a dance',
+      'Practice left turns (you turn into the dog, so they need to slow down), right turns (they need to speed up to stay with you), and stops (they should sit automatically when you stop)',
       'Add the cue "heel" once they can maintain position for 10+ steps. Use it at the start of the behavior, not as a correction when they drift',
       'Heel is a tool for specific situations (crossing busy streets, passing distractions, entering the vet), not for entire walks. Expecting a 30-minute heel is unfair and unrealistic'
     ],
     tips: [
       'Heel is different from loose leash walking. Heel = precise position at your side. Loose leash = walking without pulling. Your dog needs both skills for different situations',
-      'Keep heel sessions SHORT — 30 seconds to 2 minutes max. Holding precise position is mentally exhausting, especially for high-energy dogs who\'d rather be exploring',
+      'Keep heel sessions SHORT, 30 seconds to 2 minutes max. Holding precise position is mentally exhausting, especially for high-energy dogs who\'d rather be exploring',
       'Use your dog\'s highest-value treats for heel work. This is hard and requires intense focus, so the payoff needs to match the effort',
       'For Aussies and herding breeds: their natural tendency is to work in front of or behind you. Heel position (directly beside you) goes against their instincts, so expect it to take longer and reward generously'
     ]
@@ -276,7 +276,7 @@ export const everydayObedienceLessons: Lesson[] = [
     difficulty: 4,
     isPremium: true,
     steps: [
-      'Set up a defined "place" object — a raised platform, place board, or firm dog bed with clear edges. The boundary helps your dog understand exactly where they need to be',
+      'Set up a defined "place" object, such as a raised platform, place board, or firm dog bed with clear edges. The boundary helps your dog understand exactly where they need to be',
       'Once your dog knows basic "go to bed" (lesson 9), transfer the skill: send them to the place object, ask for a down, and reward for settling. Build from 10 seconds to 2 minutes',
       'Start adding distance: send your dog to place from 5 feet away, then 10 feet, then across the room. Use a hand signal pointing toward the object combined with your verbal "place" cue',
       'Add real-life distractions one at a time: you walking around the room, opening a door, having a conversation, picking up keys. Reward them for holding place through each new challenge',
@@ -285,10 +285,81 @@ export const everydayObedienceLessons: Lesson[] = [
       'Proof in new locations: take a portable place board to a friend\'s house, an outdoor cafe, or the park. A dog with a solid "place" can go anywhere and settle calmly'
     ],
     tips: [
-      'Place is different from "go to bed" — it\'s a boundary skill. Your dog learns to stay within the edges of a defined surface, which gives them clear criteria and builds self-control',
+      'Place is different from "go to bed." It\'s a boundary skill. Your dog learns to stay within the edges of a defined surface, which gives them clear criteria and builds self-control',
       'A raised platform (even 2 inches off the ground) makes a big difference. The elevation gives dogs a clearer sense of the boundary and makes them less likely to creep off',
       'This is one of the most practically useful advanced skills. A solid "place" means your dog can come to restaurants, friends\' houses, family gatherings, and public places without being a management headache',
       'If your dog keeps leaving place before being released, you\'re building duration too fast. Go back to a shorter duration they can succeed at, and always release them before they want to leave on their own'
+    ]
+  },
+  {
+    id: 'eo_14',
+    title: 'Come (Basic Recall)',
+    description: 'Teach your dog to come to you reliably at home',
+    duration: 8,
+    difficulty: 2,
+    isPremium: false,
+    steps: [
+      'Start indoors with zero distractions. Have 10-15 high-value treats ready, like cheese, chicken, or whatever your dog goes crazy for',
+      'Wait until your dog wanders a few feet away from you, then crouch down and say "come!" in an excited, happy voice, like you just found buried treasure',
+      'The instant they start moving toward you, keep encouraging: "good dog, come on, yes!" Make yourself the most exciting thing in the room',
+      'When they reach you, throw a party. Multiple treats, praise, petting. This should feel like winning the lottery for them',
+      'After treating, gently hold their collar for 2 seconds before releasing. This prevents the common problem of dogs who come close but dart away before you can grab them',
+      'Practice 5-10 reps, then stop. Always end before they get bored or start ignoring you',
+      'Once reliable indoors, move to a fenced yard. If they don\'t come immediately outside, do NOT repeat the cue. Go get them and try again with less distraction',
+      'Never call "come" for anything your dog won\'t enjoy, such as baths, nail trims, or going inside from the yard. Use "come" only for rewards'
+    ],
+    tips: [
+      'The #1 rule of recall: every single time your dog comes to you, something amazing happens. No exceptions. Even if they took 30 seconds to respond',
+      'Never chase your dog to get them. Instead, run the opposite direction. Their instinct to chase will kick in and they\'ll follow you',
+      'If your dog is food-motivated, use their meal as training. Split their dinner into 20 pieces and make them "come" for each one',
+      'This lesson is the indoor foundation. The Recall category covers advanced outdoor recall, long-line work, and proofing, but this is where it starts'
+    ]
+  },
+
+  {
+    id: 'eo_15',
+    title: 'Off (Get Off Furniture/People)',
+    description: 'Teach your dog to get down from furniture and stop jumping up',
+    duration: 7,
+    difficulty: 2,
+    isPremium: false,
+    steps: [
+      'When your dog is on the couch or jumping on someone, hold a treat at their nose and lure them off/down to the floor. The moment all four paws hit the ground, say "off" and deliver the treat',
+      'Repeat 10+ times per session. They need to connect "off" with the action of moving away from what they\'re on or jumping against',
+      'Start saying "off" slightly before the lure. As they begin to anticipate the word, you can fade the treat lure into a hand gesture',
+      'Practice with people: have someone stand still. When your dog jumps, they turn away. When the dog has four paws on the floor, say "off" and reward from behind your back',
+      'For counter surfing, teach "off" by placing a boring item on the counter edge. When they investigate, say "off" and reward them for turning away from the counter',
+      'Never physically push your dog off furniture or people. Pushing teaches them that physical contact is part of the game and actually reinforces the jumping'
+    ],
+    tips: [
+      '"Off" means "move away from this thing." "Down" means "lie down." Don\'t use them interchangeably or you\'ll confuse your dog',
+      'For jumping on guests, keep a treat jar by the door. Ask guests to ignore the dog completely until four paws are on the floor, then reward',
+      'Large breed owners: this is critical to train early. A 100-pound dog jumping on a child or elderly person is dangerous. Start at 8 weeks',
+      'If you want your dog on furniture sometimes but not always, use an "up" invitation cue. Without the invitation, they should stay off'
+    ]
+  },
+
+  {
+    id: 'eo_16',
+    title: 'Quiet (Stop Barking)',
+    description: 'Teach your dog to stop barking on command',
+    duration: 10,
+    difficulty: 3,
+    isPremium: true,
+    steps: [
+      'Counterintuitively, start by teaching "speak" first. When your dog barks naturally (doorbell, seeing someone outside), say "speak" and reward. Do this until they bark on cue',
+      'Once they bark on command reliably, say "speak," let them bark 2-3 times, then hold a treat right at their nose. They physically can\'t bark and sniff at the same time',
+      'The instant they stop barking to sniff, say "quiet" and give the treat. They need to connect the word "quiet" with the moment of silence',
+      'Gradually increase the silence duration before rewarding: 1 second of quiet, then 3, then 5, then 10. Build slowly',
+      'Practice with real triggers. Ring the doorbell, let them bark twice, then say "quiet" and reward silence. This takes many repetitions, so be patient',
+      'If they keep barking after "quiet," calmly walk them to another room and wait for silence. Then try again. Never yell "quiet!" because it just sounds like you\'re barking with them',
+      'For alert barkers: acknowledge the trigger first ("thank you, I see it"), then cue "quiet" and reward. This validates their instinct before asking them to stop'
+    ],
+    tips: [
+      'Yelling at a barking dog is the single most counterproductive thing you can do. To them, you\'re just joining in',
+      'Breeds like Shelties, Beagles, and Huskies are naturally vocal. You can reduce barking but may never eliminate it entirely, so manage expectations',
+      'If barking is anxiety-driven (separation, fear), "quiet" training alone won\'t fix it. You need to address the underlying anxiety first. See the Calm & Focus lessons',
+      'Exercise reduces barking dramatically. A tired dog is a quiet dog. Most excessive barking stems from boredom and pent-up energy'
     ]
   },
 ];

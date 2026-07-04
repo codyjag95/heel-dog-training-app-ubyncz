@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useApp } from '../../../contexts/AppContext';
 import { getLessonById } from '../../../data/categoryData';
+import { getLessonImage } from '../../../data/lessonImages';
 import { colors, typography, spacing } from '../../../data/darkTheme';
 import { Ionicons } from '@expo/vector-icons';
 import FloatingTimer from '../../../components/FloatingTimer';
+import LessonComplete from '../../../components/LessonComplete';
 
 export default function LessonDetailScreen() {
   const router = useRouter();
@@ -21,24 +24,20 @@ export default function LessonDetailScreen() {
   }
 
   const isComplete = isLessonComplete(categoryId!, lessonId!);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   const handleComplete = () => {
     markLessonComplete(categoryId!, lessonId!);
-    router.back();
+    setShowCelebration(true);
   };
-
-  // Use lesson's videoUrl (which contains old imageUrl) or fallback
-  const imageUrl = lesson.videoUrl || 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800&q=80';
 
   return (
     <View style={styles.container}>
-      {/* Header styled by root _layout.tsx — no override needed */}
-
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Hero Image */}
         <Image
-          source={{ uri: imageUrl }}
-          style={styles.heroImage}
+          source={getLessonImage(categoryId!, lessonId!, lesson.videoUrl)}
+          style={{ width: '100%', height: 300, backgroundColor: colors.cardBackground }}
           resizeMode="cover"
         />
 
@@ -103,6 +102,7 @@ export default function LessonDetailScreen() {
       <View style={styles.bottomContainer}>
         {isComplete ? (
           <View style={styles.completeMessage}>
+            <Ionicons name="checkmark-circle" size={22} color="#FFFFFF" style={{ marginRight: 8 }} />
             <Text style={styles.completeMessageText}>Lesson Complete!</Text>
           </View>
         ) : (
@@ -111,6 +111,7 @@ export default function LessonDetailScreen() {
           </TouchableOpacity>
         )}
       </View>
+      {showCelebration && <LessonComplete categoryId={categoryId!} lessonId={lessonId!} onDismiss={() => setShowCelebration(false)} />}
     </View>
   );
 }
@@ -127,13 +128,6 @@ const styles = StyleSheet.create({
     color: colors.error,
     textAlign: 'center',
     marginTop: spacing.xxxl,
-  },
-
-  // Hero Image
-  heroImage: {
-    width: '100%',
-    height: 300,
-    backgroundColor: colors.cardBackground,
   },
 
   // Header Section
@@ -169,9 +163,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     gap: spacing.xs,
   },
-  metaIcon: {
-    fontSize: 16,
-  },
   metaText: {
     fontSize: typography.small,
     color: colors.textPrimary,
@@ -189,9 +180,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.md,
     gap: spacing.sm,
-  },
-  sectionIcon: {
-    fontSize: 24,
   },
   sectionTitle: {
     fontSize: typography.h3,
@@ -270,17 +258,19 @@ const styles = StyleSheet.create({
   completeButtonText: {
     fontSize: typography.h4,
     fontWeight: typography.bold,
-    color: colors.textPrimary,
+    color: '#FFFFFF',
   },
   completeMessage: {
-    backgroundColor: colors.success,
+    backgroundColor: '#4CAF50',
     padding: spacing.lg,
     borderRadius: 12,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   completeMessageText: {
     fontSize: typography.h4,
     fontWeight: typography.bold,
-    color: colors.textPrimary,
+    color: '#FFFFFF',
   },
 });

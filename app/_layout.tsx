@@ -23,17 +23,32 @@ function RootLayoutNav() {
     <Stack
       screenOptions={{
         headerShown: false,
-        animation: 'slide_from_right',
+        animation: 'default',
+        gestureEnabled: true,
       }}
     >
       {/* 
         CRITICAL: title: '' prevents "Tabs" from showing as back button text
         when navigating from any tab to a stack screen like category/[id] 
       */}
-      <Stack.Screen name="(tabs)" options={{ title: '' }} />
+      <Stack.Screen name="(tabs)" options={{ title: '', headerBackTitle: '' }} />
       <Stack.Screen name="welcome" />
-      <Stack.Screen name="quiz-results" />
       <Stack.Screen
+        name="quiz-results"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+  name="roadmap"
+  options={{
+    headerShown: true,
+    headerBackVisible: true,
+    headerBackTitle: '',
+    headerTitle: 'Training Plan',
+    headerStyle: { backgroundColor: '#000' },
+    headerTintColor: '#FF4444',
+    headerTitleStyle: { color: '#FFFFFF' },
+  }}
+/> <Stack.Screen
         name="category/[id]"
         options={{
           headerShown: true,

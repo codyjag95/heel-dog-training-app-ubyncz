@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as StoreReview from 'expo-store-review';
 import { useApp } from '../../contexts/AppContext';
 import { CATEGORIES } from '../../data/categoryData';
 import { CATEGORY_ICONS } from '../../data/iconSystem';
 import { colors, typography, spacing } from '../../data/darkTheme';
+import ScrollFade from '../../components/ScrollFade';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { userProfile, getCategoryProgress, hasPremium, isLessonComplete } = useApp();
+  const { userProfile, getCategoryProgress, hasPremium, isLessonComplete, getDayStreak } = useApp();
 
   // Calculate total completed lessons across all categories
   const totalLessonsCompleted = CATEGORIES.reduce((total, category) => {
@@ -58,10 +61,41 @@ export default function HomeScreen() {
   };
 
   const nextLesson = getNextLesson();
-  const trainingStreak = 0; // TODO: Implement actual streak tracking
+  const trainingStreak = getDayStreak(); // TODO: Implement actual streak tracking
+
+  useEffect(() => {
+    // Store install date on first load
+    AsyncStorage.getItem('@heel_install_date').then(date => {
+      if (!date) AsyncStorage.setItem('@heel_install_date', new Date().toISOString());
+    });
+  }, []);
+
+  useEffect(() => {
+    const checkForReview = async () => {
+      if (totalLessonsCompleted >= 7) {
+        const hasAsked = await AsyncStorage.getItem('@heel_asked_review');
+        if (hasAsked) return;
+
+        const installDate = await AsyncStorage.getItem('@heel_install_date');
+        if (installDate) {
+          const daysSinceInstall = (Date.now() - new Date(installDate).getTime()) / (1000 * 60 * 60 * 24);
+          if (daysSinceInstall < 3) return;
+        }
+
+        const isAvailable = await StoreReview.isAvailableAsync();
+        if (isAvailable) {
+          await StoreReview.requestReview();
+          await AsyncStorage.setItem('@heel_asked_review', 'true');
+        }
+      }
+    };
+    const timer = setTimeout(() => checkForReview(), 5000);
+    return () => clearTimeout(timer);
+  }, [totalLessonsCompleted]);
 
   return (
     <View style={styles.container}>
+      <ScrollFade fadeBottom>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* HEEL Logo Header */}
         <View style={styles.logoHeader}>
@@ -156,6 +190,52 @@ export default function HomeScreen() {
         )}
 
         {/* Today's Focus */}
+        {/* Training Roadmap Button */}
+{userProfile && (
+  <View style={styles.section}>
+    <TouchableOpacity
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.cardBackground,
+        padding: spacing.lg,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: colors.accent,
+      }}
+      onPress={() => router.push('/roadmap')}
+    >
+      <View style={{
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        backgroundColor: colors.cardBackgroundSecondary || colors.background,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: spacing.md,
+      }}>
+        <Ionicons name="map" size={24} color={colors.accent} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{
+          fontSize: typography.h3,
+          fontWeight: typography.bold,
+          color: colors.textPrimary,
+          marginBottom: 2,
+        }}>
+          {userProfile.dogName}'s Training Plan
+        </Text>
+        <Text style={{
+          fontSize: typography.small,
+          color: colors.textSecondary,
+        }}>
+          View your personalized 4-week roadmap
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={colors.accent} />
+    </TouchableOpacity>
+  </View>
+)}
         {recommendedCategories.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Your Focus Areas</Text>
@@ -234,7 +314,7 @@ export default function HomeScreen() {
               onPress={() => router.push('/(tabs)/premium')}
             >
               <View style={styles.actionIconContainer}>
-                <Ionicons name="paw" size={20} color="#FFD700" />
+                <Ionicons name="paw" size={20} color="#D4AF37" />
               </View>
               <Text style={styles.actionText}>Unlock Premium Features</Text>
               <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
@@ -244,6 +324,7 @@ export default function HomeScreen() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+      </ScrollFade>
     </View>
   );
 }

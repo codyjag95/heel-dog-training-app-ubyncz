@@ -113,14 +113,14 @@ export default function SessionCompleteScreen() {
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           style={styles.secondaryButton}
-          onPress={() => router.push(`/category/${categoryId}`)}
+          onPress={() => router.replace(`/category/${categoryId}`)}
         >
           <Text style={styles.secondaryButtonText}>Back to Category</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.primaryButton}
-          onPress={() => router.push('/(tabs)')}
+          onPress={() => router.replace('/(tabs)')}
         >
           <Text style={styles.primaryButtonText}>Done</Text>
         </TouchableOpacity>

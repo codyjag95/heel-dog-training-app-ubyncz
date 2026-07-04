@@ -13,6 +13,7 @@ import { CATEGORIES } from '../../data/categoryData';
 import { useApp } from '../../contexts/AppContext';
 import { colors, typography, spacing } from '../../data/darkTheme';
 import { CATEGORY_ICONS } from '../../data/iconSystem';
+import ScrollFade from '../../components/ScrollFade';
 
 export default function TrainingScreen() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function TrainingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ScrollFade fadeBottom>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -108,6 +110,7 @@ export default function TrainingScreen() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+      </ScrollFade>
     </SafeAreaView>
   );
 }

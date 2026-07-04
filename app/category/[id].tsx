@@ -25,8 +25,6 @@ export default function CategoryDetailScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header styled by root _layout.tsx — no override needed */}
-
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
@@ -92,7 +90,7 @@ export default function CategoryDetailScreen() {
               ]}
               onPress={() => {
                 if (isLocked) {
-                  router.push('/premium');
+                  router.push('/(tabs)/premium');
                 } else {
                   router.push(`/lesson/${id}/${lesson.id}`);
                 }
@@ -149,6 +147,8 @@ export default function CategoryDetailScreen() {
             </TouchableOpacity>
           );
         })}
+
+        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.lg,
-    paddingTop: 80,
+    paddingTop: spacing.md,
   },
   errorText: {
     color: colors.error,

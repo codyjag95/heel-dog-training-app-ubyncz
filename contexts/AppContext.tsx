@@ -1,10 +1,10 @@
 /**
  * AppContext - Safe Initialization for Production
  * 
- * Includes InteractionManager.runAfterInteractions to delay AsyncStorage reads
- * Prevents crashes when native modules aren't ready on cold launch
- * 
- * IAP (In-App Purchase) support added for premium subscriptions
+ * v1.1 CHANGES:
+ * - Added breedId and q9Challenges to QuizProfile type
+ * - generateProfile now accepts optional allAnswers parameter for Q9 fix
+ * - getDayStreak implemented properly
  */
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
@@ -36,11 +36,17 @@ type QuizAnswer = {
 type QuizProfile = {
   dogName: string;
   breed: string;
+  breedId: string;           // NEW: breed database ID for lookups
   energyLevel: number;
   experience: number;
   motivationType: 'food' | 'play' | 'praise' | 'mixed';
   availability: number;
+  availabilityLabel: string;   // NEW: human-readable time label
   challenges: string[];
+  q9Challenges: string[];    // NEW: urgent challenges from Q9
+  q7Goal: string;            // NEW: primary goal from Q7
+  ageLabel: string;          // NEW: human-readable age label
+  experienceLabel: string;   // NEW: human-readable experience label
   recommendedCategories: string[];
 };
 
@@ -64,7 +70,7 @@ type AppContextType = {
   
   // Profile
   userProfile: QuizProfile | null;
-  generateProfile: () => void;
+  generateProfile: (allAnswers?: QuizAnswer[]) => void;
   
   // Progress tracking
   lessonProgress: LessonProgress[];
@@ -157,21 +163,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [error, setError] = useState<string | null>(null);
 
   // ============================================================================
-  // INITIALIZATION - Safe loading with InteractionManager
+  // INITIALIZATION
   // ============================================================================
 
   useEffect(() => {
     let isMounted = true;
     
     const initializeApp = async () => {
-      // Wait for interactions to complete and native modules to be ready
       await new Promise<void>((resolve) => {
         InteractionManager.runAfterInteractions(() => {
           resolve();
         });
       });
       
-      // Additional small delay to ensure native modules are fully initialized
       await new Promise(resolve => setTimeout(resolve, 100));
       
       if (!isMounted) return;
@@ -194,11 +198,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!isMounted) return;
 
         if (savedAnswers) {
-          try {
-            setQuizAnswers(JSON.parse(savedAnswers));
-          } catch (e) {
-            console.log('Error parsing quiz answers:', e);
-          }
+          try { setQuizAnswers(JSON.parse(savedAnswers)); } catch (e) { console.log('Error parsing quiz answers:', e); }
         }
 
         if (savedDogName) {
@@ -209,45 +209,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           try {
             setUserProfile(JSON.parse(savedProfile));
             setIsQuizComplete(true);
-          } catch (e) {
-            console.log('Error parsing profile:', e);
-          }
+          } catch (e) { console.log('Error parsing profile:', e); }
         }
 
         if (savedProgress) {
-          try {
-            setLessonProgress(JSON.parse(savedProgress));
-          } catch (e) {
-            console.log('Error parsing progress:', e);
-          }
+          try { setLessonProgress(JSON.parse(savedProgress)); } catch (e) { console.log('Error parsing progress:', e); }
         }
 
         if (savedPremium) {
           try {
-            setHasPremiumState(JSON.parse(savedPremium));
+            const isPremium = JSON.parse(savedPremium);
+            if (isPremium) {
+              // Check if test unlock has expired (30 days)
+              const unlockType = await safeGetItem('@heel_unlock_type');
+              const isBetaTester = await safeGetItem('@heel_beta_tester');
+              if (isBetaTester === 'true' && unlockType === 'test') {
+                const unlockDate = await safeGetItem('@heel_test_unlock_date');
+                if (unlockDate) {
+                  const daysSinceUnlock = (Date.now() - new Date(unlockDate).getTime()) / (1000 * 60 * 60 * 24);
+                  if (daysSinceUnlock > 30) {
+                    // Test code expired
+                    await AsyncStorage.setItem('@heel_has_premium', 'false');
+                    await AsyncStorage.removeItem('@heel_beta_tester');
+                    await AsyncStorage.removeItem('@heel_unlock_type');
+                    await AsyncStorage.removeItem('@heel_test_unlock_date');
+                    setHasPremiumState(false);
+                  } else {
+                    setHasPremiumState(true);
+                  }
+                } else {
+                  setHasPremiumState(true);
+                }
+              } else {
+                setHasPremiumState(true);
+              }
+            }
           } catch (e) {
-            // Handle both boolean and string "true"
             setHasPremiumState(savedPremium === 'true');
           }
         }
 
       } catch (err) {
         console.error('Error initializing app:', err);
-        if (isMounted) {
-          setError('Failed to load app data');
-        }
+        if (isMounted) setError('Failed to load app data');
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (isMounted) setIsLoading(false);
       }
     };
 
     initializeApp();
-    
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
 
   // ============================================================================
@@ -266,28 +277,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIapReady(connected);
 
         if (connected) {
-          // Fetch products (real prices from Apple)
-          setProductsLoading(true);
           const fetchedProducts = await getProducts();
-          if (!isMounted) return;
-          setProducts(fetchedProducts);
-          setProductsLoading(false);
+          if (isMounted) {
+            setProducts(fetchedProducts);
+            setProductsLoading(false);
+          }
 
-          // Listen for purchase updates (handles the actual purchase confirmation)
           cleanupListener = setupPurchaseListener(
-            // On success — this is where purchases get confirmed in v12+
-            async (productId: string) => {
-              console.log('AppContext: Purchase listener success for', productId);
-              if (!isMounted) return;
-              setHasPremiumState(true);
-              try {
-                await AsyncStorage.setItem('@heel_has_premium', 'true');
-                await AsyncStorage.setItem('@heel_subscription_product', productId);
-              } catch (e) {
-                console.error('Error saving premium status:', e);
+            async (purchase) => {
+              if (isMounted) {
+                setHasPremiumState(true);
+                await safeSetItem('@heel_has_premium', 'true');
               }
             },
-            // On error
             (error: string) => {
               console.error('AppContext: Purchase listener error:', error);
             }
@@ -350,11 +352,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // ============================================================================
   // PROFILE GENERATION
+  // Now accepts optional allAnswers for the Q9 timing fix
   // ============================================================================
 
-  const generateProfile = useCallback(() => {
+  const generateProfile = useCallback((allAnswers?: QuizAnswer[]) => {
     try {
-      const profile = buildProfileFromAnswers(quizAnswers, dogName);
+      const answersToUse = allAnswers || quizAnswers;
+      const profile = buildProfileFromAnswers(answersToUse, dogName, allAnswers);
       setUserProfile(profile);
       setIsQuizComplete(true);
       safeSetItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
@@ -402,16 +406,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       p => p.categoryId === categoryId && p.completed
     ).length;
     
-    return {
-      completed,
-      total: category.totalLessons
-    };
+    return { completed, total: category.totalLessons };
   }, [lessonProgress]);
 
   const getOverallProgress = useCallback(() => {
     const total = CATEGORIES.reduce((sum, cat) => sum + cat.totalLessons, 0);
     const completed = lessonProgress.filter(p => p.completed).length;
-    
     return { completed, total };
   }, [lessonProgress]);
 
@@ -457,20 +457,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // IAP ACTIONS
   // ============================================================================
 
-  /**
-   * Purchase a subscription.
-   * 
-   * In react-native-iap v12+, requestSubscription returns void and
-   * the actual confirmation comes through purchaseUpdatedListener above.
-   * We handle both flows:
-   *   - Direct return (older versions) → set premium here
-   *   - 'pending' return (v12+) → listener sets premium automatically
-   */
   const purchase = useCallback(async (productId: string): Promise<PurchaseResult> => {
     try {
       const result = await purchaseSubscription(productId);
 
-      // Direct success (older react-native-iap versions)
       if (result.success) {
         setHasPremium(true);
         try {
@@ -481,20 +471,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
 
-      // 'pending' means payment sheet was shown and listener will handle it
-      // 'cancelled' means user dismissed — both are fine, not errors
-
       return result;
     } catch (err: any) {
       console.error('AppContext purchase error:', err);
-      return {
-        success: false,
-        error: err?.message || 'Something went wrong. Please try again.',
-      };
+      return { success: false, error: err?.message || 'Something went wrong. Please try again.' };
     }
   }, [setHasPremium]);
 
-  // Restore purchases
   const restore = useCallback(async (): Promise<PurchaseResult> => {
     try {
       const result = await restoreIAP();
@@ -514,10 +497,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return result;
     } catch (err: any) {
       console.error('AppContext restore error:', err);
-      return {
-        success: false,
-        error: err?.message || 'Could not restore purchases.',
-      };
+      return { success: false, error: err?.message || 'Could not restore purchases.' };
     }
   }, [setHasPremium]);
 
