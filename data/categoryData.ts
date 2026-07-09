@@ -35,6 +35,7 @@ export type Category = {
   isPremium?: boolean;
   lessons: Lesson[];
   recommendedFor?: string[]; // Quiz tags that recommend this category
+  disclaimer?: string; // Optional legal/safety notice shown on category + lesson screens
 };
 
 export const CATEGORIES: Category[] = [
@@ -196,6 +197,8 @@ export const CATEGORIES: Category[] = [
     totalLessons: 9,
     isPremium: true,
     recommendedFor: ['service'],
+    disclaimer:
+      'This is a foundational skills course, not a substitute for professional service dog training. HEEL does not certify, register, or qualify any dog as a service animal. Legitimate service dog work requires a genuine disability-related need and typically 18–24 months of training with a qualified professional. Public-access rights and laws (including the ADA) vary by location — consult a certified trainer or an accredited organization such as Assistance Dogs International before pursuing service work.',
     lessons: serviceDogLessons,
   },
 ];

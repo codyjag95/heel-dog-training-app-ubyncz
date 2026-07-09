@@ -15,7 +15,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.codyjag95.heel",
-      "buildNumber": "110",
+      "buildNumber": "111",
       "supportsTablet": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false

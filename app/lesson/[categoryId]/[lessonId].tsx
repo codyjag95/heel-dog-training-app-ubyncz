@@ -115,6 +115,16 @@ export default function LessonDetailScreen() {
               <Text style={styles.metaText}>Level {lesson.difficulty}</Text>
             </View>
           </View>
+
+          {/* Service Dog (and any category with a disclaimer): short reminder */}
+          {category?.disclaimer && (
+            <View style={styles.lessonDisclaimer}>
+              <Ionicons name="information-circle" size={15} color={colors.warning} style={{ marginTop: 1 }} />
+              <Text style={styles.lessonDisclaimerText}>
+                Foundational skills only. Not a substitute for professional service dog training or certification.
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Instructions Section */}
@@ -270,6 +280,22 @@ const styles = StyleSheet.create({
     fontSize: typography.small,
     color: colors.textPrimary,
     fontWeight: typography.medium,
+  },
+  lessonDisclaimer: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+    backgroundColor: colors.cardBackground,
+    borderRadius: 10,
+    padding: spacing.md,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.warning,
+  },
+  lessonDisclaimerText: {
+    flex: 1,
+    fontSize: typography.caption,
+    color: colors.textSecondary,
+    lineHeight: 17,
   },
 
   // Sections

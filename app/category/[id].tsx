@@ -63,6 +63,14 @@ export default function CategoryDetailScreen() {
           <Text style={styles.description}>{category.description}</Text>
         </View>
 
+        {/* Disclaimer (e.g. Service Dog) — shown only when the category defines one */}
+        {category.disclaimer && (
+          <View style={styles.disclaimerBox}>
+            <Ionicons name="information-circle" size={18} color={colors.warning} style={{ marginTop: 1 }} />
+            <Text style={styles.disclaimerText}>{category.disclaimer}</Text>
+          </View>
+        )}
+
         {/* Progress */}
         <View style={styles.progressContainer}>
           <View style={styles.progressHeader}>
@@ -374,5 +382,21 @@ const styles = StyleSheet.create({
   },
   lockedText: {
     opacity: 0.7,
+  },
+  disclaimerBox: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    backgroundColor: colors.cardBackground,
+    borderRadius: 12,
+    padding: spacing.md,
+    marginBottom: spacing.xl,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.warning,
+  },
+  disclaimerText: {
+    flex: 1,
+    fontSize: typography.caption,
+    color: colors.textSecondary,
+    lineHeight: 18,
   },
 });
