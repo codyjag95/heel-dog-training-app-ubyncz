@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   },
   headerImage: {
     width: '100%',
-    aspectRatio: 16 / 9,
+    height: 170,
     borderRadius: 18,
     marginBottom: spacing.md,
     backgroundColor: colors.cardBackground,

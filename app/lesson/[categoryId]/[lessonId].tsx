@@ -216,12 +216,12 @@ const styles = StyleSheet.create({
   // Header Section
   heroImage: {
     width: '100%',
-    aspectRatio: 16 / 9,
+    height: 190,
     backgroundColor: colors.cardBackground,
   },
   heroFallback: {
     width: '100%',
-    aspectRatio: 16 / 9,
+    height: 190,
     backgroundColor: colors.cardBackground,
     justifyContent: 'center',
     alignItems: 'center',
