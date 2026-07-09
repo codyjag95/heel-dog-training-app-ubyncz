@@ -12,7 +12,7 @@ const SUPPORT_EMAIL = 'support@heeldogtraining.com';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { userProfile, resetQuiz, hasPremium, setHasPremium, getCategoryProgress, getDayStreak, session, signOut, syncing, syncNow, dogs, activeDogId, addDog, switchDog } = useApp();
+  const { userProfile, resetQuiz, hasPremium, setHasPremium, getCategoryProgress, getDayStreak, session, signOut, deleteAccount, syncing, syncNow, dogs, activeDogId, addDog, switchDog } = useApp();
 
   const handleAddDog = () => {
     // Multi-dog is a Premium feature
@@ -404,6 +404,52 @@ export default function ProfileScreen() {
                 <View style={styles.actionTextContainer}>
                   <Text style={styles.actionTitle}>Sign Out</Text>
                   <Text style={styles.actionSubtitle}>Progress stays backed up</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() =>
+                  Alert.alert(
+                    'Delete Account?',
+                    'This permanently deletes your account and all training data from our servers. This cannot be undone.',
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      {
+                        text: 'Delete',
+                        style: 'destructive',
+                        onPress: () =>
+                          Alert.alert(
+                            'Are you sure?',
+                            'Your account, dogs, progress, and streaks will be permanently erased.',
+                            [
+                              { text: 'Keep My Account', style: 'cancel' },
+                              {
+                                text: 'Delete Everything',
+                                style: 'destructive',
+                                onPress: async () => {
+                                  const ok = await deleteAccount();
+                                  if (ok) {
+                                    Alert.alert('Account Deleted', 'Your account and data have been removed.');
+                                    router.replace('/welcome');
+                                  } else {
+                                    Alert.alert('Could Not Delete', 'Something went wrong. Please check your connection and try again.');
+                                  }
+                                },
+                              },
+                            ]
+                          ),
+                      },
+                    ]
+                  )
+                }
+              >
+                <View style={styles.actionIconContainer}>
+                  <Ionicons name="trash-outline" size={20} color={colors.error} />
+                </View>
+                <View style={styles.actionTextContainer}>
+                  <Text style={[styles.actionTitle, { color: colors.error }]}>Delete Account</Text>
+                  <Text style={styles.actionSubtitle}>Permanently erase your account and data</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
               </TouchableOpacity>

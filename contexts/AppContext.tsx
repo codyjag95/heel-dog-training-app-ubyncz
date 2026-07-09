@@ -17,7 +17,7 @@ import {
   notificationsEnabled,
 } from '../services/notifications';
 import { supabase } from '../lib/supabase';
-import { fullSync, pushLessonCompletion } from '../services/syncService';
+import { fullSync, pushLessonCompletion, deleteAccount as deleteAccountRemote } from '../services/syncService';
 import { logEvent } from '../services/analytics';
 import type { Session } from '@supabase/supabase-js';
 import { buildProfileFromAnswers } from '../data/quizData_v2';
@@ -106,6 +106,7 @@ type AppContextType = {
   syncing: boolean;
   syncNow: () => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<boolean>;
 
   // Multi-dog
   dogs: DogEntry[];
@@ -582,6 +583,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
+  // Permanently delete the account server-side, then wipe everything local.
+  const deleteAccount = useCallback(async (): Promise<boolean> => {
+    const ok = await deleteAccountRemote();
+    if (!ok) return false;
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const heelKeys = keys.filter(k => k.startsWith('@heel'));
+      if (heelKeys.length) await AsyncStorage.multiRemove(heelKeys);
+    } catch {}
+    setSession(null);
+    setUserProfile(null);
+    setIsQuizComplete(false);
+    setLessonProgress([]);
+    setHasPremiumState(false);
+    setDogs([]);
+    setActiveDogId(null);
+    setBonusUnlocks([]);
+    setStreakFreezes(0);
+    setFreezeDates([]);
+    setLastAwardStreak(0);
+    setQuizAnswers([]);
+    setDogName('');
+    return true;
+  }, []);
+
   // ============================================================================
   // MULTI-DOG
   // The live keys (USER_PROFILE, LESSON_PROGRESS, streak keys) always hold
@@ -930,6 +956,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     syncing,
     syncNow,
     signOut,
+    deleteAccount,
     dogs,
     activeDogId,
     addDog,

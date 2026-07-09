@@ -171,6 +171,24 @@ export const redeemPromoCode = async (code: string): Promise<string> => {
 };
 
 /**
+ * Permanently delete the signed-in user's account and ALL their cloud data.
+ * Calls the delete_account() RPC (security definer), which removes the
+ * auth.users row; every data table cascades off that. Then signs out locally.
+ * Required by Apple App Store guideline 5.1.1(v) for any app with accounts.
+ */
+export const deleteAccount = async (): Promise<boolean> => {
+  const userId = await getUserId();
+  if (!userId) return false;
+  const { error } = await supabase.rpc('delete_account');
+  if (error) {
+    console.log('[Sync] deleteAccount error:', error.message);
+    return false;
+  }
+  try { await supabase.auth.signOut(); } catch {}
+  return true;
+};
+
+/**
  * The big one: full two-way sync, called on sign-in (and pull-to-refresh later).
  * Returns merged progress (union of local + cloud) and cloud premium status.
  */
