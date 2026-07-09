@@ -1,15 +1,18 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect } from 'react';
+import { Alert, StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useApp } from '../../contexts/AppContext';
 import { CATEGORIES } from '../../data/categoryData';
 import { CATEGORY_ICONS } from '../../data/iconSystem';
 import { colors, typography, spacing } from '../../data/darkTheme';
+import { LinearGradient } from 'expo-linear-gradient';
+import ScrollFade from '../../components/ScrollFade';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { userProfile, getCategoryProgress, hasPremium, isLessonComplete } = useApp();
+  const { userProfile, getCategoryProgress, hasPremium, isLessonComplete, getDayStreak, streakFreezes, dogs, activeDogId, switchDog } = useApp();
 
   // Calculate total completed lessons across all categories
   const totalLessonsCompleted = CATEGORIES.reduce((total, category) => {
@@ -58,46 +61,76 @@ export default function HomeScreen() {
   };
 
   const nextLesson = getNextLesson();
-  const trainingStreak = 0; // TODO: Implement actual streak tracking
+  const trainingStreak = getDayStreak();
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'GOOD MORNING' : hour < 17 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
+
+  useEffect(() => {
+    // Store install date on first load
+    AsyncStorage.getItem('@heel_install_date').then(date => {
+      if (!date) AsyncStorage.setItem('@heel_install_date', new Date().toISOString());
+    });
+  }, []);
+
+  // Review prompts moved to LessonComplete (milestone-based, at the
+  // celebration moment) — asking on home-screen mount was wasted timing.
 
   return (
     <View style={styles.container}>
+      <ScrollFade fadeBottom>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* HEEL Logo Header */}
+        {/* Brand bar */}
         <View style={styles.logoHeader}>
-          <View style={styles.logoContainer}>
-            <Ionicons name="paw" size={36} color={colors.accent} />
-          </View>
-          <View style={styles.brandContainer}>
+          <View style={styles.brandRow}>
+            <Ionicons name="paw" size={26} color={colors.accent} />
             <Text style={styles.brandName}>HEEL</Text>
-            <Text style={styles.brandTagline}>Dog Training</Text>
           </View>
+          {trainingStreak > 0 && (
+            <View style={styles.streakPill}>
+              <Ionicons name="flame" size={15} color="#FFFFFF" />
+              <Text style={styles.streakPillText}>{trainingStreak} day{trainingStreak === 1 ? '' : 's'}</Text>
+            </View>
+          )}
         </View>
 
-        {/* Welcome Header */}
+        {/* Hero greeting */}
         <View style={styles.header}>
-          <Text style={styles.welcomeText}>Welcome back,</Text>
-          <Text style={styles.dogName}>{userProfile?.dogName || 'Trainer'}!</Text>
+          <Text style={styles.welcomeText}>{greeting}</Text>
+          <Text style={styles.dogName}>Let's train,{'\n'}{userProfile?.dogName || 'Trainer'}.</Text>
+          {dogs.length > 1 && (
+            <TouchableOpacity
+              style={styles.dogSwitcher}
+              onPress={() =>
+                Alert.alert('Switch Dog', 'Who are we training?', [
+                  ...dogs.map(d => ({
+                    text: d.id === activeDogId ? `${d.name} ✓` : d.name,
+                    onPress: () => { if (d.id !== activeDogId) switchDog(d.id); },
+                  })),
+                  { text: 'Cancel', style: 'cancel' as const },
+                ])
+              }
+            >
+              <Ionicons name="swap-horizontal" size={14} color={colors.textSecondary} />
+              <Text style={styles.dogSwitcherText}>Switch dog</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <Ionicons name="book" size={28} color={colors.accent} />
             <Text style={styles.statValue}>{totalLessonsCompleted}</Text>
-            <Text style={styles.statLabel}>Completed</Text>
+            <Text style={styles.statLabel}>LESSONS</Text>
+          </View>
+
+          <View style={[styles.statCard, styles.statCardAccent]}>
+            <Text style={[styles.statValue, { color: colors.accent }]}>{trainingStreak}</Text>
+            <Text style={styles.statLabel}>DAY STREAK{streakFreezes > 0 ? ` · ❄${streakFreezes}` : ''}</Text>
           </View>
 
           <View style={styles.statCard}>
-            <Ionicons name="flame" size={28} color={colors.accent} />
-            <Text style={styles.statValue}>{trainingStreak}</Text>
-            <Text style={styles.statLabel}>Day Streak</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Ionicons name="flag" size={28} color={colors.accent} />
             <Text style={styles.statValue}>{recommendedCategories.length}</Text>
-            <Text style={styles.statLabel}>Focus Areas</Text>
+            <Text style={styles.statLabel}>FOCUS AREAS</Text>
           </View>
         </View>
 
@@ -106,15 +139,21 @@ export default function HomeScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Continue Training</Text>
             <TouchableOpacity
-              style={styles.continueCard}
               onPress={() =>
                 router.push(`/lesson/${nextLesson.category.id}/${nextLesson.lesson.id}`)
               }
+              activeOpacity={0.9}
+            >
+            <LinearGradient
+              colors={[colors.accent, '#8E1010']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.continueCard}
             >
               <View style={styles.continueHeader}>
-                <Text style={styles.continueCategory}>{nextLesson.category.title}</Text>
+                <Text style={styles.continueCategory}>{nextLesson.category.title.toUpperCase()}</Text>
                 <View style={styles.continueBadge}>
-                  <Text style={styles.continueBadgeText}>Next Up</Text>
+                  <Text style={styles.continueBadgeText}>NEXT UP</Text>
                 </View>
               </View>
               
@@ -124,17 +163,18 @@ export default function HomeScreen() {
               </Text>
 
               <View style={styles.continueMeta}>
-                <Ionicons name="time-outline" size={14} color={colors.textTertiary} />
+                <Ionicons name="time-outline" size={14} color="rgba(255,255,255,0.8)" />
                 <Text style={styles.continueMetaText}>{nextLesson.lesson.duration} min</Text>
                 <Text style={styles.continueMetaDot}>·</Text>
-                <Ionicons name="bar-chart-outline" size={14} color={colors.textTertiary} />
+                <Ionicons name="bar-chart-outline" size={14} color="rgba(255,255,255,0.8)" />
                 <Text style={styles.continueMetaText}>Level {nextLesson.lesson.difficulty}</Text>
               </View>
 
               <View style={styles.continueButton}>
                 <Text style={styles.continueButtonText}>Start Lesson</Text>
-                <Ionicons name="arrow-forward" size={18} color={colors.textPrimary} />
+                <Ionicons name="arrow-forward" size={18} color={colors.accent} />
               </View>
+            </LinearGradient>
             </TouchableOpacity>
           </View>
         ) : (
@@ -156,6 +196,52 @@ export default function HomeScreen() {
         )}
 
         {/* Today's Focus */}
+        {/* Training Roadmap Button */}
+{userProfile && (
+  <View style={styles.section}>
+    <TouchableOpacity
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.cardBackground,
+        padding: spacing.lg,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: colors.accent,
+      }}
+      onPress={() => router.push('/roadmap')}
+    >
+      <View style={{
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        backgroundColor: colors.cardBackgroundSecondary || colors.background,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: spacing.md,
+      }}>
+        <Ionicons name="map" size={24} color={colors.accent} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{
+          fontSize: typography.h3,
+          fontWeight: typography.bold,
+          color: colors.textPrimary,
+          marginBottom: 2,
+        }}>
+          {userProfile.dogName}'s Training Plan
+        </Text>
+        <Text style={{
+          fontSize: typography.small,
+          color: colors.textSecondary,
+        }}>
+          View your personalized 4-week roadmap
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={colors.accent} />
+    </TouchableOpacity>
+  </View>
+)}
         {recommendedCategories.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Your Focus Areas</Text>
@@ -234,7 +320,7 @@ export default function HomeScreen() {
               onPress={() => router.push('/(tabs)/premium')}
             >
               <View style={styles.actionIconContainer}>
-                <Ionicons name="paw" size={20} color="#FFD700" />
+                <Ionicons name="paw" size={20} color="#D4AF37" />
               </View>
               <Text style={styles.actionText}>Unlock Premium Features</Text>
               <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
@@ -244,6 +330,7 @@ export default function HomeScreen() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+      </ScrollFade>
     </View>
   );
 }
@@ -257,50 +344,74 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
 
-  // Logo Header
+  // Brand bar
   logoHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.xl,
-    paddingVertical: spacing.md,
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
+    paddingVertical: spacing.sm,
   },
-  logoContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
+  brandRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginRight: spacing.md,
-  },
-  brandContainer: {
-    flex: 1,
+    gap: spacing.sm,
   },
   brandName: {
-    fontSize: 28,
-    fontWeight: '800',
+    fontSize: 22,
+    fontWeight: '900',
     color: colors.textPrimary,
-    letterSpacing: 1,
+    letterSpacing: 3,
   },
-  brandTagline: {
-    fontSize: typography.small,
-    color: colors.textSecondary,
-    marginTop: -2,
+  streakPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: colors.accent,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  streakPillText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 
-  // Header
+  // Hero greeting
   header: {
     marginBottom: spacing.xl,
   },
   welcomeText: {
-    fontSize: typography.body,
-    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.textTertiary,
+    letterSpacing: 2,
     marginBottom: spacing.xs,
   },
   dogName: {
-    fontSize: typography.h1,
-    fontWeight: typography.bold,
+    fontSize: 36,
+    fontWeight: '800',
     color: colors.textPrimary,
+    lineHeight: 42,
+  },
+  dogSwitcher: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    alignSelf: 'flex-start',
+    backgroundColor: colors.cardBackground,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    marginTop: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  dogSwitcherText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.textSecondary,
   },
 
   // Stats
@@ -312,19 +423,26 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     backgroundColor: colors.cardBackground,
-    padding: spacing.lg,
-    borderRadius: 12,
+    paddingVertical: spacing.lg,
+    borderRadius: 14,
     alignItems: 'center',
-    gap: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  statCardAccent: {
+    borderColor: colors.accent,
   },
   statValue: {
-    fontSize: typography.h2,
-    fontWeight: typography.bold,
-    color: colors.accent,
+    fontSize: 28,
+    fontWeight: '800',
+    color: colors.textPrimary,
   },
   statLabel: {
-    fontSize: typography.tiny,
-    color: colors.textSecondary,
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.textTertiary,
+    letterSpacing: 1,
+    marginTop: 4,
     textAlign: 'center',
   },
 
@@ -339,66 +457,65 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
 
-  // Continue Card
+  // Continue Card (hero gradient)
   continueCard: {
-    backgroundColor: colors.cardBackground,
-    padding: spacing.lg,
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.accent,
+    padding: spacing.xl,
+    borderRadius: 18,
   },
   continueHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
   },
   continueCategory: {
-    fontSize: typography.small,
-    color: colors.textTertiary,
-    fontWeight: typography.medium,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+    color: 'rgba(255,255,255,0.85)',
   },
   continueBadge: {
-    backgroundColor: colors.accent,
+    backgroundColor: 'rgba(0,0,0,0.25)',
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: 6,
   },
   continueBadgeText: {
-    fontSize: typography.tiny,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1,
+    color: '#FFFFFF',
   },
   continueTitle: {
-    fontSize: typography.h3,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#FFFFFF',
     marginBottom: spacing.xs,
   },
   continueDescription: {
     fontSize: typography.body,
-    color: colors.textSecondary,
+    color: 'rgba(255,255,255,0.85)',
     lineHeight: 22,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
   },
   continueMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   continueMetaText: {
     fontSize: typography.small,
-    color: colors.textTertiary,
+    color: 'rgba(255,255,255,0.8)',
   },
   continueMetaDot: {
     fontSize: typography.small,
-    color: colors.textTertiary,
+    color: 'rgba(255,255,255,0.8)',
   },
   continueButton: {
-    backgroundColor: colors.accent,
+    backgroundColor: '#FFFFFF',
     padding: spacing.md,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
@@ -406,8 +523,8 @@ const styles = StyleSheet.create({
   },
   continueButtonText: {
     fontSize: typography.body,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
+    fontWeight: '800',
+    color: colors.accent,
   },
 
   // All Done Card

@@ -9,6 +9,11 @@ import { pottyTrainingLessons } from './lessons/pottyTraining';
 import { bitingNippingLessons } from './lessons/bitingNipping';
 import { handlerSkillsLessons } from './lessons/handlerSkills';
 import { tricksLessons } from './lessons/tricks';
+import { SOCIALIZATION_LESSONS } from './lessons/socialization';
+import { REACTIVE_DOG_LESSONS } from './lessons/reactiveDog';
+import { COOPERATIVE_CARE_LESSONS } from './lessons/cooperativeCare';
+import { barkingAlertControlLessons } from './lessons/barkingAlertControl';
+import { puppyFoundationsLessons } from './lessons/puppyFoundations';
 export type Lesson = {
   id: string;
   title: string;
@@ -33,25 +38,26 @@ export type Category = {
 };
 
 export const CATEGORIES: Category[] = [
-  // ============================================================================
-// 1. EVERYDAY OBEDIENCE (Mostly free)
-// Premium: Touch, Heel Position, Place (Advanced)
-// ============================================================================
-{
-  id: 'everyday_obedience',
-  title: 'Everyday Obedience',
-  description: 'Master the fundamentals of daily life with your dog',
-  icon: '🎯',
-  totalLessons: 13,
-  isPremium: false,
-  recommendedFor: ['beginner', 'basic_training'],
-  lessons: everydayObedienceLessons,
-},
-
-  // ============================================================================
-  // 2. LEASH & WALKS (Mostly free)
-  // Premium: Off-Leash Foundations, Reactive Dog Protocol, Urban Walking Mastery
-  // ============================================================================
+  {
+    id: 'puppy_foundations',
+    title: 'Puppy Foundations',
+    description: 'The first 6 months, done right. From needle teeth to best friend',
+    icon: '🐶',
+    totalLessons: 15,
+    isPremium: false,
+    recommendedFor: ['puppy', 'new_dog', 'biting', 'potty', 'crate'],
+    lessons: puppyFoundationsLessons,
+  },
+  {
+    id: 'everyday_obedience',
+    title: 'Everyday Obedience',
+    description: 'Master the fundamentals of daily life with your dog',
+    icon: '🎯',
+    totalLessons: 16,
+    isPremium: false,
+    recommendedFor: ['beginner', 'basic_training'],
+    lessons: everydayObedienceLessons,
+  },
   {
     id: 'leash_walks',
     title: 'Leash & Walks',
@@ -61,28 +67,37 @@ export const CATEGORIES: Category[] = [
     isPremium: false,
     recommendedFor: ['leash_pulling', 'walks'],
     lessons: leashWalksLessons,
-},
-
-  // ============================================================================
-  // 3. CALM & FOCUS (Mostly free)
-  // Premium: Meditation for Dogs, Arousal Up-Down Game, Focus in Chaos
-  // ============================================================================
+  },
+  {
+    id: 'potty_training',
+    title: 'Potty Training & House Habits',
+    description: 'Housebreaking, routines, and realistic expectations',
+    icon: '🏠',
+    totalLessons: 10,
+    isPremium: true,
+    recommendedFor: ['puppy', 'potty'],
+    lessons: pottyTrainingLessons,
+  },
+  {
+    id: 'biting_nipping',
+    title: 'Biting, Nipping & Mouthing',
+    description: 'Common puppy behaviors and early correction',
+    icon: '🦷',
+    totalLessons: 10,
+    isPremium: true,
+    recommendedFor: ['puppy', 'biting'],
+    lessons: bitingNippingLessons,
+  },
   {
     id: 'calm_focus',
     title: 'Calm & Focus',
     description: 'Build relaxation and attention skills',
     icon: '🧘',
-    totalLessons: 13,
+    totalLessons: 15,
     isPremium: false,
     recommendedFor: ['high_energy', 'focus', 'anxiety'],
     lessons: calmFocusLessons,
   },
-
-  // ============================================================================
-  // 4. RECALL (Mostly free)
-  // Premium: Off-Leash Foundations, Reliability Proofing, Recall from Play
-  // Note: Whistle Recall moved up, Recall from Play moved down (now premium)
-  // ============================================================================
   {
     id: 'recall',
     title: 'Recall',
@@ -93,25 +108,56 @@ export const CATEGORIES: Category[] = [
     recommendedFor: ['recall', 'off_leash'],
     lessons: recallLessons,
   },
-
-  // ============================================================================
-  // 5. MENTAL WORK (Mostly free)
-  // Premium: Scent Work DIY Enrichment, Advanced Scent Detection, Chaining Behaviors
-  // ============================================================================
+  {
+    id: 'socialization',
+    title: 'Socialization',
+    description: 'Teach your dog to be confident and comfortable in the real world',
+    icon: '🤝',
+    totalLessons: 11,
+    isPremium: true,
+    recommendedFor: ['socialization', 'fear', 'puppy'],
+    lessons: SOCIALIZATION_LESSONS,
+  },
+  {
+    id: 'reactive_dog',
+    title: 'Reactive Dog',
+    description: 'Understand and manage reactivity with proven protocols',
+    icon: '⚡',
+    totalLessons: 10,
+    isPremium: true,
+    recommendedFor: ['reactivity', 'leash_reactive', 'dog_aggressive'],
+    lessons: REACTIVE_DOG_LESSONS,
+  },
   {
     id: 'mental_work',
     title: 'Mental Work',
     description: 'Engage your dog\'s mind with enrichment',
     icon: '🧠',
-    totalLessons: 11,
+    totalLessons: 14,
     isPremium: false,
     recommendedFor: ['high_energy', 'mental_stimulation'],
     lessons: mentalWorkLessons,
   },
-
-  // ============================================================================
-  // 6. REAL-WORLD PROOFING (Premium Only)
-  // ============================================================================
+  {
+    id: 'cooperative_care',
+    title: 'Cooperative Care',
+    description: 'Make grooming, vet visits, and handling stress-free',
+    icon: '🩺',
+    totalLessons: 9,
+    isPremium: true,
+    recommendedFor: ['handling', 'grooming', 'vet_prep'],
+    lessons: COOPERATIVE_CARE_LESSONS,
+  },
+  {
+    id: 'barking_alert',
+    title: 'Barking & Alert Control',
+    description: 'Decode the noise, keep the watchdog, lose the chaos',
+    icon: '📢',
+    totalLessons: 10,
+    isPremium: false,
+    recommendedFor: ['barking', 'alert_barking', 'noise', 'reactivity'],
+    lessons: barkingAlertControlLessons,
+  },
   {
     id: 'real_world_proofing',
     title: 'Real-World Proofing',
@@ -122,56 +168,16 @@ export const CATEGORIES: Category[] = [
     recommendedFor: ['advanced'],
     lessons: realWorldProofingLessons,
   },
-
-  // ============================================================================
-  // 7. SERVICE DOG PRE-CLASS (Premium Only)
-  // ============================================================================
   {
-    id: 'service_dog',
-    title: 'Service Dog Pre-Class',
-    description: 'Advanced foundational skills for service dog preparation',
-    icon: '🦺',
-    totalLessons: 9,
-    isPremium: true,
-    recommendedFor: ['service'],
-    lessons: serviceDogLessons,
+    id: 'tricks',
+    title: 'Tricks',
+    description: 'Fun tricks from crowd-pleasers to jaw-droppers',
+    icon: '🎪',
+    totalLessons: 28,
+    isPremium: false,
+    recommendedFor: ['tricks', 'fun', 'bonding'],
+    lessons: tricksLessons,
   },
-
-  // ============================================================================
-  // 8. POTTY TRAINING & HOUSE HABITS (Premium category w/ free teasers)
-  // Free: Potty Training Foundations, Creating a Potty Schedule
-  // Rest: Premium
-  // ============================================================================
-  {
-    id: 'potty_training',
-    title: 'Potty Training & House Habits',
-    description: 'Housebreaking, routines, and realistic expectations',
-    icon: '🏠',
-    totalLessons: 8,
-    isPremium: true,
-    recommendedFor: ['puppy', 'potty'],
-    lessons: pottyTrainingLessons, 
-  },
-
-  // ============================================================================
-  // 9. BITING, NIPPING & MOUTHING (Premium category w/ free teasers)
-  // Free: Understanding Puppy Biting, Teaching Bite Inhibition
-  // Rest: Premium
-  // ============================================================================
-  {
-    id: 'biting_nipping',
-    title: 'Biting, Nipping & Mouthing',
-    description: 'Common puppy behaviors and early correction',
-    icon: '🦷',
-    totalLessons: 8,
-    isPremium: true,
-    recommendedFor: ['puppy', 'biting'],
-    lessons: bitingNippingLessons,
-  },
-
-  // ============================================================================
-  // 10. HANDLER SKILLS (Premium Only)
-  // ============================================================================
   {
     id: 'handler_skills',
     title: 'Handler Skills',
@@ -182,18 +188,16 @@ export const CATEGORIES: Category[] = [
     recommendedFor: ['advanced'],
     lessons: handlerSkillsLessons,
   },
-
-{
-  id: 'tricks',
-  title: 'Tricks',
-  description: 'Fun tricks from crowd-pleasers to jaw-droppers',
-  icon: '🎪',
-  totalLessons: 15,
-  isPremium: false,
-  recommendedFor: ['tricks', 'fun', 'bonding'],
-  lessons: tricksLessons,
-},
-
+  {
+    id: 'service_dog',
+    title: 'Service Dog Pre-Class',
+    description: 'Advanced foundational skills for service dog preparation',
+    icon: '🦺',
+    totalLessons: 9,
+    isPremium: true,
+    recommendedFor: ['service'],
+    lessons: serviceDogLessons,
+  },
 ];
 
 // Helper function to get category by ID

@@ -33,6 +33,7 @@ export const typography = {
   h4: 18,
   body: 16,
   small: 14,
+  caption: 13,
   tiny: 12,
   
   regular: '400' as const,

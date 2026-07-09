@@ -1,29 +1,25 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  LayoutAnimation,
-  Platform,
-  UIManager,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet,
+  SafeAreaView, LayoutAnimation, Platform, UIManager,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useApp } from '../contexts/AppContext';
 import { CHALLENGE_LABELS } from '../data/quizData_v2';
+import { getBreedInsight, getBreedById, getTrainingTipsForBreed } from '../data/breedDatabase';
+import { CATEGORIES } from '../data/categoryData';
+import { filterLessonsByExperience } from '../data/roadmapGenerator';
 import { colors, typography, spacing } from '../data/darkTheme';
 
-// Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 export default function QuizResultsScreen() {
   const router = useRouter();
-  const { userProfile } = useApp();
+  const { userProfile, hasPremium, isLessonComplete } = useApp();
   const [insightExpanded, setInsightExpanded] = useState(false);
 
   if (!userProfile) {
@@ -33,11 +29,8 @@ export default function QuizResultsScreen() {
           <Ionicons name="paw" size={64} color={colors.accent} style={{ marginBottom: spacing.lg }} />
           <Text style={styles.errorTitle}>Welcome to HEEL</Text>
           <Text style={styles.errorText}>Take the quiz to get your personalized training plan</Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => router.replace('/(tabs)/quiz')}
-          >
-            <Text style={styles.buttonText}>Start Quiz</Text>
+          <TouchableOpacity style={styles.ctaBtn} onPress={() => router.replace('/(tabs)/quiz')}>
+            <Text style={styles.ctaBtnText}>Start Quiz</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -45,458 +38,305 @@ export default function QuizResultsScreen() {
   }
 
   const {
-    dogName,
-    breed,
-    energyLevel,
-    experience,
-    challenges,
-    q9Challenges,
-    recommendedCategories,
+    dogName, breed, breedId, energyLevel, experience,
+    challenges, q9Challenges, recommendedCategories,
   } = userProfile;
 
-  // ============================================================================
-  // UNIFIED CHALLENGES — merge Q6 + Q9 for display
-  // ============================================================================
-  const allChallenges = [...new Set([
-    ...(q9Challenges || []),
-    ...(challenges || []),
-  ])];
-
-  // Generate personalized breed insight
-  const getBreedInsight = () => {
-    const breedLower = breed.toLowerCase();
-    
-    if (breedLower.includes('australian shepherd') || breedLower.includes('aussie')) {
-      return `${dogName} is an Australian Shepherd—one of the most intelligent and high-energy breeds. Without proper mental and physical stimulation, Aussies can become destructive and develop anxiety. Teaching calm behavior and impulse control early is essential, as they were bred to work all day herding livestock.`;
-    }
-    if (breedLower.includes('border collie')) {
-      return `${dogName} is a Border Collie—the Einstein of dog breeds. They need constant mental challenges or they'll find their own entertainment (usually destructive). Early training in impulse control and "off-switch" behavior is critical for this breed.`;
-    }
-    if (breedLower.includes('golden') || breedLower.includes('labrador')) {
-      return `${dogName} is a ${breed}—a friendly, food-motivated athlete. While generally eager to please, they can be overly enthusiastic and prone to jumping. Focus on impulse control and calm greetings will make life much easier.`;
-    }
-    if (breedLower.includes('husky')) {
-      return `${dogName} is a Siberian Husky—bred to run 100 miles a day. They're escape artists with selective hearing. Recall training and mental enrichment are non-negotiable for this breed, and they may never be fully off-leash reliable.`;
-    }
-    if (breedLower.includes('german shepherd')) {
-      return `${dogName} is a German Shepherd—a versatile working breed that bonds intensely with their family. Early socialization and confidence-building are crucial, as they can become overprotective without proper guidance.`;
-    }
-    if (breedLower.includes('pit') || breedLower.includes('staffordshire')) {
-      return `${dogName} is incredibly strong and athletic with a high pain tolerance. Early impulse control and gentle play training are essential, as they don't always know their own strength. They're highly trainable and eager to please.`;
-    }
-    if (breedLower.includes('rottweiler')) {
-      return `${dogName} is a Rottweiler—a confident, powerful working breed that's deeply loyal. They respond well to firm but fair training and need early socialization. Rottweilers excel at obedience but require a handler who's consistent and calm.`;
-    }
-    if (breedLower.includes('doberman')) {
-      return `${dogName} is a Doberman Pinscher—one of the most intelligent and trainable breeds. They bond deeply with their handler and thrive on structure. Without mental stimulation and clear leadership, they can become anxious or overprotective.`;
-    }
-    if (breedLower.includes('boxer')) {
-      return `${dogName} is a Boxer—an athletic, playful breed that stays puppy-like well into adulthood. Their enthusiasm can make training challenging, but they're incredibly eager to please. Focus on impulse control and teaching a calm settle.`;
-    }
-    if (breedLower.includes('malinois')) {
-      return `${dogName} is a Belgian Malinois—one of the most intense working breeds. They require experienced handling, extensive mental work, and a job to do. Without proper outlets, Malinois can develop serious behavioral issues. Structured training is non-negotiable.`;
-    }
-    if (breedLower.includes('poodle')) {
-      return `${dogName} is a Poodle—don't let the haircut fool you, they're one of the smartest breeds. They pick up training quickly but can also learn bad habits fast. Keep sessions varied and challenging to hold their attention.`;
-    }
-    if (breedLower.includes('corgi')) {
-      return `${dogName} is a Corgi—a herding breed in a small package. They're smart, opinionated, and may try to herd children and other pets by nipping at heels. Early training in bite inhibition and recall is important for this breed.`;
-    }
-    if (breedLower.includes('dachshund')) {
-      return `${dogName} is a Dachshund—bred to hunt badgers, so stubbornness comes standard. They respond best to food motivation and short, fun training sessions. Consistent house training is often their biggest challenge.`;
-    }
-    if (breedLower.includes('bulldog') && !breedLower.includes('french')) {
-      return `${dogName} is a Bulldog—a low-energy companion who can be stubborn. Short, positive training sessions work best, as they tire quickly due to their build. Focus on basic obedience and keeping them at a healthy weight.`;
-    }
-    if (breedLower.includes('french')) {
-      return `${dogName} is a French Bulldog—a charming companion who wants to be wherever you are. They can be stubborn, so patience and food motivation work best. Keep sessions short due to their breathing limitations.`;
-    }
-    if (breedLower.includes('chihuahua')) {
-      return `${dogName} may be small, but Chihuahuas have big personalities and can develop "small dog syndrome" if not properly trained. Don't skip the basics just because they're tiny—they benefit from the same structure as larger breeds.`;
-    }
-    if (breedLower.includes('beagle')) {
-      return `${dogName} is a Beagle—a scent hound bred to follow their nose. Recall training will be challenging, and food motivation is sky-high. Use their nose in training games to tire them mentally.`;
-    }
-    if (breedLower.includes('great dane')) {
-      return `${dogName} is a Great Dane—a gentle giant that doesn't know their own size. Leash manners and calm greetings are critical before they're full-grown, because a 150lb dog that pulls or jumps is dangerous. Start early.`;
-    }
-    if (breedLower.includes('cattle dog')) {
-      return `${dogName} is an Australian Cattle Dog—bred to herd cattle, so they're tough, smart, and have endless energy. They may nip at heels and need a clear job to do. Without mental stimulation and structure, they'll create their own (destructive) entertainment.`;
-    }
-    if (breedLower.includes('jack russell')) {
-      return `${dogName} is a Jack Russell Terrier—small but packed with more energy than dogs twice their size. They need mental challenges, firm boundaries, and consistent training. Their prey drive is strong, so recall in open areas will be a project.`;
-    }
-    if (energyLevel >= 8) {
-      return `${dogName} is a ${breed} with very high energy levels. They need both physical exercise AND mental stimulation daily. Without it, you'll see destructive behavior, hyperactivity, and difficulty settling. Focus on teaching an "off switch" early.`;
-    }
-    if (energyLevel >= 5) {
-      return `${dogName} is a ${breed} with moderate energy. They'll need daily exercise and mental engagement, but are generally adaptable to most living situations with proper training and enrichment.`;
-    }
-    return `${dogName} is a ${breed}—a lower-energy companion who's content with shorter training sessions. Focus on consistency and positive reinforcement, keeping sessions fun and engaging to maintain their interest.`;
-  };
+  const breedInsightText = breedId
+    ? getBreedInsight(breedId, dogName)
+    : getBreedInsight('mixed_breed', dogName);
+  const breedTips = breedId ? getTrainingTipsForBreed(breedId) : [];
+  const breedData = breedId ? getBreedById(breedId) : null;
+  const allChallenges = [...new Set([...(q9Challenges || []), ...(challenges || [])])];
+  const insightPreview = breedInsightText.split('.')[0] + '.';
+  const availabilityDisplay = (userProfile as any).availabilityLabel || `${userProfile.availability} minutes`;
 
   const toggleInsight = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setInsightExpanded(!insightExpanded);
   };
 
-  // ============================================================================
-  // IMMEDIATE PRIORITIES — reads from BOTH Q6 and Q9
-  // This was the bug: it only checked `challenges` (Q6), missing Q9 answers
-  // ============================================================================
-  const getChallengeAdvice = () => {
-    // Nothing to show if no challenges at all
-    if (allChallenges.length === 0) return null;
-
-    const cards: React.ReactElement[] = [];
-
-    if (allChallenges.includes('potty')) {
-      cards.push(
-        <View key="potty" style={styles.adviceCard}>
-          <View style={styles.adviceIconContainer}>
-            <Ionicons name="home" size={22} color={colors.accent} />
-          </View>
-          <View style={styles.adviceContent}>
-            <Text style={styles.adviceTitle}>Potty Training</Text>
-            <Text style={styles.adviceText}>
-              Consistency is everything. Take {dogName} out every 2 hours, after meals, play, and naps. 
-              Reward immediately when they go outside. Accidents will happen—clean with enzyme cleaner and increase supervision.
-            </Text>
-          </View>
-        </View>
-      );
-    }
-    
-    if (allChallenges.includes('biting') || allChallenges.includes('biting_urgent')) {
-      cards.push(
-        <View key="biting" style={styles.adviceCard}>
-          <View style={styles.adviceIconContainer}>
-            <Ionicons name="alert-circle" size={22} color={colors.accent} />
-          </View>
-          <View style={styles.adviceContent}>
-            <Text style={styles.adviceTitle}>Bite Inhibition</Text>
-            <Text style={styles.adviceText}>
-              Puppy biting is normal but must be addressed early. When {dogName} bites too hard, say "ouch!" 
-              and stop playing immediately. Redirect to appropriate toys. This teaches them to control bite pressure.
-            </Text>
-          </View>
-        </View>
-      );
-    }
-    
-    if (allChallenges.includes('leash_pulling')) {
-      cards.push(
-        <View key="leash" style={styles.adviceCard}>
-          <View style={styles.adviceIconContainer}>
-            <Ionicons name="walk" size={22} color={colors.accent} />
-          </View>
-          <View style={styles.adviceContent}>
-            <Text style={styles.adviceTitle}>Leash Manners</Text>
-            <Text style={styles.adviceText}>
-              Stop moving the instant the leash goes tight. Only walk when it's loose. 
-              This is tedious at first but transforms walks. Consider a front-clip harness for mechanical advantage.
-            </Text>
-          </View>
-        </View>
-      );
-    }
-
-    if (allChallenges.includes('recall')) {
-      cards.push(
-        <View key="recall" style={styles.adviceCard}>
-          <View style={styles.adviceIconContainer}>
-            <Ionicons name="megaphone" size={22} color={colors.accent} />
-          </View>
-          <View style={styles.adviceContent}>
-            <Text style={styles.adviceTitle}>Recall Training</Text>
-            <Text style={styles.adviceText}>
-              Never use {dogName}'s recall word unless you can enforce it. Start indoors with zero distractions, 
-              then slowly add distance and distraction. Make coming to you the BEST thing that happens all day.
-            </Text>
-          </View>
-        </View>
-      );
-    }
-
-    if (allChallenges.includes('jumping')) {
-      cards.push(
-        <View key="jumping" style={styles.adviceCard}>
-          <View style={styles.adviceIconContainer}>
-            <Ionicons name="arrow-up" size={22} color={colors.accent} />
-          </View>
-          <View style={styles.adviceContent}>
-            <Text style={styles.adviceTitle}>Jumping on People</Text>
-            <Text style={styles.adviceText}>
-              Turn away completely when {dogName} jumps—give zero attention until all four paws are on the floor. 
-              Then immediately reward. Consistency from everyone in the household is critical.
-            </Text>
-          </View>
-        </View>
-      );
-    }
-
-    if (allChallenges.includes('barking')) {
-      cards.push(
-        <View key="barking" style={styles.adviceCard}>
-          <View style={styles.adviceIconContainer}>
-            <Ionicons name="volume-high" size={22} color={colors.accent} />
-          </View>
-          <View style={styles.adviceContent}>
-            <Text style={styles.adviceTitle}>Excessive Barking</Text>
-            <Text style={styles.adviceText}>
-              Identify what triggers the barking—boredom, alerts, demand, or anxiety all require different approaches. 
-              Never yell at {dogName} to stop barking, as it sounds like you're joining in.
-            </Text>
-          </View>
-        </View>
-      );
-    }
-    
-    if (allChallenges.includes('separation')) {
-      cards.push(
-        <View key="separation" style={styles.adviceCard}>
-          <View style={styles.adviceIconContainer}>
-            <Ionicons name="heart-dislike" size={22} color={colors.accent} />
-          </View>
-          <View style={styles.adviceContent}>
-            <Text style={styles.adviceTitle}>Separation Anxiety</Text>
-            <Text style={styles.adviceText}>
-              Start with very short absences (30 seconds) and slowly build up. 
-              Don't make departures or arrivals a big deal. Teaching {dogName} to settle on a mat gives them a "job" when you leave.
-            </Text>
-          </View>
-        </View>
-      );
-    }
-
-    if (allChallenges.includes('fear')) {
-      cards.push(
-        <View key="fear" style={styles.adviceCard}>
-          <View style={styles.adviceIconContainer}>
-            <Ionicons name="shield" size={22} color={colors.accent} />
-          </View>
-          <View style={styles.adviceContent}>
-            <Text style={styles.adviceTitle}>Fear & Nervousness</Text>
-            <Text style={styles.adviceText}>
-              Never force {dogName} into scary situations. Let them observe from a distance, 
-              reward brave behavior, and gradually decrease distance over days/weeks. Building confidence through obedience helps enormously.
-            </Text>
-          </View>
-        </View>
-      );
-    }
-    
-    if (allChallenges.includes('hyperactive') || allChallenges.includes('overstimulated')) {
-      cards.push(
-        <View key="hyper" style={styles.adviceCard}>
-          <View style={styles.adviceIconContainer}>
-            <Ionicons name="heart" size={22} color={colors.accent} />
-          </View>
-          <View style={styles.adviceContent}>
-            <Text style={styles.adviceTitle}>Calm Training</Text>
-            <Text style={styles.adviceText}>
-              High energy dogs MUST learn to settle. Start rewarding {dogName} for just lying down calmly. 
-              Mental work (training, puzzle toys) is as tiring as physical exercise. Teach an "off switch" now.
-            </Text>
-          </View>
-        </View>
-      );
-    }
-
-    // Only render section if we have cards
-    if (cards.length === 0) return null;
-
-    return (
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>YOUR IMMEDIATE PRIORITIES</Text>
-        {cards}
-      </View>
-    );
+  // ── Category info map ──
+  const catInfo: { [k: string]: { name: string; icon: string; desc: string } } = {
+    'puppy_foundations': { name: 'Puppy', icon: 'happy-outline', desc: 'Puppy foundations' },
+    'everyday_obedience': { name: 'Obedience', icon: 'school-outline', desc: 'Foundation commands' },
+    'barking_alert': { name: 'Barking', icon: 'volume-high-outline', desc: 'Alert control' },
+    'potty_training': { name: 'Potty', icon: 'home-outline', desc: 'House training' },
+    'biting_nipping': { name: 'Biting', icon: 'alert-circle-outline', desc: 'Bite inhibition' },
+    'leash_walks': { name: 'Leash', icon: 'walk-outline', desc: 'Walking skills' },
+    'calm_focus': { name: 'Calm', icon: 'heart-outline', desc: 'Impulse control' },
+    'recall': { name: 'Recall', icon: 'megaphone-outline', desc: 'Come when called' },
+    'mental_work': { name: 'Mental', icon: 'bulb-outline', desc: 'Brain games' },
+    'real_world_proofing': { name: 'Proofing', icon: 'earth-outline', desc: 'Real-world skills' },
+    'service_dog': { name: 'Service', icon: 'shield-outline', desc: 'Service prep' },
+    'handler_skills': { name: 'Handler', icon: 'people-outline', desc: 'Your skills' },
+    'tricks': { name: 'Tricks', icon: 'star-outline', desc: 'Fun tricks' },
+    'socialization': { name: 'Social', icon: 'people-outline', desc: 'Confidence building' },
+    'reactive_dog': { name: 'Reactive', icon: 'flash-outline', desc: 'Reactivity help' },
+    'cooperative_care': { name: 'Care', icon: 'medical-outline', desc: 'Grooming & handling' },
   };
 
-  // Get urgency level for category
-  const getCategoryUrgency = (categoryId: string, index: number) => {
-    // Q9 urgent issues always get CRITICAL label
-    if (index === 0 && (
-      q9Challenges?.includes('potty') ||
-      q9Challenges?.includes('biting_urgent') ||
-      q9Challenges?.includes('separation') ||
-      q9Challenges?.includes('fear')
-    )) {
-      const urgencyMessages: { [key: string]: string } = {
-        'potty_training': 'Start now to establish good habits',
-        'biting_nipping': 'Bite inhibition must be taught early',
-        'calm_focus': 'Address anxiety before it worsens',
-        'everyday_obedience': 'Build confidence through structure',
-      };
-      return {
-        level: 'CRITICAL',
-        color: colors.accent,
-        message: urgencyMessages[categoryId] || 'Address this first',
-      };
-    }
+  const topPriorities = recommendedCategories.slice(0, 3);
 
-    switch (categoryId) {
-      case 'potty_training':
-        return { level: 'CRITICAL', color: colors.accent, message: 'Start now to establish good habits' };
-      case 'biting_nipping':
-        return { level: 'CRITICAL', color: colors.accent, message: 'Bite inhibition must be taught early' };
-      case 'everyday_obedience':
-        return experience <= 1 
-          ? { level: 'FOUNDATION', color: colors.accent, message: 'Essential building blocks' }
-          : { level: '', color: colors.textSecondary, message: 'Build reliable basics' };
-      case 'calm_focus':
-        return energyLevel >= 9
-          ? { level: 'ESSENTIAL', color: colors.accent, message: 'Prevent destructive behavior' }
-          : { level: '', color: colors.textSecondary, message: 'Teach impulse control' };
-      case 'mental_work':
-        return energyLevel >= 8
-          ? { level: 'ESSENTIAL', color: colors.accent, message: 'Mental work prevents destruction' }
-          : { level: '', color: colors.textSecondary, message: 'Keep them engaged' };
-      case 'recall':
-        return { level: '', color: colors.textSecondary, message: 'Build reliable off-leash safety' };
-      case 'leash_walks':
-        return { level: '', color: colors.textSecondary, message: 'Transform your daily walks' };
-      default:
-        return { level: '', color: colors.textSecondary, message: '' };
+  // ── Get real lessons for Week 1 (free path) ──
+  const getWeek1Lessons = () => {
+    const lessons: { title: string; category: string; duration: number; categoryId: string; lessonId: string }[] = [];
+    const usedIds = new Set<string>();
+
+    for (const catId of recommendedCategories) {
+      const category = CATEGORIES.find(c => c.id === catId);
+      if (!category) continue;
+      // Match the roadmap: hide absolute-beginner foundation lessons from
+      // dogs already past the basics.
+      const availableLessons = filterLessonsByExperience(catId, category.lessons, experience);
+      for (const lesson of availableLessons) {
+        if (usedIds.has(lesson.id)) continue;
+        if (lesson.isPremium && !hasPremium) continue;
+        lessons.push({
+          title: lesson.title,
+          category: category.title,
+          duration: lesson.duration,
+          categoryId: catId,
+          lessonId: lesson.id,
+        });
+        usedIds.add(lesson.id);
+        if (lessons.length >= 5) return lessons;
+      }
     }
+    return lessons;
   };
 
-  // ============================================================================
-  // WHY THIS PLAN — human-readable challenge descriptions
-  // ============================================================================
+  // ── Get "locked" lessons for fade tease ──
+  const getTeaseLessons = () => {
+    const teaseNames = [
+      'Advanced obedience & reliability',
+      'Real-world distractions & proofing',
+      'Structured weekly progression',
+      'Advanced skills, tricks & enrichment',
+    ];
+    return teaseNames;
+  };
+
+  const week1Lessons = getWeek1Lessons();
+  const teaseLessons = getTeaseLessons();
+
   const getHumanChallenges = (): string => {
     if (allChallenges.length === 0) return 'building a strong foundation';
-    
     const readable = allChallenges
-      .filter(c => !c.startsWith('goal_'))  // exclude goal tags
+      .filter(c => !c.startsWith('goal_'))
       .map(c => CHALLENGE_LABELS[c] || c)
-      .slice(0, 3);  // max 3 for readability
-    
-    if (readable.length === 0) return 'building a strong foundation';
-    return readable.join(', ');
+      .slice(0, 3);
+    return readable.length > 0 ? readable.join(', ') : 'building a strong foundation';
   };
 
+  // ============================================================================
+  // RENDER
+  // ============================================================================
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Success Badge */}
+
+        {/* ═══════════════════════════════════════════════════
+            PHASE 1: THE REWARD
+            ═══════════════════════════════════════════════════ */}
+
         <View style={styles.successBadge}>
           <Ionicons name="checkmark" size={40} color="#FFFFFF" />
         </View>
-
-        {/* Title */}
         <Text style={styles.title}>{dogName}'s Training Plan{'\n'}is Ready!</Text>
 
-        {/* Collapsible Breed Insight Card */}
-        <TouchableOpacity 
-          style={styles.insightCard}
-          onPress={toggleInsight}
-          activeOpacity={0.8}
-        >
-          <View style={styles.insightHeader}>
-            <Text style={styles.insightTitle}>Understanding {dogName}</Text>
-            <Ionicons 
-              name={insightExpanded ? 'chevron-up' : 'chevron-down'} 
-              size={20} 
-              color={colors.accent} 
-            />
+        {/* Top 3 Priorities — side by side */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>YOUR TOP PRIORITIES</Text>
+          <View style={styles.priorityRow}>
+            {topPriorities.map((catId, index) => {
+              const info = catInfo[catId] || { name: catId, icon: 'paw-outline', desc: '' };
+              return (
+                <View key={catId} style={[styles.priorityCard, index === 0 && styles.priorityCardFirst]}>
+                  <View style={[styles.priorityNumber, index === 0 && styles.priorityNumberFirst]}>
+                    <Text style={styles.priorityNumberText}>{index + 1}</Text>
+                  </View>
+                  <Ionicons name={info.icon as any} size={24} color={index === 0 ? colors.accent : colors.textSecondary} />
+                  <Text style={[styles.priorityName, index === 0 && styles.priorityNameFirst]}>{info.name}</Text>
+                  <Text style={styles.priorityDesc}>{info.desc}</Text>
+                </View>
+              );
+            })}
           </View>
-          {insightExpanded && (
-            <Text style={styles.insightText}>{getBreedInsight()}</Text>
-          )}
-          {!insightExpanded && (
-            <Text style={styles.insightPreview}>Tap to read about your {breed}'s training needs</Text>
+        </View>
+
+        {/* Understanding [Dog] — collapsed */}
+        <TouchableOpacity style={styles.insightCard} onPress={toggleInsight} activeOpacity={0.8}>
+          <View style={styles.insightHeader}>
+            <View style={styles.insightTitleRow}>
+              <Ionicons name="paw" size={18} color={colors.accent} />
+              <Text style={styles.insightTitle}>Understanding {dogName}</Text>
+            </View>
+            <Ionicons name={insightExpanded ? 'chevron-up' : 'chevron-down'} size={20} color={colors.accent} />
+          </View>
+          {insightExpanded ? (
+            <View>
+              <Text style={styles.insightText}>{breedInsightText}</Text>
+              {breedTips.length > 0 && (
+                <View style={styles.tipsContainer}>
+                  <Text style={styles.tipsTitle}>Training Tips for {breed}</Text>
+                  {breedTips.slice(0, 3).map((tip, i) => (
+                    <View key={i} style={styles.tipRow}>
+                      <Ionicons name="checkmark-circle" size={14} color={colors.accent} style={{ marginTop: 3 }} />
+                      <Text style={styles.tipText}>{tip}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+              {breedData && (
+                <View style={styles.statsRow}>
+                  <View style={styles.statBox}>
+                    <Text style={styles.statLabel}>Energy</Text>
+                    <Text style={styles.statValue}>{breedData.energy.replace('_', ' ')}</Text>
+                  </View>
+                  <View style={styles.statBox}>
+                    <Text style={styles.statLabel}>Size</Text>
+                    <Text style={styles.statValue}>{breedData.size}</Text>
+                  </View>
+                  <View style={styles.statBox}>
+                    <Text style={styles.statLabel}>Exercise</Text>
+                    <Text style={styles.statValue}>{breedData.exerciseNeeds.split('—')[0].trim()}</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          ) : (
+            <Text style={styles.insightPreview} numberOfLines={2}>{insightPreview}</Text>
           )}
         </TouchableOpacity>
 
-        {/* Challenge-Specific Advice — MOVED ABOVE categories for visibility */}
-        {getChallengeAdvice()}
+        {/* ═══════════════════════════════════════════════════
+            PHASE 2: THE FREE PATH
+            ═══════════════════════════════════════════════════ */}
 
-        {/* Recommended Categories */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>YOUR TRAINING ROADMAP</Text>
-          <Text style={styles.sectionSubtitle}>
-            Start with the top priorities, then move down the list
-          </Text>
-          
-          {recommendedCategories.map((categoryId, index) => {
-            const categoryNames: { [key: string]: { name: string; desc: string; isPremium?: boolean } } = {
-              'everyday_obedience': { name: 'Everyday Obedience', desc: 'Foundation commands every dog needs' },
-              'potty_training': { name: 'Potty Training', desc: 'Establish reliable bathroom habits', isPremium: true },
-              'biting_nipping': { name: 'Biting & Nipping', desc: 'Teach bite inhibition and gentle play', isPremium: true },
-              'leash_walks': { name: 'Leash & Walks', desc: 'Perfect loose-leash walking' },
-              'calm_focus': { name: 'Calm & Focus', desc: 'Teaching impulse control and settle' },
-              'recall': { name: 'Recall', desc: 'Reliable come-when-called' },
-              'mental_work': { name: 'Mental Stimulation', desc: 'Brain games to tire them out' },
-              'real_world_proofing': { name: 'Real-World Proofing', desc: 'Training in distracting environments', isPremium: true },
-              'service_dog': { name: 'Service Dog Pre-Class', desc: 'Foundational skills for service dogs', isPremium: true },
-              'handler_skills': { name: 'Handler Skills', desc: 'Improve your training technique', isPremium: true },
-              'tricks': { name: 'Tricks', desc: 'Fun tricks from crowd-pleasers to jaw-droppers' },
-            };
-            
-            const category = categoryNames[categoryId] || { name: categoryId, desc: '', isPremium: false };
-            const urgency = getCategoryUrgency(categoryId, index);
-            
+          <Text style={styles.sectionTitle}>START HERE</Text>
+          <Text style={styles.sectionSubtitle}>These lessons create early wins and build trust.</Text>
+
+          {week1Lessons.map((lesson, index) => {
+            const completed = isLessonComplete(lesson.categoryId, lesson.lessonId);
             return (
-              <View key={categoryId} style={[
-                styles.categoryCard,
-                index === 0 && styles.categoryCardPriority
-              ]}>
-                <View style={styles.categoryHeader}>
-                  <View style={[
-                    styles.categoryNumber,
-                    index === 0 && styles.categoryNumberPriority
-                  ]}>
-                    <Text style={styles.categoryNumberText}>{index + 1}</Text>
-                  </View>
-                  <View style={styles.categoryInfo}>
-                    <View style={styles.categoryTitleRow}>
-                      <Text style={styles.categoryName}>{category.name}</Text>
-                      {category.isPremium && (
-                        <View style={styles.premiumBadge}>
-                          <Text style={styles.premiumText}>PREMIUM</Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text style={styles.categoryDesc}>{category.desc}</Text>
-                    {urgency.level && (
-                      <Text style={[styles.urgencyText, { color: urgency.color }]}>
-                        {urgency.level}: {urgency.message}
-                      </Text>
-                    )}
-                    {category.isPremium && (
-                      <View style={styles.freeTrialRow}>
-                        <Ionicons name="checkmark-circle" size={13} color={colors.accent} />
-                        <Text style={styles.freeTrialText}>First 2 lessons FREE</Text>
-                      </View>
-                    )}
-                  </View>
+              <TouchableOpacity
+                key={`${lesson.categoryId}_${lesson.lessonId}`}
+                style={[styles.lessonRow, completed && styles.lessonRowComplete]}
+                onPress={() => router.push(`/lesson/${lesson.categoryId}/${lesson.lessonId}`)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.lessonCheck, completed && styles.lessonCheckComplete]}>
+                  {completed ? (
+                    <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+                  ) : (
+                    <View style={styles.lessonCheckInner} />
+                  )}
                 </View>
-              </View>
+                <View style={styles.lessonInfo}>
+                  <Text style={[styles.lessonTitle, completed && styles.lessonTitleComplete]}>{lesson.title}</Text>
+                  <Text style={styles.lessonMeta}>{lesson.category} · {lesson.duration} min</Text>
+                </View>
+                {!completed && <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />}
+                {completed && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
+              </TouchableOpacity>
             );
           })}
         </View>
+
+        {/* ═══════════════════════════════════════════════════
+            PHASE 3: COMING UP NEXT
+            ═══════════════════════════════════════════════════ */}
+
+        {hasPremium ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>COMING UP NEXT</Text>
+            <Text style={styles.sectionSubtitle}>Your full training roadmap is unlocked.</Text>
+            {teaseLessons.map((name, index) => (
+              <View key={index} style={styles.lessonRow}>
+                <View style={styles.lessonCheck}>
+                  <Ionicons name="checkmark-circle-outline" size={14} color={colors.accent} />
+                </View>
+                <View style={styles.lessonInfo}>
+                  <Text style={styles.lessonTitle}>{name}</Text>
+                  <Text style={styles.lessonMeta}>Weeks 2-4</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.fadeSection}>
+            {/* Fading lesson rows */}
+            <View style={styles.fadeContent}>
+              {teaseLessons.map((name, index) => (
+                <View key={index} style={[styles.lessonRow, { opacity: index === 0 ? 0.6 : index === 1 ? 0.35 : index === 2 ? 0.15 : 0.05 }]}>
+                  <View style={styles.lessonCheck}>
+                    <Ionicons name="lock-closed" size={10} color={colors.textTertiary} />
+                  </View>
+                  <View style={styles.lessonInfo}>
+                    <Text style={styles.lessonTitle}>{name}</Text>
+                    <Text style={styles.lessonMeta}>Premium · Weeks 2-4</Text>
+                  </View>
+                </View>
+              ))}
+
+              {/* Gradient overlay */}
+              <LinearGradient
+                colors={['rgba(0,0,0,0)', colors.background]}
+                style={styles.fadeGradient}
+                pointerEvents="none"
+              />
+            </View>
+
+            {/* Premium tease — centered over fade */}
+            <View style={styles.teaseCenter}>
+              <Text style={styles.teaseLine1}>Your full training roadmap{'\n'}continues here.</Text>
+              <Text style={styles.teaseLine2}>
+                Premium turns individual lessons into a complete, structured training program.
+              </Text>
+              <TouchableOpacity
+                style={styles.teaseButton}
+                onPress={() => router.push('/paywall?context=tease')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.teaseButtonText}>Unlock Full Plan</Text>
+                <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+              </TouchableOpacity>
+              <Text style={styles.teaseSubtext}>Free lessons are always free. Upgrade when you're ready.</Text>
+            </View>
+          </View>
+        )}
+
+        {/* ═══════════════════════════════════════════════════
+            PHASE 4: THE SAFETY NET
+            ═══════════════════════════════════════════════════ */}
 
         {/* Why This Plan */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>WHY THIS PLAN?</Text>
           <View style={styles.whyCard}>
-            <WhyPoint text={`Tailored to ${breed} temperament and energy level`} />
-            <WhyPoint text={`Addresses your specific challenges: ${getHumanChallenges()}`} />
-            <WhyPoint text={`Matches your ${userProfile.availability}-minute daily commitment`} />
-            <WhyPoint text={`Uses ${userProfile.motivationType === 'mixed' ? 'a mix of rewards' : userProfile.motivationType} as primary reward system`} />
+            <WhyPoint text={`Tailored to ${breed} temperament and energy`} />
+            <WhyPoint text={`Addresses: ${getHumanChallenges()}`} />
+            <WhyPoint text={`Fits your ${availabilityDisplay} daily commitment`} />
+            <WhyPoint text={`Uses ${userProfile.motivationType === 'mixed' ? 'a mix of rewards' : userProfile.motivationType} as primary reward`} />
           </View>
         </View>
 
-        {/* CTA Button */}
+        {/* Start Training */}
         <TouchableOpacity
           style={styles.startButton}
-          onPress={() => router.replace('/(tabs)')}
+          onPress={() => router.replace(hasPremium ? '/(tabs)' : '/paywall?context=post-quiz')}
         >
-          <Text style={styles.startButtonText}>Start Training {dogName}</Text>
-          <Ionicons name="arrow-forward" size={20} color={colors.textPrimary} />
+          <Text style={styles.startButtonText}>Start {dogName}'s Training</Text>
+          <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
         </TouchableOpacity>
+
+        {/* Subtle bottom note */}
+        {!hasPremium && (
+          <Text style={styles.bottomNote}>Upgrade anytime in the Premium tab.</Text>
+        )}
 
         <View style={{ height: 60 }} />
       </ScrollView>
@@ -513,268 +353,118 @@ function WhyPoint({ text }: { text: string }) {
   );
 }
 
+// ============================================================================
+// STYLES
+// ============================================================================
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: spacing.lg,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xxxl,
-  },
-  errorTitle: {
-    fontSize: typography.h1,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-  },
-  errorText: {
-    fontSize: typography.body,
-    color: colors.textSecondary,
-    marginBottom: spacing.xl,
-    textAlign: 'center',
-  },
+  container: { flex: 1, backgroundColor: colors.background },
+  scrollView: { flex: 1 },
+  scrollContent: { padding: spacing.lg },
 
-  // Success Badge
+  errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xxxl },
+  errorTitle: { fontSize: typography.h1, fontWeight: typography.bold, color: colors.textPrimary, marginBottom: spacing.sm },
+  errorText: { fontSize: typography.body, color: colors.textSecondary, marginBottom: spacing.xl, textAlign: 'center' },
+
+  // ── Success ──
   successBadge: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.accent,
-    alignSelf: 'center',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 80, height: 80, borderRadius: 40, backgroundColor: colors.accent,
+    alignSelf: 'center', justifyContent: 'center', alignItems: 'center',
     marginBottom: spacing.xl,
   },
-
-  // Title
   title: {
-    fontSize: typography.h1,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: spacing.xxxl,
-    lineHeight: 36,
+    fontSize: typography.h1, fontWeight: typography.bold, color: colors.textPrimary,
+    textAlign: 'center', marginBottom: spacing.xl, lineHeight: 36,
   },
 
-  // Collapsible Insight Card
+  // ── Sections ──
+  section: { marginBottom: spacing.xl },
+  sectionTitle: { fontSize: typography.h4, fontWeight: typography.bold, color: colors.textPrimary, marginBottom: spacing.sm, letterSpacing: 1 },
+  sectionSubtitle: { fontSize: typography.small, color: colors.textSecondary, marginBottom: spacing.lg },
+
+  // ── Priority Cards ──
+  priorityRow: { flexDirection: 'row', gap: spacing.sm },
+  priorityCard: {
+    flex: 1, backgroundColor: colors.cardBackground, padding: spacing.md,
+    borderRadius: 14, alignItems: 'center', borderWidth: 1, borderColor: colors.border, gap: 6,
+  },
+  priorityCardFirst: { borderColor: colors.accent, borderWidth: 2 },
+  priorityNumber: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.border, justifyContent: 'center', alignItems: 'center' },
+  priorityNumberFirst: { backgroundColor: colors.accent },
+  priorityNumberText: { fontSize: 12, fontWeight: typography.bold, color: '#FFFFFF' },
+  priorityName: { fontSize: 14, fontWeight: typography.bold, color: colors.textPrimary, textAlign: 'center' },
+  priorityNameFirst: { color: colors.accent },
+  priorityDesc: { fontSize: 11, color: colors.textSecondary, textAlign: 'center' },
+
+  // ── Insight Card ──
   insightCard: {
-    backgroundColor: colors.cardBackground,
-    padding: spacing.xl,
-    borderRadius: 16,
-    marginBottom: spacing.xxxl,
-    borderWidth: 2,
-    borderColor: colors.accent,
+    backgroundColor: colors.cardBackground, padding: spacing.lg, borderRadius: 16,
+    marginBottom: spacing.xl, borderWidth: 2, borderColor: colors.accent,
   },
-  insightHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  insightTitle: {
-    fontSize: typography.h3,
-    fontWeight: typography.bold,
-    color: colors.accent,
-  },
-  insightText: {
-    fontSize: typography.body,
-    color: colors.textPrimary,
-    lineHeight: 24,
-    marginTop: spacing.md,
-  },
-  insightPreview: {
-    fontSize: typography.small,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-  },
+  insightHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  insightTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  insightTitle: { fontSize: typography.h3, fontWeight: typography.bold, color: colors.accent },
+  insightText: { fontSize: typography.body, color: colors.textPrimary, lineHeight: 24, marginTop: spacing.md },
+  insightPreview: { fontSize: typography.small, color: colors.textSecondary, marginTop: spacing.sm, lineHeight: 20 },
+  tipsContainer: { marginTop: spacing.lg, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
+  tipsTitle: { fontSize: typography.h4, fontWeight: typography.bold, color: colors.textPrimary, marginBottom: spacing.md },
+  tipRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.sm },
+  tipText: { flex: 1, fontSize: typography.small, color: colors.textSecondary, lineHeight: 20 },
+  statsRow: { flexDirection: 'row', marginTop: spacing.lg, gap: spacing.sm },
+  statBox: { flex: 1, backgroundColor: colors.cardBackgroundSecondary || colors.background, padding: spacing.md, borderRadius: 10, alignItems: 'center' },
+  statLabel: { fontSize: 11, color: colors.textTertiary, fontWeight: typography.semibold, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
+  statValue: { fontSize: typography.small, color: colors.textPrimary, fontWeight: typography.bold, textTransform: 'capitalize' },
 
-  // Sections
-  section: {
-    marginBottom: spacing.xxxl,
+  // ── Lesson Rows (free path) ──
+  lessonRow: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.cardBackground,
+    padding: spacing.md, borderRadius: 10, marginBottom: spacing.sm,
   },
-  sectionTitle: {
-    fontSize: typography.h4,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-    letterSpacing: 1,
+  lessonCheck: {
+    width: 24, height: 24, borderRadius: 12, borderWidth: 2,
+    borderColor: colors.border, justifyContent: 'center', alignItems: 'center', marginRight: spacing.md,
   },
-  sectionSubtitle: {
-    fontSize: typography.small,
-    color: colors.textSecondary,
-    marginBottom: spacing.lg,
-  },
+  lessonCheckInner: { width: 0, height: 0 },
+  lessonCheckComplete: { backgroundColor: colors.accent, borderColor: colors.accent },
+  lessonRowComplete: { opacity: 0.7 },
+  lessonTitleComplete: { textDecorationLine: 'line-through', color: colors.textSecondary },
+  lessonInfo: { flex: 1 },
+  lessonTitle: { fontSize: typography.body, fontWeight: typography.semibold, color: colors.textPrimary, marginBottom: 2 },
+  lessonMeta: { fontSize: 12, color: colors.textSecondary },
 
-  // Category Cards
-  categoryCard: {
-    backgroundColor: colors.cardBackground,
-    padding: spacing.lg,
+  // ── Fade Tease ──
+  fadeSection: { marginBottom: spacing.xl },
+  fadeContent: { position: 'relative', overflow: 'hidden' },
+  fadeGradient: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 120 },
+  teaseCenter: { alignItems: 'center', paddingTop: spacing.lg, paddingBottom: spacing.md },
+  teaseLine1: {
+    fontSize: 22, fontWeight: '700', color: '#FFFFFF', textAlign: 'center',
+    lineHeight: 30, marginBottom: spacing.md,
+  },
+  teaseLine2: {
+    fontSize: typography.body, color: colors.textSecondary, textAlign: 'center',
+    lineHeight: 22, marginBottom: spacing.lg, paddingHorizontal: spacing.md,
+  },
+  teaseButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
+    backgroundColor: colors.accent, paddingVertical: 14, paddingHorizontal: spacing.xxl,
     borderRadius: 12,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
-  categoryCardPriority: {
-    borderWidth: 2,
-    borderColor: colors.accent,
-    backgroundColor: colors.cardBackgroundSecondary,
-  },
-  categoryHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.md,
-  },
-  categoryNumber: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  categoryNumberPriority: {
-    backgroundColor: colors.accent,
-  },
-  categoryNumberText: {
-    fontSize: typography.h4,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
-  },
-  categoryInfo: {
-    flex: 1,
-  },
-  categoryTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: 4,
-  },
-  categoryName: {
-    fontSize: typography.h4,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
-  },
-  categoryDesc: {
-    fontSize: typography.small,
-    color: colors.textSecondary,
-    marginBottom: 4,
-  },
-  urgencyText: {
-    fontSize: 11,
-    fontWeight: typography.bold,
-    marginTop: 4,
-    letterSpacing: 0.5,
-  },
-  freeTrialRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
-  },
-  freeTrialText: {
-    fontSize: 11,
-    color: colors.accent,
-    fontWeight: typography.semibold,
-  },
-  premiumBadge: {
-    backgroundColor: colors.accent,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  premiumText: {
-    fontSize: 9,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
-    letterSpacing: 0.5,
-  },
+  teaseButtonText: { fontSize: typography.h4, fontWeight: typography.bold, color: '#FFFFFF' },
+  teaseSubtext: { fontSize: typography.small, color: colors.textTertiary, marginTop: spacing.md, textAlign: 'center' },
 
-  // Advice Cards
-  adviceCard: {
-    flexDirection: 'row',
-    backgroundColor: colors.cardBackground,
-    padding: spacing.lg,
-    borderRadius: 12,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  adviceIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: colors.cardBackgroundSecondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md,
-  },
-  adviceContent: {
-    flex: 1,
-  },
-  adviceTitle: {
-    fontSize: typography.h4,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-  },
-  adviceText: {
-    fontSize: typography.small,
-    color: colors.textSecondary,
-    lineHeight: 20,
-  },
+  // ── Why Card ──
+  whyCard: { backgroundColor: colors.cardBackground, padding: spacing.lg, borderRadius: 12, gap: spacing.md },
+  whyRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
+  whyText: { flex: 1, fontSize: typography.body, color: colors.textPrimary, lineHeight: 24 },
 
-  // Why Card
-  whyCard: {
-    backgroundColor: colors.cardBackground,
-    padding: spacing.lg,
-    borderRadius: 12,
-    gap: spacing.md,
-  },
-  whyRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.md,
-  },
-  whyText: {
-    flex: 1,
-    fontSize: typography.body,
-    color: colors.textPrimary,
-    lineHeight: 24,
-  },
-
-  // Buttons
+  // ── Buttons ──
   startButton: {
-    backgroundColor: colors.accent,
-    padding: spacing.lg,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginTop: spacing.xl,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.sm,
+    backgroundColor: colors.accent, padding: spacing.lg, borderRadius: 16,
+    alignItems: 'center', marginTop: spacing.md,
+    flexDirection: 'row', justifyContent: 'center', gap: spacing.sm,
   },
-  startButtonText: {
-    fontSize: typography.h3,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
-  },
-  button: {
-    backgroundColor: colors.accent,
-    paddingHorizontal: spacing.xxxl,
-    paddingVertical: spacing.lg,
-    borderRadius: 12,
-  },
-  buttonText: {
-    fontSize: typography.h4,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
-  },
+  startButtonText: { fontSize: typography.h3, fontWeight: typography.bold, color: '#FFFFFF' },
+  ctaBtn: { backgroundColor: colors.accent, paddingHorizontal: spacing.xxxl, paddingVertical: spacing.lg, borderRadius: 12 },
+  ctaBtnText: { fontSize: typography.h4, fontWeight: typography.bold, color: '#FFFFFF' },
+  bottomNote: { fontSize: typography.small, color: colors.textTertiary, textAlign: 'center', marginTop: spacing.lg },
 });

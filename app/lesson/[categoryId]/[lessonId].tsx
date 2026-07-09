@@ -1,15 +1,20 @@
+import { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { useApp } from '../../../contexts/AppContext';
-import { getLessonById } from '../../../data/categoryData';
+import { getCategoryById, getLessonById } from '../../../data/categoryData';
+import { getLessonImage } from '../../../data/lessonImages';
 import { colors, typography, spacing } from '../../../data/darkTheme';
+import { CATEGORY_ICONS } from '../../../data/iconSystem';
+import { isLessonLocked } from '../../../utils/premiumAccess';
 import { Ionicons } from '@expo/vector-icons';
 import FloatingTimer from '../../../components/FloatingTimer';
+import LessonComplete from '../../../components/LessonComplete';
 
 export default function LessonDetailScreen() {
   const router = useRouter();
   const { categoryId, lessonId } = useLocalSearchParams<{ categoryId: string; lessonId: string }>();
-  const { markLessonComplete, isLessonComplete } = useApp();
+  const { markLessonComplete, isLessonComplete, hasPremium, userProfile, bonusUnlocks } = useApp();
 
   const lesson = getLessonById(categoryId!, lessonId!);
   if (!lesson) {
@@ -20,27 +25,79 @@ export default function LessonDetailScreen() {
     );
   }
 
+  const category = getCategoryById(categoryId!);
+  const lessonIndex = category?.lessons.findIndex(({ id }) => id === lesson.id);
+  const lessonImage = getLessonImage(
+    categoryId!,
+    lesson.id,
+    lessonIndex !== undefined && lessonIndex >= 0 ? lessonIndex : undefined,
+  );
   const isComplete = isLessonComplete(categoryId!, lessonId!);
+  const [showCelebration, setShowCelebration] = useState(false);
+
+  // ── THE ACTUAL LOCK ──
+  // Before this check existed, any route into a premium lesson rendered
+  // full content. Now the wall is at the content itself.
+  const locked = isLessonLocked(categoryId!, lessonId!, hasPremium, bonusUnlocks);
+  if (locked) {
+    return (
+      <View style={[styles.container, styles.lockedContainer]}>
+        <View style={styles.lockedBadge}>
+          <Ionicons name="lock-closed" size={40} color={colors.accent} />
+        </View>
+        <Text style={styles.lockedTitle}>{lesson.title}</Text>
+        <Text style={styles.lockedSubtext}>
+          This lesson is part of {userProfile?.dogName ? `${userProfile.dogName}'s` : 'the'} full training program.
+        </Text>
+        <TouchableOpacity
+          style={styles.lockedButton}
+          onPress={() => router.push('/paywall?context=lesson-locked')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.lockedButtonText}>Unlock Full Program</Text>
+          <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   const handleComplete = () => {
     markLessonComplete(categoryId!, lessonId!);
-    router.back();
+    setShowCelebration(true);
   };
-
-  // Use lesson's videoUrl (which contains old imageUrl) or fallback
-  const imageUrl = lesson.videoUrl || 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800&q=80';
 
   return (
     <View style={styles.container}>
-      {/* Header styled by root _layout.tsx — no override needed */}
-
+      {/* Custom back button, the native one was unreliable on first tap */}
+      <Stack.Screen
+        options={{
+          headerBackVisible: false,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/training'))}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              style={{ paddingRight: 12 }}
+            >
+              <Ionicons name="chevron-back" size={28} color="#FF4444" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Hero Image */}
-        <Image
-          source={{ uri: imageUrl }}
-          style={styles.heroImage}
-          resizeMode="cover"
-        />
+        {lessonImage ? (
+          <Image source={lessonImage} style={styles.heroImage} resizeMode="cover" />
+        ) : (
+          <View style={styles.heroFallback}>
+            <View style={styles.heroFallbackIcon}>
+              <Ionicons
+                name={CATEGORY_ICONS[categoryId!] || 'book'}
+                size={52}
+                color={colors.accent}
+              />
+            </View>
+          </View>
+        )}
 
         {/* Lesson Header */}
         <View style={styles.headerSection}>
@@ -102,15 +159,21 @@ export default function LessonDetailScreen() {
       {/* Complete Button */}
       <View style={styles.bottomContainer}>
         {isComplete ? (
-          <View style={styles.completeMessage}>
-            <Text style={styles.completeMessageText}>Lesson Complete!</Text>
-          </View>
+          <TouchableOpacity
+            style={styles.completeMessage}
+            onPress={() => setShowCelebration(true)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="checkmark-circle" size={22} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <Text style={styles.completeMessageText}>Complete · Tap to Continue</Text>
+          </TouchableOpacity>
         ) : (
           <TouchableOpacity style={styles.completeButton} onPress={handleComplete}>
             <Text style={styles.completeButtonText}>Mark as Complete</Text>
           </TouchableOpacity>
         )}
       </View>
+      {showCelebration && <LessonComplete categoryId={categoryId!} lessonId={lessonId!} onDismiss={() => setShowCelebration(false)} />}
     </View>
   );
 }
@@ -129,14 +192,48 @@ const styles = StyleSheet.create({
     marginTop: spacing.xxxl,
   },
 
-  // Hero Image
-  heroImage: {
-    width: '100%',
-    height: 300,
-    backgroundColor: colors.cardBackground,
+  // Locked state
+  lockedContainer: { justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
+  lockedBadge: {
+    width: 88, height: 88, borderRadius: 44, backgroundColor: colors.cardBackground,
+    justifyContent: 'center', alignItems: 'center', marginBottom: spacing.xl,
   },
+  lockedTitle: {
+    fontSize: typography.h2, fontWeight: typography.bold, color: colors.textPrimary,
+    textAlign: 'center', marginBottom: spacing.sm,
+  },
+  lockedSubtext: {
+    fontSize: typography.body, color: colors.textSecondary, textAlign: 'center',
+    lineHeight: 22, marginBottom: spacing.xl, paddingHorizontal: spacing.lg,
+  },
+  lockedButton: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    backgroundColor: colors.accent, borderRadius: 14,
+    paddingVertical: 15, paddingHorizontal: spacing.xxl,
+  },
+  lockedButtonText: { fontSize: typography.h4, fontWeight: typography.bold, color: '#FFFFFF' },
 
   // Header Section
+  heroImage: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    backgroundColor: colors.cardBackground,
+  },
+  heroFallback: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    backgroundColor: colors.cardBackground,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heroFallbackIcon: {
+    width: 104,
+    height: 104,
+    borderRadius: 26,
+    backgroundColor: colors.cardBackgroundSecondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   headerSection: {
     padding: spacing.lg,
     borderBottomWidth: 1,
@@ -169,9 +266,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     gap: spacing.xs,
   },
-  metaIcon: {
-    fontSize: 16,
-  },
   metaText: {
     fontSize: typography.small,
     color: colors.textPrimary,
@@ -189,9 +283,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.md,
     gap: spacing.sm,
-  },
-  sectionIcon: {
-    fontSize: 24,
   },
   sectionTitle: {
     fontSize: typography.h3,
@@ -270,17 +361,19 @@ const styles = StyleSheet.create({
   completeButtonText: {
     fontSize: typography.h4,
     fontWeight: typography.bold,
-    color: colors.textPrimary,
+    color: '#FFFFFF',
   },
   completeMessage: {
-    backgroundColor: colors.success,
+    backgroundColor: '#4CAF50',
     padding: spacing.lg,
     borderRadius: 12,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   completeMessageText: {
     fontSize: typography.h4,
     fontWeight: typography.bold,
-    color: colors.textPrimary,
+    color: '#FFFFFF',
   },
 });

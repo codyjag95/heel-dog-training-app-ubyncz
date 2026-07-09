@@ -1,15 +1,17 @@
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../../contexts/AppContext';
 import { getCategoryById } from '../../data/categoryData';
+import { isLessonLocked } from '../../utils/premiumAccess';
 import { colors, typography, spacing } from '../../data/darkTheme';
 import { CATEGORY_ICONS } from '../../data/iconSystem';
+import { getCategoryImage } from '../../data/lessonImages';
 
 export default function CategoryDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { isLessonComplete, getCategoryProgress, hasPremium } = useApp();
+  const { isLessonComplete, getCategoryProgress, hasPremium, bonusUnlocks } = useApp();
 
   const category = getCategoryById(id!);
   if (!category) {
@@ -22,21 +24,41 @@ export default function CategoryDetailScreen() {
 
   const { completed, total } = getCategoryProgress(id!);
   const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const categoryImage = getCategoryImage(category.id);
 
   return (
     <View style={styles.container}>
-      {/* Header styled by root _layout.tsx — no override needed */}
-
+      {/* Custom back button — the native one was unreliable on first tap.
+          This one calls router.back() directly, with a fallback route. */}
+      <Stack.Screen
+        options={{
+          headerBackVisible: false,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/training'))}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              style={{ paddingRight: 12 }}
+            >
+              <Ionicons name="chevron-back" size={28} color="#FF4444" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
+        {/* Header — uses the category photo if one exists, else the icon.
+            Drop a photo in assets/images/categories/ (see data/lessonImages.ts). */}
         <View style={styles.header}>
-          <View style={styles.iconContainer}>
-            <Ionicons
-              name={CATEGORY_ICONS[id!] || 'book'}
-              size={48}
-              color={colors.accent}
-            />
-          </View>
+          {categoryImage ? (
+            <Image source={categoryImage} style={styles.headerImage} resizeMode="cover" />
+          ) : (
+            <View style={styles.iconContainer}>
+              <Ionicons
+                name={CATEGORY_ICONS[id!] || 'book'}
+                size={48}
+                color={colors.accent}
+              />
+            </View>
+          )}
           <Text style={styles.title}>{category.title}</Text>
           <Text style={styles.description}>{category.description}</Text>
         </View>
@@ -72,13 +94,8 @@ export default function CategoryDetailScreen() {
         {category.lessons.map((lesson, index) => {
           const isComplete = isLessonComplete(id!, lesson.id);
           
-          const isLocked = (() => {
-            if (category.isPremium) {
-              return lesson.isPremium !== false && !hasPremium;
-            }
-            return lesson.isPremium === true && !hasPremium;
-          })();
-          
+          const isLocked = isLessonLocked(category.id, lesson.id, hasPremium, bonusUnlocks);
+
           const showProBadge = isLocked;
           const showFreeBadge = category.isPremium && lesson.isPremium === false;
 
@@ -92,7 +109,7 @@ export default function CategoryDetailScreen() {
               ]}
               onPress={() => {
                 if (isLocked) {
-                  router.push('/premium');
+                  router.push('/paywall?context=lesson-locked');
                 } else {
                   router.push(`/lesson/${id}/${lesson.id}`);
                 }
@@ -149,6 +166,8 @@ export default function CategoryDetailScreen() {
             </TouchableOpacity>
           );
         })}
+
+        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
@@ -161,7 +180,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.lg,
-    paddingTop: 80,
+    paddingTop: spacing.md,
   },
   errorText: {
     color: colors.error,
@@ -180,6 +199,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.md,
+  },
+  headerImage: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    borderRadius: 18,
+    marginBottom: spacing.md,
+    backgroundColor: colors.cardBackground,
   },
   title: {
     fontSize: typography.h1,

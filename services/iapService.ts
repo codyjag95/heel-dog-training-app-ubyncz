@@ -318,6 +318,34 @@ export const restorePurchases = async (): Promise<PurchaseResult> => {
 };
 
 // ============================================================
+// Launch Re-validation — "is this subscription STILL active?"
+// error:true means "couldn't check (offline / store down)".
+// Callers must NOT revoke premium when error is true — only
+// revoke on a confirmed "no active subscription" answer.
+// ============================================================
+export const checkActiveSubscription = async (): Promise<{
+  active: boolean;
+  productId?: string;
+  error?: boolean;
+}> => {
+  if (Platform.OS !== 'ios' || !RNIap) return { active: false, error: true };
+  if (!isInitialized) {
+    const ok = await initializeIAP();
+    if (!ok) return { active: false, error: true };
+  }
+  if (typeof RNIap.getAvailablePurchases !== 'function') return { active: false, error: true };
+
+  try {
+    const purchases = await RNIap.getAvailablePurchases();
+    const heel = purchases?.find((p: any) => SUBSCRIPTION_SKUS.includes(p.productId));
+    return heel ? { active: true, productId: heel.productId } : { active: false };
+  } catch (e: any) {
+    console.error('[IAP] checkActiveSubscription error:', e?.message);
+    return { active: false, error: true };
+  }
+};
+
+// ============================================================
 // Purchase Listener (called ONCE in AppContext)
 // ============================================================
 export const setupPurchaseListener = (

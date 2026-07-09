@@ -1,64 +1,139 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Animated,
+  Image,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors, typography, spacing } from '../data/darkTheme';
+import { logEvent } from '../services/analytics';
 
 export default function WelcomeScreen() {
   const router = useRouter();
 
+  // Entrance animations
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const pawScale = useRef(new Animated.Value(0.5)).current;
+  const ctaFade = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.spring(pawScale, {
+      toValue: 1,
+      friction: 5,
+      tension: 80,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 600,
+      delay: 300,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 600,
+      delay: 300,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.timing(ctaFade, {
+      toValue: 1,
+      duration: 500,
+      delay: 800,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
   return (
     <View style={styles.container}>
-      {/* Logo/Paw */}
-      <View style={styles.logoContainer}>
-        <View style={styles.pawCircle}>
-          <Ionicons name="paw" size={64} color="#FFFFFF" />
-        </View>
+      {/* Top: brand */}
+      <View style={styles.topSection}>
+        <Animated.View style={[styles.logoWrap, { transform: [{ scale: pawScale }] }]}>
+          <Image source={require('../assets/images/icon.png')} style={styles.logoImage} resizeMode="cover" />
+        </Animated.View>
+
+        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+          <Text style={styles.brandName}>HEEL</Text>
+          <Text style={styles.brandSub}>DOG TRAINING</Text>
+        </Animated.View>
       </View>
 
-      {/* Main Content */}
-      <View style={styles.content}>
-        {/* Brand Name */}
-        <Text style={styles.brandName}>HEEL</Text>
-
-        {/* Headline */}
-        <Text style={styles.headline}>Calm, structured{'\n'}dog training</Text>
-
-        {/* Subheading */}
-        <Text style={styles.subheading}>
-          Short, structured sessions that build{'\n'}real behavior
+      {/* Middle: the promise */}
+      <Animated.View style={[styles.middleSection, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+        <Text style={styles.headline}>
+          A well-trained dog{'\n'}isn't luck. It's a plan.
         </Text>
 
-        {/* Bullet Points */}
-        <View style={styles.bulletContainer}>
-          <BulletPoint text="Build calm focus in minutes" />
-          <BulletPoint text="Reinforce good behavior consistently" />
-          <BulletPoint text="See progress over time" />
-        </View>
-      </View>
+        <Text style={styles.subheading}>
+          HEEL builds a day-by-day program around your dog's breed, age, and the exact behaviors driving you crazy.
+        </Text>
 
-      {/* CTA Button */}
-      <View style={styles.buttonContainer}>
+        <View style={styles.featureContainer}>
+          <FeaturePoint
+            icon="clipboard-outline"
+            title="30-second quiz, custom plan"
+            desc="Tell us about your dog. We build the program"
+          />
+          <FeaturePoint
+            icon="list-outline"
+            title="175+ expert lessons"
+            desc="Step-by-step, from first sit to showstopper"
+          />
+          <FeaturePoint
+            icon="time-outline"
+            title="5-10 minutes a day"
+            desc="Short sessions that fit real life and actually stick"
+          />
+        </View>
+      </Animated.View>
+
+      {/* Bottom: CTA */}
+      <Animated.View style={[styles.bottomSection, { opacity: ctaFade }]}>
+        <Text style={styles.socialProof}>
+          Positive reinforcement. Real structure. Zero guesswork.
+        </Text>
+
         <TouchableOpacity
-          style={styles.ctaButton}
-          onPress={() => router.push('/(tabs)/quiz')}
-          activeOpacity={0.8}
+          onPress={() => { logEvent('quiz_started'); router.push('/(tabs)/quiz'); }}
+          activeOpacity={0.85}
         >
-          <Text style={styles.ctaButtonText}>Start Training</Text>
+          <LinearGradient
+            colors={[colors.accent, '#8E1010']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.ctaButton}
+          >
+            <Text style={styles.ctaButtonText}>Build My Dog's Plan</Text>
+            <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+          </LinearGradient>
         </TouchableOpacity>
-      </View>
+
+        <Text style={styles.ctaSubtext}>
+          Free · Takes 30 seconds · No account needed
+        </Text>
+      </Animated.View>
     </View>
   );
 }
 
-// Bullet Point Component
-function BulletPoint({ text }: { text: string }) {
+function FeaturePoint({ icon, title, desc }: { icon: string; title: string; desc: string }) {
   return (
-    <View style={styles.bulletRow}>
-      <View style={styles.checkCircle}>
-        <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+    <View style={styles.featureRow}>
+      <View style={styles.featureIconContainer}>
+        <Ionicons name={icon as any} size={22} color={colors.accent} />
       </View>
-      <Text style={styles.bulletText}>{text}</Text>
+      <View style={styles.featureTextContainer}>
+        <Text style={styles.featureTitle}>{title}</Text>
+        <Text style={styles.featureDesc}>{desc}</Text>
+      </View>
     </View>
   );
 }
@@ -70,92 +145,136 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
   },
 
-  // Logo Section
-  logoContainer: {
-    flex: 0.35,
+  topSection: {
+    flex: 0.3,
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingBottom: spacing.lg,
+    marginTop: 40,
   },
-  pawCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: colors.accent,
-    justifyContent: 'center',
-    alignItems: 'center',
+  logoWrap: {
+    width: 104,
+    height: 104,
+    borderRadius: 24,
+    overflow: 'hidden',
+    marginBottom: spacing.md,
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 10,
   },
-
-  // Content Section
-  content: {
-    flex: 0.5,
-    justifyContent: 'flex-start',
-    paddingTop: spacing.md,
+  logoImage: {
+    width: '100%',
+    height: '100%',
   },
   brandName: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: colors.accent,
-    textAlign: 'center',
-    letterSpacing: 4,
-    marginBottom: spacing.sm,
-  },
-  headline: {
-    fontSize: 32,
-    fontWeight: typography.bold,
+    fontSize: 38,
+    fontWeight: '900',
     color: colors.textPrimary,
     textAlign: 'center',
-    marginBottom: spacing.md,
-    lineHeight: 40,
+    letterSpacing: 8,
   },
-  subheading: {
-    fontSize: typography.body,
+  brandSub: {
+    fontSize: 11,
+    fontWeight: '700',
     color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: spacing.xxl,
+    letterSpacing: 4,
+    marginTop: 2,
   },
 
-  // Bullets
-  bulletContainer: {
-    gap: spacing.lg,
-    paddingHorizontal: spacing.md,
+  middleSection: {
+    flex: 0.5,
+    justifyContent: 'center',
+    paddingTop: spacing.md,
   },
-  bulletRow: {
+  headline: {
+    fontSize: 30,
+    fontWeight: '800',
+    color: colors.textPrimary,
+    textAlign: 'center',
+    lineHeight: 38,
+    marginBottom: spacing.md,
+  },
+  subheading: {
+    fontSize: 15,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: spacing.xxl,
+    paddingHorizontal: spacing.sm,
+  },
+
+  featureContainer: {
+    gap: spacing.lg,
+    paddingHorizontal: spacing.xs,
+  },
+  featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
   },
-  checkCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.accent,
+  featureIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: colors.cardBackground,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  bulletText: {
+  featureTextContainer: {
     flex: 1,
-    fontSize: typography.body,
+  },
+  featureTitle: {
+    fontSize: 16,
+    fontWeight: '800',
     color: colors.textPrimary,
-    lineHeight: 22,
+    marginBottom: 2,
+  },
+  featureDesc: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    lineHeight: 18,
   },
 
-  // CTA Button
-  buttonContainer: {
-    flex: 0.15,
+  bottomSection: {
+    flex: 0.2,
     justifyContent: 'flex-end',
     paddingBottom: spacing.xxxl,
   },
+  socialProof: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.textTertiary,
+    textAlign: 'center',
+    letterSpacing: 0.5,
+    marginBottom: spacing.md,
+  },
   ctaButton: {
-    backgroundColor: colors.accent,
     paddingVertical: 18,
     borderRadius: 14,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
   },
   ctaButtonText: {
     fontSize: 18,
-    fontWeight: typography.bold,
-    color: colors.textPrimary,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  ctaSubtext: {
+    fontSize: 12,
+    color: colors.textTertiary,
+    textAlign: 'center',
+    marginTop: spacing.sm,
   },
 });

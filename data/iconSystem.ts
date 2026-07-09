@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Category icon mappings - dog training themed
 export const CATEGORY_ICONS: { [key: string]: keyof typeof Ionicons.glyphMap } = {
+  'puppy_foundations': 'happy',             // Puppy track
   'everyday_obedience': 'paw',              // Foundation - the brand icon
   'leash_walks': 'walk',                     // Walking/leash
   'calm_focus': 'heart',                     // Calm/wellness
@@ -21,6 +22,11 @@ export const CATEGORY_ICONS: { [key: string]: keyof typeof Ionicons.glyphMap } =
   'potty_training': 'home',                  // House training
   'biting_nipping': 'alert-circle',          // Warning/correction
   'handler_skills': 'person',               // Human handler
+  'socialization': 'people-outline',          // Social/people
+  'reactive_dog': 'flash-outline',           // Reactivity/energy
+  'cooperative_care': 'medical-outline',     // Vet/care
+  'barking_alert': 'volume-high',            // Barking/alert control
+  'tricks': 'star',                          // Fun/tricks
 };
 
 // Tab bar icon mappings
